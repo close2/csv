@@ -1,0 +1,7 @@
+name: csv
+description: |-
+  A codec to transform between a string and a list of values.
+
+  The string must be comma (configurable) separated values.
+dependencies:
+  unittest: any
