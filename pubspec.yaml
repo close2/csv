@@ -1,4 +1,6 @@
 name: csv
+version: 1.0.1
+author: Christian Loitsch
 description: |-
   A codec to transform between a string and a list of values.
 
