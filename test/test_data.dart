@@ -134,3 +134,17 @@ const List<List> complexRows3 = const [
                                        const ['', '.', 'a','b', '_']
                                       ];
 
+const List<String> autodetectCsv_parts = const ['ab',
+                                                'c,2',
+                                                ',\n"',
+                                                '"3,«',
+                                                '«,\'\r',
+                                                '\n!,\'\n'];
+
+final String autodetectCsv = autodetectCsv_parts.join();
+
+const List<List> autodetectRows = const [
+                                         const ['abc', 2, ''],
+                                         const ['3,', "'\r"],
+                                         const ['!', "'"]
+                                        ];
