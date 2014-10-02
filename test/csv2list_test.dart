@@ -12,42 +12,42 @@ import 'test_data.dart';
 
 main() {
   const commaDoubleQuotCsvToListConverter =
-      const Csv2ListConverter(parseNumbers: false);
+      const CsvToListConverter(parseNumbers: false);
   const commaDoubleQuotCsvToListConverterParseNumbers =
-      const Csv2ListConverter();
+      const CsvToListConverter();
   const semicolonDoubleQuotCsvToListConverter =
-      const Csv2ListConverter(fieldDelimiter: ';',
+      const CsvToListConverter(fieldDelimiter: ';',
                               parseNumbers: false);
   const dotDoubleQuotCsvToListConverter =
-      const Csv2ListConverter(fieldDelimiter: '.',
+      const CsvToListConverter(fieldDelimiter: '.',
                               parseNumbers: false);
   const dotSingleQuotCsvToListConverterUnixEol =
-      const Csv2ListConverter(fieldDelimiter: '.',
+      const CsvToListConverter(fieldDelimiter: '.',
                               textDelimiter: "'",
                               eol: '\n',
                               parseNumbers: false);
   const dotSingleQuotCsvToListConverterUnixEol_double =
-      const Csv2ListConverter(fieldDelimiter: '.',
+      const CsvToListConverter(fieldDelimiter: '.',
                               textDelimiter: "'",
                               textEndDelimiter: '"',
                               eol: '\n',
                               parseNumbers: false);
   const aaBbCsvToListConverter =
-      const Csv2ListConverter(fieldDelimiter: 'aa',
+      const CsvToListConverter(fieldDelimiter: 'aa',
                               textDelimiter: 'bb',
                               parseNumbers: false);
   const complexConverter =
-      const Csv2ListConverter(fieldDelimiter: '...*',
+      const CsvToListConverter(fieldDelimiter: '...*',
                               textDelimiter: '...#',
                               eol: '....',
                               parseNumbers: true);
   const complex2Converter =
-      const Csv2ListConverter(fieldDelimiter: '...*',
+      const CsvToListConverter(fieldDelimiter: '...*',
                               textDelimiter: '...#',
                               eol: '.*.*',
                               parseNumbers: true);
   const complex3Converter =
-      const Csv2ListConverter(fieldDelimiter: ',',
+      const CsvToListConverter(fieldDelimiter: ',',
                               textDelimiter: '.,a,b,__',
                               eol: '_xyz',
                               parseNumbers: true);
@@ -187,7 +187,7 @@ main() {
 
   test('Throw an exception if allowInvalid is false and field Delimiter and '
        'text Delimiter are equal or either is null', () {
-    expect(() => new Csv2ListConverter(fieldDelimiter: 'a',
+    expect(() => new CsvToListConverter(fieldDelimiter: 'a',
                                        textDelimiter: 'a',
                                        allowInvalid: false).convert('a,b'),
            throwsArgumentError);
@@ -197,7 +197,7 @@ main() {
                             textDelimiter: 'a',
                             allowInvalid: false),
            throwsArgumentError);
-    expect(() => new Csv2ListConverter(fieldDelimiter: null,
+    expect(() => new CsvToListConverter(fieldDelimiter: null,
                                        textDelimiter: null,
                                        allowInvalid: false).convert('a,b'),
            throwsArgumentError);
@@ -205,7 +205,7 @@ main() {
 
   test('Doesn\'t throw an exception if allowInvalid and field Delimiter and '
        'text Delimiter are equal or either is null', () {
-    expect(new Csv2ListConverter(fieldDelimiter: 'a',
+    expect(new CsvToListConverter(fieldDelimiter: 'a',
                                  textDelimiter: 'a').convert('a,b'),
            isNotNull);
     expect(commaDoubleQuotCsvToListConverter
@@ -213,7 +213,7 @@ main() {
                             fieldDelimiter: 'a',
                             textDelimiter: 'a'),
            isNotNull);
-    expect(() => new Csv2ListConverter(fieldDelimiter: null,
+    expect(() => new CsvToListConverter(fieldDelimiter: null,
                                        textDelimiter: null).convert('a,b'),
            isNotNull);
   });
@@ -243,13 +243,13 @@ main() {
   });
 
   test('Throw an exception if allowInvalid is false and eol is null', () {
-    expect(() => new Csv2ListConverter(eol: null,
+    expect(() => new CsvToListConverter(eol: null,
                                        allowInvalid: false).convert('a'),
            throwsArgumentError);
   });
 
   test('Doesn\'t throw an exception if allowInvalid and eol is null', () {
-    expect(new Csv2ListConverter(eol: null).convert('a'),
+    expect(new CsvToListConverter(eol: null).convert('a'),
            equals([['a']]));
   });
 
@@ -279,7 +279,7 @@ main() {
   test('Throws an exception if not allowInvalid and csv ends without '
        'text end delimiter', () {
     const String csv = 'abc,"def,xyz';
-    expect(() => new Csv2ListConverter(allowInvalid: false).convert(csv),
+    expect(() => new CsvToListConverter(allowInvalid: false).convert(csv),
                  throwsFormatException);
   });
 
@@ -325,7 +325,7 @@ main() {
        'without text end delimiter', () {
     const List<String> csv = const ['abc,"d','ef,xyz'];
     final csvStream = new Stream.fromIterable(csv);
-    final converter = new Csv2ListConverter(allowInvalid: false);
+    final converter = new CsvToListConverter(allowInvalid: false);
     var f_rows = csvStream.transform(converter).toList();
     expect(f_rows, throwsFormatException);
   });
@@ -333,7 +333,7 @@ main() {
   test('Transformer throws an exception if not allowInvalid and eol is null',
        () {
     var csvStream = new Stream.fromIterable(csvComplex3_parts);
-    final converter = new Csv2ListConverter(eol: null, allowInvalid: false);
+    final converter = new CsvToListConverter(eol: null, allowInvalid: false);
     var f_rows = csvStream.transform(converter);
     expect(() => f_rows.toList(), throwsArgumentError);
   });
@@ -344,7 +344,11 @@ main() {
     final parser = new CsvParser();
     expect(parser.verifyCurrentSettings(), equals([]));
 
-    var errors = parser.verifySettings('a', 'a', 'b', '\r\n', throwError: false);
+    var errors = parser.verifySettings('a',
+                                       'a',
+                                       'b',
+                                       '\r\n',
+                                       throwError: false);
     expect(errors.length, equals(1));
     expect(errors.first.runtimeType, equals(SettingsValuesEqualError));
 
@@ -354,8 +358,11 @@ main() {
 
     errors = parser.verifySettings(null, 'a', null, 'a', throwError: false);
     expect(errors.length, equals(3));
-    expect(errors.map((e) => e.runtimeType), contains(FieldDelimiterNullError));
-    expect(errors.map((e) => e.runtimeType), contains(TextEndDelimiterNullError));
-    expect(errors.map((e) => e.runtimeType), contains(SettingsValuesEqualError));
+    expect(errors.map((e) => e.runtimeType),
+           contains(FieldDelimiterNullError));
+    expect(errors.map((e) => e.runtimeType),
+           contains(TextEndDelimiterNullError));
+    expect(errors.map((e) => e.runtimeType),
+           contains(SettingsValuesEqualError));
   });
 }

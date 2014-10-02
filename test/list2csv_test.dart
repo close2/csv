@@ -12,33 +12,33 @@ import 'test_data.dart';
 main() {
 
   const commaDoubleQuotListToCsvConverter =
-      const List2CsvConverter();
+      const ListToCsvConverter();
   const semicolonDoubleQuotListToCsvConverter =
-      const List2CsvConverter(fieldDelimiter: ';');
+      const ListToCsvConverter(fieldDelimiter: ';');
   const dotDoubleQuotListToCsvConverter =
-      const List2CsvConverter(fieldDelimiter: '.');
+      const ListToCsvConverter(fieldDelimiter: '.');
   const dotSingleQuotListToCsvConverterUnixEol =
-      const List2CsvConverter(fieldDelimiter: '.',
+      const ListToCsvConverter(fieldDelimiter: '.',
                               textDelimiter: "'",
                               eol: '\n');
   const aaBbListToCsvConverter =
-      const List2CsvConverter(fieldDelimiter: 'aa', textDelimiter: 'bb');
+      const ListToCsvConverter(fieldDelimiter: 'aa', textDelimiter: 'bb');
 
   const commaDoubleQuotListToCsvConverter_xy =
-      const List2CsvConverter(textEndDelimiter: 'XY');
+      const ListToCsvConverter(textEndDelimiter: 'XY');
   const semicolonDoubleQuotListToCsvConverter_xy =
-      const List2CsvConverter(fieldDelimiter: ';',
+      const ListToCsvConverter(fieldDelimiter: ';',
                               textEndDelimiter: 'XY');
   const dotDoubleQuotListToCsvConverter_xy =
-      const List2CsvConverter(fieldDelimiter: '.',
+      const ListToCsvConverter(fieldDelimiter: '.',
                               textEndDelimiter: 'XY');
   const dotSingleQuotListToCsvConverterUnixEol_double =
-      const List2CsvConverter(fieldDelimiter: '.',
+      const ListToCsvConverter(fieldDelimiter: '.',
                               textDelimiter: "'",
                               textEndDelimiter: '"',
                               eol: '\n');
   const aaBbListToCsvConverter_xy =
-      const List2CsvConverter(fieldDelimiter: 'aa',
+      const ListToCsvConverter(fieldDelimiter: 'aa',
                               textDelimiter: 'bb',
                               textEndDelimiter: 'XY');
 
@@ -48,7 +48,7 @@ main() {
     expect(commaDoubleQuotListToCsvConverter.fieldDelimiter, equals(','));
     expect(commaDoubleQuotListToCsvConverter.textDelimiter, equals('"'));
     expect(commaDoubleQuotListToCsvConverter.textEndDelimiter, equals('"'));
-    expect(const List2CsvConverter(textEndDelimiter: 'abc').textEndDelimiter,
+    expect(const ListToCsvConverter(textEndDelimiter: 'abc').textEndDelimiter,
            equals('abc'));
     expect(commaDoubleQuotListToCsvConverter.eol, equals('\r\n'));
     expect(dotSingleQuotListToCsvConverterUnixEol.fieldDelimiter, equals('.'));
@@ -113,7 +113,7 @@ main() {
        'either is null', () {
     sb.clear();
     expect(() {
-        var converter = new List2CsvConverter(fieldDelimiter: 'a',
+        var converter = new ListToCsvConverter(fieldDelimiter: 'a',
                                               textDelimiter: 'a');
         converter.convertSingleRow(sb, singleRow);
       }, throwsArgumentError);
@@ -125,7 +125,7 @@ main() {
                                    textDelimiter: 'a');
       }, throwsArgumentError);
     expect(() {
-        new List2CsvConverter(fieldDelimiter: null,
+        new ListToCsvConverter(fieldDelimiter: null,
                               textDelimiter: null).convertSingleRow(sb,
                                                                     singleRow);
       }, throwsArgumentError);
@@ -176,7 +176,7 @@ main() {
   });
 
   test('Throw an exception if eol is null', () {
-    expect(() => new List2CsvConverter(eol: null).convert(singleRow),
+    expect(() => new ListToCsvConverter(eol: null).convert(singleRow),
            throwsArgumentError);
   });
 
@@ -187,7 +187,9 @@ main() {
     var result = csvSingleRowComma + eol +
                  csvSingleRowComma + eol +
                  csvSingleRowComma + eol;
-    var f_csv = multipleRowsStream.transform(commaDoubleQuotListToCsvConverter).join();
+    var f_csv = multipleRowsStream
+        .transform(commaDoubleQuotListToCsvConverter)
+        .join();
     expect(f_csv, completion(result));
   });
 

@@ -21,12 +21,12 @@ const String defaultEol = '\r\n';
 
 /// A codec which converts a csv string ↔ List of rows.
 ///
-/// See [Csv2ListConverter] and [List2CsvConverter].
+/// See [CsvToListConverter] and [ListToCsvConverter].
 class CsvCodec extends Codec<String, List> {
 
-  final Csv2ListConverter encoder;
+  final CsvToListConverter encoder;
 
-  final List2CsvConverter decoder;
+  final ListToCsvConverter decoder;
 
 
   CsvCodec({String fieldDelimiter: defaultFieldDelimiter,
@@ -35,16 +35,16 @@ class CsvCodec extends Codec<String, List> {
             String eol: defaultEol,
             bool parseNumbers: true,
             bool allowInvalid: true})
-      : encoder = new Csv2ListConverter(fieldDelimiter: fieldDelimiter,
-                                        textDelimiter: textDelimiter,
-                                        textEndDelimiter: textEndDelimiter,
-                                        eol: eol,
-                                        parseNumbers: parseNumbers,
-                                        allowInvalid: allowInvalid),
-        decoder = new List2CsvConverter(fieldDelimiter: fieldDelimiter,
-                                        textDelimiter: textDelimiter,
-                                        textEndDelimiter: textEndDelimiter,
-                                        eol: eol);
+      : encoder = new CsvToListConverter(fieldDelimiter: fieldDelimiter,
+                                         textDelimiter: textDelimiter,
+                                         textEndDelimiter: textEndDelimiter,
+                                         eol: eol,
+                                         parseNumbers: parseNumbers,
+                                         allowInvalid: allowInvalid),
+        decoder = new ListToCsvConverter(fieldDelimiter: fieldDelimiter,
+                                         textDelimiter: textDelimiter,
+                                         textEndDelimiter: textEndDelimiter,
+                                         eol: eol);
 
 }
 

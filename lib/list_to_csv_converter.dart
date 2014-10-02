@@ -71,7 +71,7 @@ part of csv;
 ///    double quote.  For example:
 ///
 ///     "aaa","b""bb","ccc"
-class List2CsvConverter extends Converter<List<List>, String> implements StreamTransformer {
+class ListToCsvConverter extends Converter<List<List>, String> implements StreamTransformer {
 
   /// The separator between fields in the outputstring.
   final String fieldDelimiter;
@@ -98,7 +98,7 @@ class List2CsvConverter extends Converter<List<List>, String> implements StreamT
   /// The default values for [fieldDelimiter], [textDelimiter] and [eol]
   /// are consistend with [rfc4180](http://tools.ietf.org/html/rfc4180).
   ///
-  const List2CsvConverter({this.fieldDelimiter: defaultFieldDelimiter,
+  const ListToCsvConverter({this.fieldDelimiter: defaultFieldDelimiter,
                            String textDelimiter: defaultTextDelimiter,
                            String textEndDelimiter,
                            this.eol: defaultEol})
@@ -274,7 +274,7 @@ class List2CsvSink extends ChunkedConversionSink<List> {
 
   /// This is the List2CsvConverter which has the configurations
   /// (fieldDelimiter, textDel., eol)
-  final List2CsvConverter _converter;
+  final ListToCsvConverter _converter;
 
   /// Rows converted to csv are added to this sink.
   final Sink<String> _outSink;

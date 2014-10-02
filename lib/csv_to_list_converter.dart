@@ -8,7 +8,7 @@ part of csv;
 /// This converter follows the rules of [rfc4180](http://tools.ietf.org/html/rfc4180).
 ///
 /// See the [CsvParser] for more information.
-class Csv2ListConverter extends Converter<String, List<List>> implements StreamTransformer {
+class CsvToListConverter extends Converter<String, List<List>> implements StreamTransformer {
 
   /// The separator between fields.
   final String fieldDelimiter;
@@ -39,7 +39,7 @@ class Csv2ListConverter extends Converter<String, List<List>> implements StreamT
   ///
   /// Note that by default invalid values are allowed and no exceptions are
   /// thrown.
-  const Csv2ListConverter({this.fieldDelimiter: defaultFieldDelimiter,
+  const CsvToListConverter({this.fieldDelimiter: defaultFieldDelimiter,
                            String textDelimiter: defaultTextDelimiter,
                            String textEndDelimiter,
                            this.eol: defaultEol,
@@ -56,7 +56,7 @@ class Csv2ListConverter extends Converter<String, List<List>> implements StreamT
 
   /// Implementation so that this converter can be used as transformer.
   @override
-  Csv2ListSink startChunkedConversion(Sink<List> outputSink) {
+  CsvToListSink startChunkedConversion(Sink<List> outputSink) {
 
     var parser = new CsvParser(fieldDelimiter: fieldDelimiter,
                                textDelimiter: textDelimiter,
@@ -65,7 +65,7 @@ class Csv2ListConverter extends Converter<String, List<List>> implements StreamT
                                parseNumbers: parseNumbers,
                                allowInvalid: allowInvalid);
 
-    return new Csv2ListSink(parser, outputSink);
+    return new CsvToListSink(parser, outputSink);
   }
 
 
@@ -98,7 +98,7 @@ class Csv2ListConverter extends Converter<String, List<List>> implements StreamT
 
 
 /// The input sink for a chunked csv-string to list conversion.
-class Csv2ListSink extends ChunkedConversionSink<String> {
+class CsvToListSink extends ChunkedConversionSink<String> {
 
   /// Rows converted to Lists are added to this sink.
   final Sink<List> _outSink;
@@ -109,7 +109,7 @@ class Csv2ListSink extends ChunkedConversionSink<String> {
 
   List _currentRow;
 
-  Csv2ListSink(this._parser, this._outSink)
+  CsvToListSink(this._parser, this._outSink)
       : _currentRow = [];
 
 
@@ -148,7 +148,6 @@ class Csv2ListSink extends ChunkedConversionSink<String> {
   close() {
     _add(null, fieldCompleteWhenEndOfString: true);
 
-    // TODO check if not inside quoted string.
     _outSink.close();
   }
 }
