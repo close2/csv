@@ -10,20 +10,28 @@ part of csv;
 /// See the [CsvParser] for more information.
 class CsvToListConverter extends Converter<String, List<List>> implements StreamTransformer {
 
-  /// The separator between fields.
+  /// If there is only one value in the list it's the separator between fields
+  /// Otherwise the first occurence of any string in this list becomes the
+  /// field delimiter.  Example: [',', ';'] would allow either , or ; to become
+  /// the field delimiter.
   final List<String> fieldDelimiters;
 
   /// The delimiter which (optionally) surrounds text / fields.
+  /// See [fieldDelimiters] for an explanation why this is a list.
   final List<String> textDelimiters;
 
   /// The end delimiter for text.  This allows text to be quoted with different
   /// start / end delimiters: Example:  «abc».
-  /// If [textEndDelimiter] is null, [textDelimiter] is used instead;
+  /// If no occurence of any [textEndDelimiters] is found, [textDelimiters] is
+  /// used instead;
+  ///
+  /// See [fieldDelimiters] for an explanation why this is a list.
   final List<String> textEndDelimiters;
 
   /// The end of line character which is expected after "row".
   ///
   /// The eol is optional for the last row.
+  /// See [fieldDelimiters] for an explanation why this is a list.
   final List<String> eols;
 
   /// Should we try to parse unquoted text to numbers (int and doubles)
@@ -34,6 +42,9 @@ class CsvToListConverter extends Converter<String, List<List>> implements Stream
   final bool allowInvalid;
 
 
+  /// Converts [setting] to List<String> if it's a String.
+  /// If setting is null returns [alternativeSetting] instead (if necessary
+  /// also converted to List<String>).
   static List<String> _prep(setting, [alternativeSetting]) {
     if (setting != null && setting is List) return setting;
     if (setting != null && setting is String) return [setting];
@@ -49,6 +60,9 @@ class CsvToListConverter extends Converter<String, List<List>> implements Stream
   ///
   /// Note that by default invalid values are allowed and no exceptions are
   /// thrown.
+  ///
+  /// [fieldDelimiters], [textDelimiters], [textEndDelimiters] and [eols] may
+  /// either be a String or a List of Strings for autodetection.
   CsvToListConverter({fieldDelimiters: defaultFieldDelimiter,
                       textDelimiters: defaultTextDelimiter,
                       textEndDelimiters,
@@ -150,16 +164,22 @@ class CsvToListSink extends ChunkedConversionSink<String> {
     if (newCsvChunk == null) newCsvChunk = '';
     _unparsedCsvChunks.add(newCsvChunk);
 
+    // Unless this is the last chunk (fieldCompleteWhenEndOfString) we might
+    // have to wait for another chunk to autodetect / find the first occurence
+    // of a setting string.
     if (_parser == null) {
+
       final fieldMatch = _findFirst(_unparsedCsvChunks, _fieldDelimiters);
       final textMatch = _findFirst(_unparsedCsvChunks, _textDelimiters);
       final textEndMatch = _findFirst(_unparsedCsvChunks, _textEndDelimiters);
       final eolMatch = _findFirst(_unparsedCsvChunks, _eols);
+
       if (!fieldCompleteWhenEndOfString &&
           (fieldMatch._index == null ||
            textMatch._index == null ||
            textEndMatch._index == null ||
            eolMatch._index == null)) return; // and wait for another chunk.
+
       _parser = new CsvParser(fieldDelimiter: fieldMatch._match,
                               textDelimiter: textMatch._match,
                               textEndDelimiter: textEndMatch._match,
@@ -215,6 +235,7 @@ class CsvToListSink extends ChunkedConversionSink<String> {
 
 
 
+/// A simple class to return 2 values at the same time.
 class _FirstMatch {
   final String _match;
   final int _index;
@@ -222,6 +243,17 @@ class _FirstMatch {
   const _FirstMatch(this._match, this._index);
 }
 
+
+/// This function goes through every possible value in [possibleValues]
+/// and returns the value which has the lowest start position inside
+/// [csvStringOrList]
+///
+/// If there is only one possible value it returns this value immediately.
+///
+/// [csvStringOrList] can be a String or a List of Strings which are
+/// simply concatendated!
+///
+/// If [csvStringOrList] is null it becomes ''.
 _FirstMatch _findFirst(csvStringOrList, List<String> possibleValues) {
   // This is definitely not the fastest way!
   // We can however not simply check every chunk on its own, as a possibleValue
@@ -240,8 +272,6 @@ _FirstMatch _findFirst(csvStringOrList, List<String> possibleValues) {
   var bestMatchIndex = csv.length;
   var bestMatch = possibleValues.first;
 
-  // This is definitely not the fastest way!
-  // We can however not simply check every
   possibleValues.forEach((val) {
     if (val == null) return;
 
