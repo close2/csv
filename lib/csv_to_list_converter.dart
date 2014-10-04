@@ -10,29 +10,20 @@ part of csv;
 /// See the [CsvParser] for more information.
 class CsvToListConverter extends Converter<String, List<List>> implements StreamTransformer {
 
-  /// If there is only one value in the list it's the separator between fields
-  /// Otherwise the first occurence of any string in this list becomes the
-  /// field delimiter.  Example: [',', ';'] would allow either , or ; to become
-  /// the field delimiter.
-  final List<String> fieldDelimiters;
+  /// The separator between fields.
+  final String fieldDelimiter;
 
   /// The delimiter which (optionally) surrounds text / fields.
-  /// See [fieldDelimiters] for an explanation why this is a list.
-  final List<String> textDelimiters;
+  final String textDelimiter;
 
   /// The end delimiter for text.  This allows text to be quoted with different
   /// start / end delimiters: Example:  «abc».
-  /// If no occurence of any [textEndDelimiters] is found, [textDelimiters] is
-  /// used instead;
-  ///
-  /// See [fieldDelimiters] for an explanation why this is a list.
-  final List<String> textEndDelimiters;
+  final String textEndDelimiter;
 
   /// The end of line character which is expected after "row".
   ///
   /// The eol is optional for the last row.
-  /// See [fieldDelimiters] for an explanation why this is a list.
-  final List<String> eols;
+  final String eol;
 
   /// Should we try to parse unquoted text to numbers (int and doubles)
   final bool parseNumbers;
@@ -41,39 +32,27 @@ class CsvToListConverter extends Converter<String, List<List>> implements Stream
   /// See [CsvParser.allowInvalid]
   final bool allowInvalid;
 
+  
+  /// An optional csvSettingsDetector.  See [CsvSettingsDetector].
+  final CsvSettingsDetector csvSettingsDetector;
 
-  /// Converts [setting] to List<String> if it's a String.
-  /// If setting is null returns [alternativeSetting] instead (if necessary
-  /// also converted to List<String>).
-  static List<String> _prep(setting, [alternativeSetting]) {
-    if (setting != null && setting is List) return setting;
-    if (setting != null && setting is String) return [setting];
-    if (alternativeSetting != null && alternativeSetting is List)
-      return alternativeSetting;
-    if (alternativeSetting != null && alternativeSetting is String)
-      return [alternativeSetting];
-    return [null];
-  }
-
+  
   /// The default values for the optional arguments are consistend with
   /// [rfc4180](http://tools.ietf.org/html/rfc4180).
   ///
   /// Note that by default invalid values are allowed and no exceptions are
   /// thrown.
-  ///
-  /// [fieldDelimiters], [textDelimiters], [textEndDelimiters] and [eols] may
-  /// either be a String or a List of Strings for autodetection.
-  CsvToListConverter({fieldDelimiters: defaultFieldDelimiter,
-                      textDelimiters: defaultTextDelimiter,
-                      textEndDelimiters,
-                      eols: defaultEol,
-                      bool parseNumbers,
-                      bool allowInvalid})
-      : this.fieldDelimiters = _prep(fieldDelimiters),
-        this.textDelimiters = _prep(textDelimiters),
-        this.textEndDelimiters = _prep(textEndDelimiters,
-                                       textDelimiters),
-        this.eols = _prep(eols),
+  const CsvToListConverter({this.fieldDelimiter: defaultFieldDelimiter,
+                           String textDelimiter: defaultTextDelimiter,
+                           String textEndDelimiter,
+                           this.eol: defaultEol,
+                           this.csvSettingsDetector,
+                           bool parseNumbers,
+                           bool allowInvalid})
+      : this.textDelimiter = textDelimiter,
+        this.textEndDelimiter = textEndDelimiter != null ?
+                                textEndDelimiter :
+                                textDelimiter,
         this.parseNumbers = parseNumbers != null ? parseNumbers : true,
         this.allowInvalid = allowInvalid != null ? allowInvalid : true;
 
@@ -84,10 +63,11 @@ class CsvToListConverter extends Converter<String, List<List>> implements Stream
   CsvToListSink startChunkedConversion(Sink<List> outputSink) {
 
     return new CsvToListSink(outputSink,
-                             fieldDelimiters,
-                             textDelimiters,
-                             textEndDelimiters,
-                             eols,
+                             fieldDelimiter,
+                             textDelimiter,
+                             textEndDelimiter,
+                             eol,
+                             csvSettingsDetector,
                              parseNumbers,
                              allowInvalid);
   }
@@ -96,35 +76,72 @@ class CsvToListConverter extends Converter<String, List<List>> implements Stream
   /// Parses the [csv] and returns a List (rows) of Lists (columns).
   @override
   List<List> convert(String csv,
-                     {fieldDelimiters,
-                      textDelimiters,
-                      textEndDelimiters,
-                      eols,
+                     {String fieldDelimiter,
+                      String textDelimiter,
+                      String textEndDelimiter,
+                      String eol,
+                      CsvSettingsDetector csvSettingsDetector,
                       bool parseNumbers,
                       bool allowInvalid}) {
-    fieldDelimiters = _prep(fieldDelimiters, this.fieldDelimiters);
-    textDelimiters = _prep(textDelimiters, this.textDelimiters);
-    textEndDelimiters = _prep(textEndDelimiters, this.textEndDelimiters);
-    eols = _prep(eols, this.eols);
+    if (fieldDelimiter == null) fieldDelimiter = this.fieldDelimiter;
+    if (textDelimiter == null) textDelimiter = this.textDelimiter;
+    if (textEndDelimiter == null) textEndDelimiter = this.textEndDelimiter;
+    if (eol == null) eol = this.eol;
+    if (csvSettingsDetector == null) {
+      csvSettingsDetector = this.csvSettingsDetector;
+    }
     if (parseNumbers == null) parseNumbers = this.parseNumbers;
     if (allowInvalid == null) allowInvalid = this.allowInvalid;
 
-    final fieldDelimiter = _findFirst(csv, fieldDelimiters)._match;
-    final textDelimiter = _findFirst(csv, textDelimiters)._match;
-    final textEndDelimiter = _findFirst(csv, textEndDelimiters)._match;
-    final eol = _findFirst(csv, eols)._match;
-
-    var parser = new CsvParser(fieldDelimiter: fieldDelimiter,
-                               textDelimiter: textDelimiter,
-                               textEndDelimiter: textEndDelimiter,
-                               eol: eol,
-                               parseNumbers: parseNumbers,
-                               allowInvalid: allowInvalid);
+    
+    var parser = _buildNewParserWithSettings([csv],
+                                             true,
+                                             csvSettingsDetector,
+                                             fieldDelimiter,
+                                             textDelimiter,
+                                             textEndDelimiter,
+                                             eol,
+                                             parseNumbers,
+                                             allowInvalid);
 
     return parser.convert(csv);
   }
 }
 
+
+CsvParser _buildNewParserWithSettings(List<String> unparsedCsvChunks,
+                                      bool noMoreChunks,
+                                      CsvSettingsDetector csvSettingsDetector,
+                                      String fieldDelimiter,
+                                      String textDelimiter,
+                                      String textEndDelimiter,
+                                      String eol,
+                                      bool parseNumbers,
+                                      bool allowInvalid) {
+    if (csvSettingsDetector != null) {
+      var settings = csvSettingsDetector.detectFromCsvChunks(unparsedCsvChunks,
+                                                             noMoreChunks);
+      
+      if (settings.needMoreData && !noMoreChunks) return null;
+    
+      var ifNotNull = (String value, String defaultValue) {
+        return value != null ? value : defaultValue;
+      };
+      
+      fieldDelimiter = ifNotNull(settings.fieldDelimiter, fieldDelimiter);
+      textDelimiter = ifNotNull(settings.textDelimiter, textDelimiter);
+      textEndDelimiter = ifNotNull(settings.textEndDelimiter,
+                                   textEndDelimiter);
+      eol = ifNotNull(settings.eol, eol);
+    }
+    
+    return new CsvParser(fieldDelimiter: fieldDelimiter,
+                         textDelimiter: textDelimiter,
+                         textEndDelimiter: textEndDelimiter,
+                         eol: eol,
+                         parseNumbers: parseNumbers,
+                         allowInvalid: allowInvalid);
+}
 
 /// The input sink for a chunked csv-string to list conversion.
 class CsvToListSink extends ChunkedConversionSink<String> {
@@ -141,18 +158,20 @@ class CsvToListSink extends ChunkedConversionSink<String> {
   List _currentRow;
 
 
-  final _fieldDelimiters;
-  final _textDelimiters;
-  final _textEndDelimiters;
-  final _eols;
+  final String _fieldDelimiter;
+  final String _textDelimiter;
+  final String _textEndDelimiter;
+  final String _eol;
+  final CsvSettingsDetector _csvSettingsDetector;
   bool _parseNumbers;
   bool _allowInvalid;
 
   CsvToListSink(this._outSink,
-                this._fieldDelimiters,
-                this._textDelimiters,
-                this._textEndDelimiters,
-                this._eols,
+                this._fieldDelimiter,
+                this._textDelimiter,
+                this._textEndDelimiter,
+                this._eol,
+                this._csvSettingsDetector,
                 this._parseNumbers,
                 this._allowInvalid)
       : _currentRow = [],
@@ -168,24 +187,17 @@ class CsvToListSink extends ChunkedConversionSink<String> {
     // have to wait for another chunk to autodetect / find the first occurence
     // of a setting string.
     if (_parser == null) {
-
-      final fieldMatch = _findFirst(_unparsedCsvChunks, _fieldDelimiters);
-      final textMatch = _findFirst(_unparsedCsvChunks, _textDelimiters);
-      final textEndMatch = _findFirst(_unparsedCsvChunks, _textEndDelimiters);
-      final eolMatch = _findFirst(_unparsedCsvChunks, _eols);
-
-      if (!fieldCompleteWhenEndOfString &&
-          (fieldMatch._index == null ||
-           textMatch._index == null ||
-           textEndMatch._index == null ||
-           eolMatch._index == null)) return; // and wait for another chunk.
-
-      _parser = new CsvParser(fieldDelimiter: fieldMatch._match,
-                              textDelimiter: textMatch._match,
-                              textEndDelimiter: textEndMatch._match,
-                              eol: eolMatch._match,
-                              parseNumbers: _parseNumbers,
-                              allowInvalid: _allowInvalid);
+      _parser = _buildNewParserWithSettings(_unparsedCsvChunks,
+                                            fieldCompleteWhenEndOfString,
+                                            _csvSettingsDetector,
+                                            _fieldDelimiter,
+                                            _textDelimiter,
+                                            _textEndDelimiter,
+                                            _eol,
+                                            _parseNumbers,
+                                            _allowInvalid);
+      assert(_parser != null || !fieldCompleteWhenEndOfString);
+      if (_parser == null) return;  // and wait for another chunk
     }
 
 
@@ -232,61 +244,3 @@ class CsvToListSink extends ChunkedConversionSink<String> {
     _outSink.close();
   }
 }
-
-
-
-/// A simple class to return 2 values at the same time.
-class _FirstMatch {
-  final String _match;
-  final int _index;
-
-  const _FirstMatch(this._match, this._index);
-}
-
-
-/// This function goes through every possible value in [possibleValues]
-/// and returns the value which has the lowest start position inside
-/// [csvStringOrList]
-///
-/// If there is only one possible value it returns this value immediately.
-///
-/// [csvStringOrList] can be a String or a List of Strings which are
-/// simply concatendated!
-///
-/// If [csvStringOrList] is null it becomes ''.
-_FirstMatch _findFirst(csvStringOrList, List<String> possibleValues) {
-  // This is definitely not the fastest way!
-  // We can however not simply check every chunk on its own, as a possibleValue
-  // might span 2 (or more) chunks.
-
-  if (csvStringOrList == null) csvStringOrList = '';
-
-  final csv = csvStringOrList is String ?
-              csvStringOrList :
-              (csvStringOrList as List<String>).join();
-
-  if (possibleValues.length == 1) {
-    return new _FirstMatch(possibleValues.first, 0);
-  }
-
-  var bestMatchIndex = csv.length;
-  var bestMatch = possibleValues.first;
-
-  possibleValues.forEach((val) {
-    if (val == null) return;
-
-    final currentIndex = csv.indexOf(val);
-
-    if (currentIndex != -1 && currentIndex < bestMatchIndex) {
-      bestMatchIndex = currentIndex;
-      bestMatch = val;
-    }
-
-  });
-
-  final int retIndex = bestMatchIndex == csv.length ?
-                       null:
-                       bestMatchIndex;
-  return new _FirstMatch(bestMatch, retIndex);
-}
-

@@ -53,35 +53,38 @@ main_transformer() {
   test('Transformer throws an exception if not allowInvalid and eol is null',
        () {
     var csvStream = new Stream.fromIterable(csvComplex3_parts);
-    final converter = new CsvToListConverter(eols: null, allowInvalid: false);
+    final converter = new CsvToListConverter(eol: null, allowInvalid: false);
 
     var fun = () => csvStream.transform(converter).toList();
     expect(fun(), throwsArgumentError);
   });
 
   test('Autodetecting settings works in transformer mode', () {
-    var converter = new CsvToListConverter(fieldDelimiters: [',', ';'],
-                                           textDelimiters: ['"', "'"],
-                                           textEndDelimiters: ['"', "'"],
-                                           eols: ['\r\n', '\n'],
+    var det = new FirstOccurenceSettingsDetector(fieldDelimiters: [',', ';'],
+                                                 textDelimiters: ['"', "'"],
+                                                 textEndDelimiters: ['"', "'"],
+                                                 eols: ['\r\n', '\n']);
+    var converter = new CsvToListConverter(csvSettingsDetector: det,
                                            parseNumbers: true);
     var stream = new Stream.fromIterable([csvSimpleStringsSingleRowComma]);
     var f_rows = stream.transform(converter).toList();
     expect(f_rows, completion([simpleStringsSingleRow]));
 
-    converter = new CsvToListConverter(fieldDelimiters: [',', 'b'],
-                                       textDelimiters: ["'", '"'],
-                                       textEndDelimiters: ['.', '"'],
-                                       eols: ['\n'],
+    det = new FirstOccurenceSettingsDetector(fieldDelimiters: [',', 'b'],
+                                             textDelimiters: ["'", '"'],
+                                             textEndDelimiters: ['.', '"'],
+                                             eols: ['\n']);
+    converter = new CsvToListConverter(csvSettingsDetector: det,
                                        parseNumbers: false);
     stream = new Stream.fromIterable([csvSingleRowComma]);
     f_rows = stream.transform(converter).toList();
     expect(f_rows, completion([singleRowAllText]));
 
 
-    converter = new CsvToListConverter(fieldDelimiters: ['aa', '2'],
-                                       textDelimiters: ['bb', '"'],
-                                       textEndDelimiters: ['"', 'bb'],
+    det = new FirstOccurenceSettingsDetector(fieldDelimiters: ['aa', '2'],
+                                             textDelimiters: ['bb', '"'],
+                                             textEndDelimiters: ['"', 'bb']);
+    converter = new CsvToListConverter(csvSettingsDetector: det,
                                        parseNumbers: true);
     stream = new Stream.fromIterable([csvSingleRowAaBb]);
     f_rows = stream.transform(converter).toList();
@@ -90,7 +93,8 @@ main_transformer() {
 
 
   test('Transformer autodetects settings for a multiline csv correctly', () {
-    var converter = new CsvToListConverter(eols: ['\r\n', '\n']);
+    var det = new FirstOccurenceSettingsDetector(eols: ['\r\n', '\n']);
+    var converter = new CsvToListConverter(csvSettingsDetector: det);
     var eol = '\n';
     var csvStream = new Stream.fromIterable([csvSingleRowComma,
                                              eol,
@@ -100,9 +104,10 @@ main_transformer() {
     var f_rows = csvStream.transform(converter).toList();
     expect(f_rows, completion(multipleRows));
 
-    converter = new CsvToListConverter(eols: ['\r\n', '\n'],
-                                       textDelimiters: ['""', "'"],
-                                       textEndDelimiters: ['««', '!']);
+    det = new FirstOccurenceSettingsDetector(eols: ['\r\n', '\n'],
+                                             textDelimiters: ['""', "'"],
+                                             textEndDelimiters: ['««', '!']);
+    converter = new CsvToListConverter(csvSettingsDetector: det);
     csvStream = new Stream.fromIterable(autodetectCsv_parts);
     f_rows = csvStream.transform(converter).toList();
     expect(f_rows, completion(autodetectRows));

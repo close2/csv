@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:unittest/unittest.dart';
 import 'package:csv/csv.dart';
 import 'package:csv/src/csv_parser.dart';
+import 'package:csv/csv_settings_autodetection.dart';
 
 import 'test_data.dart';
 
@@ -19,40 +20,40 @@ final commaDoubleQuotCsvToListConverter =
 final commaDoubleQuotCsvToListConverterParseNumbers =
     new CsvToListConverter();
 final semicolonDoubleQuotCsvToListConverter =
-    new CsvToListConverter(fieldDelimiters: ';',
+    new CsvToListConverter(fieldDelimiter: ';',
                            parseNumbers: false);
 final dotDoubleQuotCsvToListConverter =
-    new CsvToListConverter(fieldDelimiters: '.',
+    new CsvToListConverter(fieldDelimiter: '.',
                            parseNumbers: false);
 final dotSingleQuotCsvToListConverterUnixEol =
-    new CsvToListConverter(fieldDelimiters: '.',
-                           textDelimiters: "'",
-                           eols: '\n',
+    new CsvToListConverter(fieldDelimiter: '.',
+                           textDelimiter: "'",
+                           eol: '\n',
                            parseNumbers: false);
 final dotSingleQuotCsvToListConverterUnixEol_double =
-    new CsvToListConverter(fieldDelimiters: '.',
-                           textDelimiters: "'",
-                           textEndDelimiters: '"',
-                           eols: '\n',
+    new CsvToListConverter(fieldDelimiter: '.',
+                           textDelimiter: "'",
+                           textEndDelimiter: '"',
+                           eol: '\n',
                            parseNumbers: false);
 final aaBbCsvToListConverter =
-    new CsvToListConverter(fieldDelimiters: 'aa',
-                           textDelimiters: 'bb',
+    new CsvToListConverter(fieldDelimiter: 'aa',
+                           textDelimiter: 'bb',
                            parseNumbers: false);
 final complexConverter =
-    new CsvToListConverter(fieldDelimiters: '...*',
-                           textDelimiters: '...#',
-                           eols: '....',
+    new CsvToListConverter(fieldDelimiter: '...*',
+                           textDelimiter: '...#',
+                           eol: '....',
                            parseNumbers: true);
 final complex2Converter =
-    new CsvToListConverter(fieldDelimiters: '...*',
-                           textDelimiters: '...#',
-                           eols: '.*.*',
+    new CsvToListConverter(fieldDelimiter: '...*',
+                           textDelimiter: '...#',
+                           eol: '.*.*',
                            parseNumbers: true);
 final complex3Converter =
-    new CsvToListConverter(fieldDelimiters: ',',
-                           textDelimiters: '.,a,b,__',
-                           eols: '_xyz',
+    new CsvToListConverter(fieldDelimiter: ',',
+                           textDelimiter: '.,a,b,__',
+                           eol: '_xyz',
                            parseNumbers: true);
 
 

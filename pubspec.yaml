@@ -1,9 +1,11 @@
 name: csv
-version: 1.0.1
+version: 2.0.0
 author: Christian Loitsch
 description: |-
   A codec to transform between a string and a list of values.
 
   The string must be comma (configurable) separated values.
+homepage: https://github.com/close2/csv
+documentation: https://github.com/close2/csv
 dependencies:
   unittest: any

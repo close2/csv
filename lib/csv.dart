@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:async';
 
 import 'src/csv_parser.dart';
+import 'csv_settings_autodetection.dart';
 
 part 'csv_to_list_converter.dart';
 part 'list_to_csv_converter.dart';
@@ -35,10 +36,10 @@ class CsvCodec extends Codec<String, List> {
             String eol: defaultEol,
             bool parseNumbers: true,
             bool allowInvalid: true})
-      : encoder = new CsvToListConverter(fieldDelimiters: fieldDelimiter,
-                                         textDelimiters: textDelimiter,
-                                         textEndDelimiters: textEndDelimiter,
-                                         eols: eol,
+      : encoder = new CsvToListConverter(fieldDelimiter: fieldDelimiter,
+                                         textDelimiter: textDelimiter,
+                                         textEndDelimiter: textEndDelimiter,
+                                         eol: eol,
                                          parseNumbers: parseNumbers,
                                          allowInvalid: allowInvalid),
         decoder = new ListToCsvConverter(fieldDelimiter: fieldDelimiter,

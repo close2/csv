@@ -3,23 +3,23 @@ part of csv_to_list_test;
 
 main_converter() {
   test('Csv converter has sane default values and stores parameters', () {
-    expect(commaDoubleQuotCsvToListConverter.fieldDelimiters, equals([',']));
-    expect(commaDoubleQuotCsvToListConverter.textDelimiters, equals(['"']));
-    expect(commaDoubleQuotCsvToListConverter.textEndDelimiters, equals(['"']));
-    expect(commaDoubleQuotCsvToListConverter.eols, equals(['\r\n']));
+    expect(commaDoubleQuotCsvToListConverter.fieldDelimiter, equals(','));
+    expect(commaDoubleQuotCsvToListConverter.textDelimiter, equals('"'));
+    expect(commaDoubleQuotCsvToListConverter.textEndDelimiter, equals('"'));
+    expect(commaDoubleQuotCsvToListConverter.eol, equals('\r\n'));
     expect(commaDoubleQuotCsvToListConverter.parseNumbers, equals(false));
     expect(commaDoubleQuotCsvToListConverterParseNumbers.parseNumbers,
            equals(true));
-    expect(dotSingleQuotCsvToListConverterUnixEol.fieldDelimiters,
-           equals(['.']));
-    expect(dotSingleQuotCsvToListConverterUnixEol.textDelimiters, equals(["'"]));
-    expect(dotSingleQuotCsvToListConverterUnixEol.textEndDelimiters,
-           equals(["'"]));
-    expect(dotSingleQuotCsvToListConverterUnixEol.eols, equals(['\n']));
+    expect(dotSingleQuotCsvToListConverterUnixEol.fieldDelimiter,
+           equals('.'));
+    expect(dotSingleQuotCsvToListConverterUnixEol.textDelimiter, equals("'"));
+    expect(dotSingleQuotCsvToListConverterUnixEol.textEndDelimiter,
+           equals("'"));
+    expect(dotSingleQuotCsvToListConverterUnixEol.eol, equals('\n'));
     expect(dotSingleQuotCsvToListConverterUnixEol.parseNumbers, equals(false));
 
-    expect(dotSingleQuotCsvToListConverterUnixEol_double.textEndDelimiters,
-           equals(['"']));
+    expect(dotSingleQuotCsvToListConverterUnixEol_double.textEndDelimiter,
+           equals('"'));
   });
 
 
@@ -66,40 +66,40 @@ main_converter() {
 
   test('Can override field, text (end) delimiter and parseNumbers', () {
     expect(aaBbCsvToListConverter.convert(csvSimpleStringsSingleRowComma,
-                                          fieldDelimiters: ',',
-                                          textDelimiters: '"',
-                                          textEndDelimiters: '"',
+                                          fieldDelimiter: ',',
+                                          textDelimiter: '"',
+                                          textEndDelimiter: '"',
                                           parseNumbers: true),
            equals([simpleStringsSingleRow]));
     expect(commaDoubleQuotCsvToListConverterParseNumbers
              .convert(csvSingleRowComma,
-                      fieldDelimiters: ',',
-                      textDelimiters: '"',
-                      textEndDelimiters: '"',
+                      fieldDelimiter: ',',
+                      textDelimiter: '"',
+                      textEndDelimiter: '"',
                       parseNumbers: false),
            equals([singleRowAllText]));
     expect(aaBbCsvToListConverter.convert(csvSingleRowSemicolon,
-                                          fieldDelimiters: ';',
-                                          textDelimiters: '"',
-                                          textEndDelimiters: '"',
+                                          fieldDelimiter: ';',
+                                          textDelimiter: '"',
+                                          textEndDelimiter: '"',
                                           parseNumbers: true),
            equals([singleRow]));
     expect(aaBbCsvToListConverter.convert(csvSingleRowDotDoubleQuot,
-                                          fieldDelimiters: '.',
-                                          textDelimiters: '"',
-                                          textEndDelimiters: '"',
+                                          fieldDelimiter: '.',
+                                          textDelimiter: '"',
+                                          textEndDelimiter: '"',
                                           parseNumbers: true),
            equals([singleRowNoDouble]));
     expect(aaBbCsvToListConverter.convert(csvSingleRowDotSingleQuot,
-                                          fieldDelimiters: '.',
-                                          textDelimiters: "'",
-                                          textEndDelimiters: "'",
+                                          fieldDelimiter: '.',
+                                          textDelimiter: "'",
+                                          textEndDelimiter: "'",
                                           parseNumbers: true),
            equals([singleRowNoDouble]));
     expect(commaDoubleQuotCsvToListConverter.convert(csvSingleRowAaBb,
-                                                     fieldDelimiters: 'aa',
-                                                     textDelimiters: 'bb',
-                                                     textEndDelimiters: 'bb',
+                                                     fieldDelimiter: 'aa',
+                                                     textDelimiter: 'bb',
+                                                     textEndDelimiter: 'bb',
                                                      parseNumbers: true),
            equals([singleRow]));
   });
@@ -107,22 +107,22 @@ main_converter() {
   test('Can parse different formats when text end delimiter is different', () {
     expect(commaDoubleQuotCsvToListConverterParseNumbers
              .convert(csvSingleRowComma_endQuotXY,
-                      textEndDelimiters: "XY"),
+                      textEndDelimiter: "XY"),
            equals([singleRow]));
     expect(semicolonDoubleQuotCsvToListConverter
              .convert(csvSingleRowSemicolon_endQuotXY,
                       parseNumbers: true,
-                      textEndDelimiters: "XY"),
+                      textEndDelimiter: "XY"),
            equals([singleRow]));
     expect(dotDoubleQuotCsvToListConverter
              .convert(csvSingleRowDotDoubleQuot_endQuotXY,
                       parseNumbers: true,
-                      textEndDelimiters: "XY"),
+                      textEndDelimiter: "XY"),
            equals([singleRowNoDouble]));
     expect(dotSingleQuotCsvToListConverterUnixEol
              .convert(csvSingleRowDotSingleQuot_endQuotDouble,
                       parseNumbers: true,
-                      textEndDelimiters: '"'),
+                      textEndDelimiter: '"'),
            equals([singleRowNoDouble]));
     expect(dotSingleQuotCsvToListConverterUnixEol_double
              .convert(csvSingleRowDotSingleQuot_endQuotDouble,
@@ -131,40 +131,40 @@ main_converter() {
     expect(aaBbCsvToListConverter
              .convert(csvSingleRowAaBbXy,
                       parseNumbers: true,
-                      textEndDelimiters: "XY"),
+                      textEndDelimiter: "XY"),
            equals([singleRow]));
   });
 
   test('Throw an exception if allowInvalid is false and field Delimiter and '
        'text Delimiter are equal or either is null', () {
-    expect(() => new CsvToListConverter(fieldDelimiters: 'a',
-                                        textDelimiters: 'a',
+    expect(() => new CsvToListConverter(fieldDelimiter: 'a',
+                                        textDelimiter: 'a',
                                         allowInvalid: false).convert('a,b'),
            throwsArgumentError);
     expect(() => commaDoubleQuotCsvToListConverter
                    .convert('a,b',
-                            fieldDelimiters: 'a',
-                            textDelimiters: 'a',
+                            fieldDelimiter: 'a',
+                            textDelimiter: 'a',
                             allowInvalid: false),
            throwsArgumentError);
-    expect(() => new CsvToListConverter(fieldDelimiters: null,
-                                        textDelimiters: null,
+    expect(() => new CsvToListConverter(fieldDelimiter: null,
+                                        textDelimiter: null,
                                         allowInvalid: false).convert('a,b'),
            throwsArgumentError);
   });
 
   test('Doesn\'t throw an exception if allowInvalid and field Delimiter and '
        'text Delimiter are equal or either is null', () {
-    expect(new CsvToListConverter(fieldDelimiters: 'a',
-                                  textDelimiters: 'a').convert('a,b'),
+    expect(new CsvToListConverter(fieldDelimiter: 'a',
+                                  textDelimiter: 'a').convert('a,b'),
            isNotNull);
     expect(commaDoubleQuotCsvToListConverter
                    .convert('a,b',
-                            fieldDelimiters: 'a',
-                            textDelimiters: 'a'),
+                            fieldDelimiter: 'a',
+                            textDelimiter: 'a'),
            isNotNull);
-    expect(() => new CsvToListConverter(fieldDelimiters: null,
-                                        textDelimiters: null).convert('a,b'),
+    expect(() => new CsvToListConverter(fieldDelimiter: null,
+                                        textDelimiter: null).convert('a,b'),
            isNotNull);
   });
 
@@ -175,7 +175,7 @@ main_converter() {
       expect(commaDoubleQuotCsvToListConverter.convert(''), equals([])));
 
   test('Parses a multiline csv string correctly (different eols)', () {
-    var eol = commaDoubleQuotCsvToListConverterParseNumbers.eols.first;
+    var eol = commaDoubleQuotCsvToListConverterParseNumbers.eol;
     expect(eol, equals('\r\n'));
     var csv = csvSingleRowComma + eol +
               csvSingleRowComma + eol +
@@ -183,7 +183,7 @@ main_converter() {
     expect(commaDoubleQuotCsvToListConverterParseNumbers.convert(csv),
            equals(multipleRows));
 
-    eol = dotSingleQuotCsvToListConverterUnixEol.eols.first;
+    eol = dotSingleQuotCsvToListConverterUnixEol.eol;
     expect(eol, equals('\n'));
     csv = csvSingleRowDotSingleQuot + eol +
           csvSingleRowDotSingleQuot + eol +
@@ -193,13 +193,13 @@ main_converter() {
   });
 
   test('Throw an exception if allowInvalid is false and eol is null', () {
-    expect(() => new CsvToListConverter(eols: null,
+    expect(() => new CsvToListConverter(eol: null,
                                         allowInvalid: false).convert('a'),
            throwsArgumentError);
   });
 
   test('Doesn\'t throw an exception if allowInvalid and eol is null', () {
-    expect(new CsvToListConverter(eols: null).convert('a'),
+    expect(new CsvToListConverter(eol: null).convert('a'),
            equals([['a']]));
   });
 
@@ -234,33 +234,39 @@ main_converter() {
   });
 
   test('Autodetecting settings works in converter mode', () {
+    var det = new FirstOccurenceSettingsDetector(fieldDelimiters: [',', ';'],
+                                                 textDelimiters: ['"', "'"],
+                                                 textEndDelimiters: ['"', "'"],
+                                                 eols: ['\r\n', '\n']);
     expect(aaBbCsvToListConverter.convert(csvSimpleStringsSingleRowComma,
-                                          fieldDelimiters: [',', ';'],
-                                          textDelimiters: ['"', "'"],
-                                          textEndDelimiters: ['"', "'"],
-                                          eols: ['\r\n', '\n'],
+                                          csvSettingsDetector: det,
                                           parseNumbers: true),
            equals([simpleStringsSingleRow]));
+    
+    det = new FirstOccurenceSettingsDetector(fieldDelimiters: [',', 'b'],
+                                             textDelimiters: ["'", '"'],
+                                             textEndDelimiters: ['.', '"'],
+                                             eols: ['\n']);
     expect(commaDoubleQuotCsvToListConverterParseNumbers
              .convert(csvSingleRowComma,
-                      fieldDelimiters: [',', 'b'],
-                      textDelimiters: ["'", '"'],
-                      textEndDelimiters: ['.', '"'],
-                      eols: ['\n'],
+                      csvSettingsDetector: det,
                       parseNumbers: false),
            equals([singleRowAllText]));
+    
+    det = new FirstOccurenceSettingsDetector(fieldDelimiters: ['aa', '2'],
+                                             textDelimiters: ['bb', '"'],
+                                             textEndDelimiters: ['"', 'bb']);
     expect(commaDoubleQuotCsvToListConverter
              .convert(csvSingleRowAaBb,
-                      fieldDelimiters: ['aa', '2'],
-                      textDelimiters: ['bb', '"'],
-                      textEndDelimiters: ['"', 'bb'],
+                      csvSettingsDetector: det,
                       parseNumbers: true),
            equals([singleRow]));
 
   });
 
   test('Autodetects settings for a multiline csv string correctly', () {
-    var converter = new CsvToListConverter(eols: ['\r\n', '\n']);
+    var det = new FirstOccurenceSettingsDetector(eols: ['\r\n', '\n']);
+    var converter = new CsvToListConverter(csvSettingsDetector: det);
     var eol = '\n';
     var csv = csvSingleRowComma + eol +
               csvSingleRowComma + eol +
@@ -268,10 +274,12 @@ main_converter() {
     expect(converter.convert(csv),
            equals(multipleRows));
 
+
+    det = new FirstOccurenceSettingsDetector(eols: ['\r\n', '\n'],
+                                             textDelimiters: ['""', "'"],
+                                             textEndDelimiters: ['««', '!']);
     csv = autodetectCsv;
-    expect(new CsvToListConverter(eols: ['\r\n', '\n'],
-                                  textDelimiters: ['""', "'"],
-                                  textEndDelimiters: ['««', '!']).convert(csv),
+    expect(new CsvToListConverter(csvSettingsDetector: det).convert(csv),
            equals(autodetectRows));
   });
 
