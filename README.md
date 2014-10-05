@@ -2,6 +2,31 @@
 
 A dart csv to list codec / converter.
 
+`final csvCodec = new CsvCodec();`
+
+    csvCodec.encoder.convert([['a', 'b'], [1, 2]]);
+    // or
+    final encoder = ListToCsvConverter();
+    encoder.convert([['a', 'b'], [1, 2]]);
+
+    final stream = new Stream.fromIterable([['a', 'b'], [1, 2]]);
+    final csvRowStream = stream.transform(csvCodec.encoder);
+
+
+    csvCodec.decoder.convert('a,b\r\n12,3.14');
+    // or
+    final decoder = CsvToListConverter();
+    decoder.convert('a,b\r\n12,3.14');
+    
+    final stream = new Stream.fromIterable(['a,', 'b\r\n12,3.14']);
+    final listStream = stream.transform(csvCodec.decoder);
+    
+    var det = new FirstOccurenceSettingsDetector(eols: ['\r\n', '\n']);
+    var converter = new CsvToListConverter(csvSettingsDetector: det);
+    // assume someStream is a string stream
+    someStream.transfrom(converter); // will output another stream of lists.
+    
+    
 [![Build Status](https://drone.io/github.com/close2/csv/status.png)](https://drone.io/github.com/close2/csv/latest)
 
 ### The decoder
@@ -109,6 +134,22 @@ plus
  an exception.  Even if `fieldDelimiter`, `textDelimiter`,... don't make sense
  or the csv-String is invalid.  This may for instance happen if the csv-String
  ends with a quoted String without the end-quote (`textEndDelimiter`) string.
+* `csvSettingsDetector`: must be an object which extends from
+ `CsvSettingsDetector`.  There is a simple implementation which simply uses the
+ first occurence of a list of possible values as value.
+ 
+    var d = new FirstOccurenceSettingsDetector(eols: ['\r\n', '\n'],
+                                               textDelimiters: ['""', "'"]);
+
+
+    new CsvToListConverter(csvSettingsDetector: d);
+    
+In this case `eol` will either be `'\r\n'` or `'\n'` depending on which of
+those 2 comes first in the csv string.  Note that the
+`FirstOccurenceSettingsDetector` doesn't parse the csv string!  For instance
+if eol should be `'\r\n'` but there is a field with `'\n'` in the first row,
+`'\n'` is used instead.
+    
 
 To check your configuration values there is `CsvToListConverter.verifySettings`
 and `verifyCurrentSettings`.  Both return a list of errors or if the optional
