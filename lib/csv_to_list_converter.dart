@@ -56,7 +56,30 @@ class CsvToListConverter extends Converter<String, List<List>> implements Stream
         this.parseNumbers = parseNumbers != null ? parseNumbers : true,
         this.allowInvalid = allowInvalid != null ? allowInvalid : true;
 
+  
+  
+  List<ArgumentError> verifyCurrentSettings({bool throwError}) {
+    return verifySettings(fieldDelimiter,
+                          textDelimiter,
+                          textEndDelimiter,
+                          eol,
+                          throwError: throwError);
+  }
 
+  /// Verifies arguments and unless [throwError] is false throws an
+  /// error-exceptions if they are invalid.
+  static List<ArgumentError> verifySettings(String fieldDelimiter,
+                                            String textDelimiter,
+                                            String textEndDelimiter,
+                                            String eol,
+                                            {bool throwError}) {
+    return CsvParser.verifySettings(fieldDelimiter,
+                                    textDelimiter,
+                                    textEndDelimiter,
+                                    eol);
+  }
+
+  
 
   /// Implementation so that this converter can be used as transformer.
   @override

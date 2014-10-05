@@ -23,11 +23,11 @@ const String defaultEol = '\r\n';
 /// A codec which converts a csv string ↔ List of rows.
 ///
 /// See [CsvToListConverter] and [ListToCsvConverter].
-class CsvCodec extends Codec<String, List> {
+class CsvCodec extends Codec<List<List>, String> {
 
-  final CsvToListConverter encoder;
+  final CsvToListConverter decoder;
 
-  final ListToCsvConverter decoder;
+  final ListToCsvConverter encoder;
 
 
   CsvCodec({String fieldDelimiter: defaultFieldDelimiter,
@@ -36,13 +36,13 @@ class CsvCodec extends Codec<String, List> {
             String eol: defaultEol,
             bool parseNumbers: true,
             bool allowInvalid: true})
-      : encoder = new CsvToListConverter(fieldDelimiter: fieldDelimiter,
+      : decoder = new CsvToListConverter(fieldDelimiter: fieldDelimiter,
                                          textDelimiter: textDelimiter,
                                          textEndDelimiter: textEndDelimiter,
                                          eol: eol,
                                          parseNumbers: parseNumbers,
                                          allowInvalid: allowInvalid),
-        decoder = new ListToCsvConverter(fieldDelimiter: fieldDelimiter,
+        encoder = new ListToCsvConverter(fieldDelimiter: fieldDelimiter,
                                          textDelimiter: textDelimiter,
                                          textEndDelimiter: textEndDelimiter,
                                          eol: eol);

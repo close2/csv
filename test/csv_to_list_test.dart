@@ -68,19 +68,23 @@ main() {
     final parser = new CsvParser();
     expect(parser.verifyCurrentSettings(), equals([]));
 
-    var errors = parser.verifySettings('a',
-                                       'a',
-                                       'b',
-                                       '\r\n',
-                                       throwError: false);
+    var errors = CsvParser.verifySettings('a',
+                                          'a',
+                                          'b',
+                                          '\r\n',
+                                          throwError: false);
     expect(errors.length, equals(1));
     expect(errors.first.runtimeType, equals(SettingsValuesEqualError));
 
-    errors = parser.verifySettings('a', null, 'b', '\r\n', throwError: false);
+    errors = CsvParser.verifySettings('a',
+                                      null,
+                                      'b',
+                                      '\r\n',
+                                      throwError: false);
     expect(errors.length, equals(1));
     expect(errors.first.runtimeType, equals(TextDelimiterNullError));
 
-    errors = parser.verifySettings(null, 'a', null, 'a', throwError: false);
+    errors = CsvParser.verifySettings(null, 'a', null, 'a', throwError: false);
     expect(errors.length, equals(3));
     expect(errors.map((e) => e.runtimeType),
            contains(FieldDelimiterNullError));

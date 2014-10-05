@@ -113,8 +113,8 @@ main() {
        'either is null', () {
     sb.clear();
     expect(() {
-        var converter = new ListToCsvConverter(fieldDelimiter: 'a',
-                                              textDelimiter: 'a');
+        var converter = const ListToCsvConverter(fieldDelimiter: 'a',
+                                                 textDelimiter: 'a');
         converter.convertSingleRow(sb, singleRow);
       }, throwsArgumentError);
     expect(() {

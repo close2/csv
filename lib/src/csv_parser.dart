@@ -569,11 +569,11 @@ class CsvParser {
 
   /// Verifies arguments and unless [throwError] is false throws an
   /// error-exceptions if they are invalid.
-  List<ArgumentError> verifySettings(String fieldDelimiter,
-                                     String textDelimiter,
-                                     String textEndDelimiter,
-                                     String eol,
-                                     {bool throwError}) {
+  static List<ArgumentError> verifySettings(String fieldDelimiter,
+                                            String textDelimiter,
+                                            String textEndDelimiter,
+                                            String eol,
+                                            {bool throwError}) {
     final errors = <ArgumentError>[];
     if (fieldDelimiter == null) errors.add(new FieldDelimiterNullError());
     if (textDelimiter == null) errors.add(new TextDelimiterNullError());
