@@ -32,8 +32,8 @@ not throw an error.
 In addition this converter supports multiple characters for all delimiters
 and eol.  Also the start text delimiter and end text delimiter may be
 different.  This means the following text can be parsed:
-«abc«d»*|*«xy»»z»*|*123
-And (if configured correctly) will return ['abc«d', 'xy»z', 123]
+`«abc«d»*|*«xy»»z»*|*123`
+And (if configured correctly) will return `['abc«d', 'xy»z', 123]`
 
 
 ## Usage
@@ -49,12 +49,13 @@ call `convert`:
 
 There are 2 interesting things to note:
 
-1) Not all rows have to be the same length.
-2) The default eol is `'\r\n'` and `'\n'` is also quoted.  The apparence of only
+* Not all rows have to be the same length.
+* The default eol is `'\r\n'` and `'\n'` is also quoted.  The apparence of only
  one character is enough for the string to be quoted.
 
 The converter takes the following configurations either in the constructor or
 the `convert` function:
+
 * `fieldDelimiter`: the separator between fields.  By default _,_ but another
  common value is _;_.
 * `textDelimiter`: the quotation string.  By default _"_.
@@ -63,6 +64,7 @@ the `convert` function:
 * `eol`: The new line string.  By default _\r\n_.  Another common value: _\n_
 
 *All configuration values may be multiple characters!:*
+
     const conv = const ListToCsvConverter(fieldDelimiter: '|*|',
                                           textDelimiter: '<<',
                                           textEndDelimiter: '>>',
