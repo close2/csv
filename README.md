@@ -56,12 +56,12 @@ There are 2 interesting things to note:
 The converter takes the following configurations either in the constructor or
 the `convert` function:
 
-* `fieldDelimiter`: the separator between fields.  By default _,_ but another
- common value is _;_.
-* `textDelimiter`: the quotation string.  By default _"_.
+* `fieldDelimiter`: the separator between fields.  By default `','` but another
+ common value is `';'`.
+* `textDelimiter`: the quotation string.  By default `'"'`.
 * `textEndDelimiter`: the end quotation string.  By default equals
  `textDelimiter`.  This is the string used to end a quoted string.
-* `eol`: The new line string.  By default _\r\n_.  Another common value: _\n_
+* `eol`: The new line string.  By default `'\r\n'`.  Another common value: `'\n'`
 
 *All configuration values may be multiple characters!:*
 
@@ -95,7 +95,7 @@ If the default values are fine, simply instantiate `CsvToListConverter` and
 call `convert`:
 
     final res = const CsvToListConverter().convert('",b",3.1,42\r\n"n\n"');
-    assert(res == [[',b', 3.1, 42], ['n\n']]);
+    assert(res.toString() == [[',b', 3.1, 42], ['n\n']].toString());
 
 Again please note that depending on the input not all rows have the same number
 of values.
