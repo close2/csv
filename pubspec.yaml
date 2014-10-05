@@ -1,6 +1,6 @@
 name: csv
 version: 2.0.0
-author: Christian Loitsch <pub.dartlang@abc.delta64.com>
+author: Christian Loitsch <christian@loitsch.com>
 description: |-
   A codec to transform between a string and a list of values.
 
