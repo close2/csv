@@ -24,7 +24,7 @@ A dart csv to list codec / converter.
     var det = new FirstOccurenceSettingsDetector(eols: ['\r\n', '\n']);
     var converter = new CsvToListConverter(csvSettingsDetector: det);
     // assume someStream is a string stream
-    someStream.transfrom(converter); // will output another stream of lists.
+    someStream.transform(converter); // will output another stream of lists.
     
     
 [![Build Status](https://drone.io/github.com/close2/csv/status.png)](https://drone.io/github.com/close2/csv/latest)
