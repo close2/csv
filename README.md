@@ -4,28 +4,29 @@ A dart csv to list codec / converter.
 
 `final csvCodec = new CsvCodec();`
 
-    csvCodec.encoder.convert([['a', 'b'], [1, 2]]);
-    // or
-    final encoder = ListToCsvConverter();
-    encoder.convert([['a', 'b'], [1, 2]]);
+```dart
+csvCodec.encoder.convert([['a', 'b'], [1, 2]]);
+// or
+final encoder = ListToCsvConverter();
+encoder.convert([['a', 'b'], [1, 2]]);
 
-    final stream = new Stream.fromIterable([['a', 'b'], [1, 2]]);
-    final csvRowStream = stream.transform(csvCodec.encoder);
+final stream = new Stream.fromIterable([['a', 'b'], [1, 2]]);
+final csvRowStream = stream.transform(csvCodec.encoder);
 
 
-    csvCodec.decoder.convert('a,b\r\n12,3.14');
-    // or
-    final decoder = CsvToListConverter();
-    decoder.convert('a,b\r\n12,3.14');
-    
-    final stream = new Stream.fromIterable(['a,', 'b\r\n12,3.14']);
-    final listStream = stream.transform(csvCodec.decoder);
-    
-    var det = new FirstOccurenceSettingsDetector(eols: ['\r\n', '\n']);
-    var converter = new CsvToListConverter(csvSettingsDetector: det);
-    // assume someStream is a string stream
-    someStream.transform(converter); // will output another stream of lists.
-    
+csvCodec.decoder.convert('a,b\r\n12,3.14');
+// or
+final decoder = CsvToListConverter();
+decoder.convert('a,b\r\n12,3.14');
+
+final stream = new Stream.fromIterable(['a,', 'b\r\n12,3.14']);
+final listStream = stream.transform(csvCodec.decoder);
+
+var det = new FirstOccurenceSettingsDetector(eols: ['\r\n', '\n']);
+var converter = new CsvToListConverter(csvSettingsDetector: det);
+// assume someStream is a string stream
+someStream.transform(converter); // will output another stream of lists.
+```
     
 [![Build Status](https://drone.io/github.com/close2/csv/status.png)](https://drone.io/github.com/close2/csv/latest)
 
@@ -68,9 +69,10 @@ And (if configured correctly) will return `['abc«d', 'xy»z', 123]`
 If the default values are fine, simply instantiate `ListToCsvConverter` and
 call `convert`:
 
-    final res = const ListToCsvConverter().convert([[',b', 3.1, 42], ['n\n']]);
-    assert(res == '",b",3.1,42\r\n"n\n"');
-
+```dart
+final res = const ListToCsvConverter().convert([[',b', 3.1, 42], ['n\n']]);
+assert(res == '",b",3.1,42\r\n"n\n"');
+```
 
 There are 2 interesting things to note:
 
@@ -90,21 +92,22 @@ the `convert` function:
 
 *All configuration values may be multiple characters!:*
 
-    const conv = const ListToCsvConverter(fieldDelimiter: '|*|',
-                                          textDelimiter: '<<',
-                                          textEndDelimiter: '>>',
-                                          eol: '**\n');
-    final res = conv.convert([['a','>'], ['<<', '>>'], [1, 2]]);
-    assert(res == 'a|*|<<>>>**\n<<<<>>|*|<<>>>>>>**\n1|*|2');
-    
-    final res2 = const ListToCsvConverter()
-        .convert([['a','>'], ['<<', '>>'], [1, 2]],
-                 fieldDelimiter: '|*|',
-                 textDelimiter: '<<',
-                 textEndDelimiter: '>>',
-                 eol: '**\n');
-    assert(res == res2);
-    
+```dart
+const conv = const ListToCsvConverter(fieldDelimiter: '|*|',
+                                      textDelimiter: '<<',
+                                      textEndDelimiter: '>>',
+                                      eol: '**\n');
+final res = conv.convert([['a','>'], ['<<', '>>'], [1, 2]]);
+assert(res == 'a|*|<<>>>**\n<<<<>>|*|<<>>>>>>**\n1|*|2');
+
+final res2 = const ListToCsvConverter()
+    .convert([['a','>'], ['<<', '>>'], [1, 2]],
+             fieldDelimiter: '|*|',
+             textDelimiter: '<<',
+             textEndDelimiter: '>>',
+             eol: '**\n');
+assert(res == res2);
+```
 
 Note that:
 
@@ -119,8 +122,10 @@ Note that:
 If the default values are fine, simply instantiate `CsvToListConverter` and
 call `convert`:
 
-    final res = const CsvToListConverter().convert('",b",3.1,42\r\n"n\n"');
-    assert(res.toString() == [[',b', 3.1, 42], ['n\n']].toString());
+```dart
+final res = const CsvToListConverter().convert('",b",3.1,42\r\n"n\n"');
+assert(res.toString() == [[',b', 3.1, 42], ['n\n']].toString());
+```
 
 Again please note that depending on the input not all rows have the same number
 of values.
@@ -138,12 +143,12 @@ plus
  `CsvSettingsDetector`.  There is a simple implementation which simply uses the
  first occurence of a list of possible values as value.
  
+    ```dart
     var d = new FirstOccurenceSettingsDetector(eols: ['\r\n', '\n'],
                                                textDelimiters: ['""', "'"]);
-
-
     new CsvToListConverter(csvSettingsDetector: d);
-    
+    ```
+
 In this case `eol` will either be `'\r\n'` or `'\n'` depending on which of
 those 2 comes first in the csv string.  Note that the
 `FirstOccurenceSettingsDetector` doesn't parse the csv string!  For instance
