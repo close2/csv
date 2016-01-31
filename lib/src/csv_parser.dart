@@ -535,26 +535,13 @@ class CsvParser {
 
     if (!parseNumbers || quoted) row.add(value);
     else {
-      bool convertedToNumber;
-      // try to parse a number
-      try {
-        // first try int
-        convertedToNumber = true;
-        row.add(int.parse(value));
-      } on FormatException catch(e) {
-        convertedToNumber = false;
-      }
-      // if we had an exception try double
-      if (!convertedToNumber) {
-        try {
-          convertedToNumber = true;
-          row.add(double.parse(value));
-        } on FormatException catch(e) {
-          convertedToNumber = false;
-        }
-      }
-      // if there was an exception too, add it as string
-      if (!convertedToNumber) row.add(value);
+      var addValueAsString = (s) {
+        row.add(value);
+        return null;
+      };
+      num n;
+      n = num.parse(value, addValueAsString);
+      if (n != null) row.add(n);
     }
   }
 
