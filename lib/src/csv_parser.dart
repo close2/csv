@@ -2,7 +2,6 @@ library csv_parser;
 
 part 'csv_argument_errors.dart';
 
-
 /// Parses a csv string into a List of rows.  Each row is represented by a
 /// List.
 ///
@@ -70,7 +69,6 @@ part 'csv_argument_errors.dart';
 ///
 ///     "aaa","b""bb","ccc"
 
-
 // Notes regarding the implementation:
 // The field-separator is called fieldDelimiter (taken from the rfc) the string
 // which starts a quoted text is called textDelimiter and the string ending a
@@ -101,7 +99,7 @@ part 'csv_argument_errors.dart';
 // !! If they all start with the same character all three counters will be
 //    incremented !!
 //
-// If _c_ matches a delimiter we will not add it the the field stringbuffer!
+// If _c_ matches a delimiter we will not add it the the field stringBuffer!
 //
 // This goes on until a delimiter is completely matched (the counter == the
 // delimiter.length) or the character doesn't match any of the delimiters.
@@ -118,7 +116,6 @@ part 'csv_argument_errors.dart';
 // * textDelimiter:    ...#
 // * eol:              .*.*
 class CsvParser {
-
   /// The separator between fields.
   final String fieldDelimiter;
 
@@ -136,8 +133,8 @@ class CsvParser {
   /// The eol is optional for the last row.
   final String eol;
 
-  /// Should we try to parse unquoted text to numbers (int and doubles)
-  final bool parseNumbers;
+  /// Whether we try to parse unquoted text to numbers (int and doubles)
+  final bool shouldParseNumbers;
 
   /// If this variable is true, don't throw an exception if the csv or the
   /// arguments ([fieldDelimiter], [textDelimiter], [textEndDelimiter] or
@@ -148,8 +145,6 @@ class CsvParser {
   /// if [allowInvalid] is false.  An example for such an exception is if a
   /// csv string ends with a quoted field but without a [textEndDelimiter].
   final bool allowInvalid;
-
-
 
   // The parsing state variables (Yes there are a lot):
 
@@ -166,7 +161,7 @@ class CsvParser {
   /// unsuccessful.  This field is null otherwise.
   String _pushbackBuffer;
 
-  /// Are we inside a text/string (not necessarely quoted).
+  /// Are we inside a text/string (not necessarily quoted).
   bool _insideString;
 
   /// Are we inside a quoted text/string ([_insideString] must be true as well
@@ -199,13 +194,10 @@ class CsvParser {
   /// non 0 counter and take a substring of the corresponding string.
   StringBuffer _matchedChars;
 
-
-
   /// If [allowInvalid] is true we only use the user supplied value if it isn't null.
-  static String _argValue(bool allowInvalid,
-                          String userValue,
-                          String defaultValue,
-                          {String userValue2}) {
+  static String _argValue(
+      bool allowInvalid, String userValue, String defaultValue,
+      {String userValue2}) {
     if (userValue != null) return userValue;
     if (userValue2 != null) return userValue2;
 
@@ -213,27 +205,27 @@ class CsvParser {
     return userValue;
   }
 
-  /// The default values are consistend with
+  /// The default values are consistent with
   /// [rfc4180](http://tools.ietf.org/html/rfc4180).
   ///
   /// The arguments are only checked if [allowInvalid] is false.
   ///
   /// In [allowInvalid] is false the arguments are checked with
   /// [verifyArgument].
-  CsvParser({String fieldDelimiter: ',',
-             String textDelimiter: '"',
-             String textEndDelimiter,
-             String eol: '\r\n',
-             bool parseNumbers,
-             bool allowInvalid})
+  CsvParser(
+      {String fieldDelimiter: ',',
+      String textDelimiter: '"',
+      String textEndDelimiter,
+      String eol: '\r\n',
+      bool shouldParseNumbers,
+      bool allowInvalid})
       : this.fieldDelimiter = _argValue(allowInvalid, fieldDelimiter, ','),
         this.textDelimiter = _argValue(allowInvalid, textDelimiter, '"'),
-        this.textEndDelimiter = _argValue(allowInvalid,
-                                          textEndDelimiter,
-                                          '"',
-                                          userValue2: textDelimiter),
+        this.textEndDelimiter = _argValue(allowInvalid, textEndDelimiter, '"',
+            userValue2: textDelimiter),
         this.eol = _argValue(allowInvalid, eol, '\r\n'),
-        this.parseNumbers = parseNumbers != null ? parseNumbers : true,
+        this.shouldParseNumbers =
+            shouldParseNumbers != null ? shouldParseNumbers : true,
         this.allowInvalid = allowInvalid != null ? allowInvalid : true {
     _field = new StringBuffer();
     _currentPos = 0;
@@ -248,14 +240,10 @@ class CsvParser {
     _matchedChars = new StringBuffer();
 
     if (!this.allowInvalid) {
-      verifySettings(fieldDelimiter,
-                     textDelimiter,
-                     textEndDelimiter,
-                     eol,
-                     throwError: true);
+      verifySettings(fieldDelimiter, textDelimiter, textEndDelimiter, eol,
+          throwError: true);
     }
   }
-
 
   /// Adds [c] to the stringBuffer which holds the value for the current field.
   _addTextToField(String c) {
@@ -265,8 +253,8 @@ class CsvParser {
     _resetMatcher();
   }
 
-
   /// Reparse the [_pushbackBuffer].
+  ///
   /// The [_csvText] is temporarely replaced with [_pushbackBuffer] before
   /// calling [_parseField].
   /// Only call this if [_pushbackBuffer] is not null!
@@ -298,63 +286,63 @@ class CsvParser {
     return result;
   }
 
-
   /// Tries to match c against any (allowed) delimiter/eol.
   // See the implementation note at the start of this class.
   bool _match(String c, bool matching) {
-
-    final onlyTextEndDelimiterMatches = _insideQuotedString &&
-                                        !_previousWasTextEndDelimiter;
+    final onlyTextEndDelimiterMatches =
+        _insideQuotedString && !_previousWasTextEndDelimiter;
 
     // never look for a start text delimiter inside a quoted string.
     // (even if _previousWasTextEndDelimiter)
-    final matchTextDelimiters = !_insideQuotedString &&
-                                (!matching || _matchingTextDelimiter > 0);
+    final matchTextDelimiters =
+        !_insideQuotedString && (!matching || _matchingTextDelimiter > 0);
 
-    final matchTextEndDelimiters = _insideQuotedString &&
-                                   (!matching || _matchingTextEndDelimiter > 0);
+    final matchTextEndDelimiters =
+        _insideQuotedString && (!matching || _matchingTextEndDelimiter > 0);
 
     final matchFieldDelimiters = !onlyTextEndDelimiterMatches &&
-                                 (!matching || _matchingFieldDelimiter > 0);
+        (!matching || _matchingFieldDelimiter > 0);
 
-    final matchEols = !onlyTextEndDelimiterMatches &&
-                      (!matching || _matchingEol > 0);
-
+    final matchEols =
+        !onlyTextEndDelimiterMatches && (!matching || _matchingEol > 0);
 
     var foundMatch = false;
 
-
     // try to match (or finish matching) our "special" strings.
 
-    if (matchTextDelimiters &&
-        c == textDelimiter[_matchingTextDelimiter]) {
+    if (matchTextDelimiters && c == textDelimiter[_matchingTextDelimiter]) {
       _matchingTextDelimiter++;
       foundMatch = true;
-    } else _matchingTextDelimiter = 0;
+    } else {
+      _matchingTextDelimiter = 0;
+    }
 
     if (matchTextEndDelimiters &&
         c == textEndDelimiter[_matchingTextEndDelimiter]) {
       _matchingTextEndDelimiter++;
       foundMatch = true;
-    } else _matchingTextEndDelimiter = 0;
+    } else {
+      _matchingTextEndDelimiter = 0;
+    }
 
-    if (matchEols &&
-        c == eol[_matchingEol]) {
+    if (matchEols && c == eol[_matchingEol]) {
       _matchingEol++;
       foundMatch = true;
-    } else _matchingEol = 0;
+    } else {
+      _matchingEol = 0;
+    }
 
-    if (matchFieldDelimiters &&
-        c == fieldDelimiter[_matchingFieldDelimiter]) {
+    if (matchFieldDelimiters && c == fieldDelimiter[_matchingFieldDelimiter]) {
       _matchingFieldDelimiter++;
       foundMatch = true;
-    } else _matchingFieldDelimiter = 0;
+    } else {
+      _matchingFieldDelimiter = 0;
+    }
 
     if (foundMatch) _matchedChars.write(c);
 
     return foundMatch;
   }
-
 
   /// Resets match counters and clear [_matchedChars] StringBuffer.
   void _resetMatcher() {
@@ -365,7 +353,6 @@ class CsvParser {
     _matchingEol = 0;
     _matchedChars.clear();
   }
-
 
   /// Reparses wrongly matched characters.  This is only possible if any
   /// delimiter / eol is multi characters long.
@@ -388,7 +375,6 @@ class CsvParser {
     return result;
   }
 
-
   /// Consumes and sets the correct flags after a [textDelimiter] has been
   /// found.
   _consumeTextDelimiter() {
@@ -400,7 +386,6 @@ class CsvParser {
       _insideQuotedString = true;
     }
   }
-
 
   /// Consumes and sets the correct flags after a [textEndDelimiter] has been
   /// found.
@@ -420,13 +405,11 @@ class CsvParser {
     }
   }
 
-
   /// Consumes and sets the correct flags after an [eol] has been found.
   ParsingResult _consumeEol() {
     _resetMatcher();
 
-    assert(_insideQuotedString == false ||
-           _previousWasTextEndDelimiter);
+    assert(_insideQuotedString == false || _previousWasTextEndDelimiter);
 
     _insideString = false;
     _insideQuotedString = false;
@@ -437,16 +420,13 @@ class CsvParser {
     return new ParsingResult(ParsingStopReason.Eol, quoted);
   }
 
-
   /// Consumes and sets the correct flags after a [fieldDelimiter] has been
   /// found.
   ParsingResult _consumeFieldDelimiter() {
-
     _resetMatcher();
 
     _insideString = false;
-    assert(_insideQuotedString == false ||
-           _previousWasTextEndDelimiter);
+    assert(_insideQuotedString == false || _previousWasTextEndDelimiter);
     _insideQuotedString = false;
 
     bool quoted = _previousWasTextEndDelimiter;
@@ -462,16 +442,15 @@ class CsvParser {
   bool _matching() {
     // we are in matching "state" if at least one counter is > 0
     return _matchingEol > 0 ||
-           _matchingFieldDelimiter > 0 ||
-           _matchingTextDelimiter > 0 ||
-           _matchingTextEndDelimiter > 0;
+        _matchingFieldDelimiter > 0 ||
+        _matchingTextDelimiter > 0 ||
+        _matchingTextEndDelimiter > 0;
   }
 
   /// Goes through [_csvText] until either no more characters are left, or
   /// until either a complete field has been parsed because we encountered an
   /// unquoted [eol] or we encountered an unquoted [fieldDelimiter].
   ParsingResult _parseField() {
-
     if (_pushbackBuffer != null) {
       final result = _parsePushbackBuffer();
       if (result.stopReason != ParsingStopReason.EndOfString) return result;
@@ -486,7 +465,6 @@ class CsvParser {
       final matching = _matching();
 
       final foundMatch = _match(c, matching);
-
 
       if (matching && !foundMatch) {
         // retry the current character later
@@ -521,70 +499,59 @@ class CsvParser {
       if (matchedFieldDelimiter) return _consumeFieldDelimiter();
     }
 
-    return new ParsingResult(ParsingStopReason.EndOfString,
-                             _previousWasTextEndDelimiter);
+    return new ParsingResult(
+        ParsingStopReason.EndOfString, _previousWasTextEndDelimiter);
   }
 
-
-  /// Adds [value] to [row].  Unless value was [quoted] or [_parseNumbers] is
-  /// false tries to convert value to a number.  (If possible int, otherwise
+  /// Adds [value] to [row].  Unless value was [quoted] or [_shouldParseNumbers]
+  /// is false tries to convert value to a number.  (If possible int, otherwise
   /// double).
-  void _addValueToRow(String value,
-                      List row,
-                      bool quoted) {
-
-    if (!parseNumbers || quoted) row.add(value);
+  void _addValueToRow(String value, List row, bool quoted) {
+    if (!shouldParseNumbers || quoted)
+      row.add(value);
     else {
-      bool convertedToNumber;
-      // try to parse a number
-      try {
-        // first try int
-        convertedToNumber = true;
-        row.add(int.parse(value));
-      } on FormatException catch(e) {
-        convertedToNumber = false;
+      int addValueAsString(String s) {
+        row.add(value);
+        return null;
       }
-      // if we had an exception try double
-      if (!convertedToNumber) {
-        try {
-          convertedToNumber = true;
-          row.add(double.parse(value));
-        } on FormatException catch(e) {
-          convertedToNumber = false;
-        }
-      }
-      // if there was an exception too, add it as string
-      if (!convertedToNumber) row.add(value);
+      ;
+      num n;
+      n = num.parse(value, addValueAsString);
+      if (n != null) row.add(n);
     }
   }
 
-
   List<ArgumentError> verifyCurrentSettings({bool throwError}) {
-    return verifySettings(fieldDelimiter,
-                          textDelimiter,
-                          textEndDelimiter,
-                          eol,
-                          throwError: throwError);
+    return verifySettings(fieldDelimiter, textDelimiter, textEndDelimiter, eol,
+        throwError: throwError);
   }
 
-  /// Verifies arguments and unless [throwError] is false throws an
-  /// error-exceptions if they are invalid.
+  /// Verifies settings.
+  ///
+  /// Settings are not allowed to be null.  [fieldDelimiter], [textDelimiter],
+  /// [eol] must be distinct and not the start of another parameter.
+  /// For instance, if [fieldDelimiter] is ',' then [textDelimiter] may not be
+  /// ',|,'.  If [textEndDelimiter] is different to [textDelimiter] the same
+  /// rules apply.
+  ///
+  /// Returns either an empty list, if there are not errors, or a list of
+  /// errors.  If [throwError] throws an error if a setting is invalid.
   static List<ArgumentError> verifySettings(String fieldDelimiter,
-                                            String textDelimiter,
-                                            String textEndDelimiter,
-                                            String eol,
-                                            {bool throwError}) {
+      String textDelimiter, String textEndDelimiter, String eol,
+      {bool throwError}) {
     final errors = <ArgumentError>[];
     if (fieldDelimiter == null) errors.add(new FieldDelimiterNullError());
     if (textDelimiter == null) errors.add(new TextDelimiterNullError());
     if (textEndDelimiter == null) errors.add(new TextEndDelimiterNullError());
     if (eol == null) errors.add(new EolNullError());
-    if (throwError == null) throwError = false;
+    throwError ??= false;
 
-    final argumentMap = { 'fieldDelimiter': fieldDelimiter,
-                          'textDelimiter': textDelimiter,
-                          'textEndDelimiter': textEndDelimiter,
-                          'eol': eol };
+    final argumentMap = {
+      'fieldDelimiter': fieldDelimiter,
+      'textDelimiter': textDelimiter,
+      'textEndDelimiter': textEndDelimiter,
+      'eol': eol
+    };
 
     // n² !
     argumentMap.forEach((String name, String value) {
@@ -601,20 +568,17 @@ class CsvParser {
         if (valuesAreEqual ||
             !valuesAreEqual && value.startsWith(value2) ||
             !valuesAreEqual && value2.startsWith(value)) {
-          errors.add(new SettingsValuesEqualError(name, value,
-                                                  name2, value2));
+          errors.add(new SettingsValuesEqualError(name, value, name2, value2));
         }
       });
     });
 
     if (throwError && errors.isNotEmpty) {
       if (errors.length == 1) throw errors.first;
-      throw new ArgumentError(errors.map((e) => e.toString())
-          .join('\n'));
+      throw new ArgumentError(errors.map((e) => e.toString()).join('\n'));
     }
     return errors;
   }
-
 
   /// Parses [csv] and appends fields to [currentRow] until either an unquoted
   /// [eol] has been parsed or no more characters are left.
@@ -626,14 +590,10 @@ class CsvParser {
   /// the values from a previous call to this function.
   ///
   /// If there was no previous call [csv] is still used!
-  ParsingResult convertRow(String csv,
-                           List currentRow,
-                           {bool continueCsv,
-                            bool fieldCompleteWhenEndOfString}) {
-    if (continueCsv == null) continueCsv = false;
-    if (fieldCompleteWhenEndOfString == null) {
-      fieldCompleteWhenEndOfString = true;
-    }
+  ParsingResult convertRow(String csv, List currentRow,
+      {bool continueCsv, bool fieldCompleteWhenEndOfString}) {
+    continueCsv ??= false;
+    fieldCompleteWhenEndOfString ??= true;
 
     if (!continueCsv || _csvText == null) {
       _csvText = csv == null ? '' : csv;
@@ -642,7 +602,6 @@ class CsvParser {
 
     ParsingResult result;
     for (;;) {
-
       result = _parseField();
       var stopReason = result.stopReason;
 
@@ -652,8 +611,8 @@ class CsvParser {
       // If end of string means that the field is complete, we have to reparse
       // the already matched characters.
       while (fieldCompleteWhenEndOfString &&
-             stopReason == ParsingStopReason.EndOfString &&
-             _matching()) {
+          stopReason == ParsingStopReason.EndOfString &&
+          _matching()) {
         result = _reparseWronglyMatched();
         stopReason = result.stopReason;
       }
@@ -661,8 +620,7 @@ class CsvParser {
       var value = _field.toString();
       _field.clear();
 
-      var isOptionalEolAtEnd =
-          stopReason == ParsingStopReason.EndOfString &&
+      var isOptionalEolAtEnd = stopReason == ParsingStopReason.EndOfString &&
           !result.quoted &&
           value.isEmpty &&
           currentRow.isEmpty;
@@ -673,7 +631,6 @@ class CsvParser {
 
       if (stopReason == ParsingStopReason.Eol) break;
       if (stopReason == ParsingStopReason.EndOfString) break;
-
     }
 
     if (!allowInvalid &&
@@ -684,7 +641,6 @@ class CsvParser {
     }
     return result;
   }
-
 
   /// Parses the [csv] and returns a List (rows) of Lists (columns).
   List<List> convert(String csv) {
@@ -697,7 +653,8 @@ class CsvParser {
 
       if (currentRow.isNotEmpty) {
         rows.add(currentRow);
-      } else assert(result.stopReason == ParsingStopReason.EndOfString);
+      } else
+        assert(result.stopReason == ParsingStopReason.EndOfString);
 
       if (result.stopReason == ParsingStopReason.EndOfString) break;
     }
@@ -706,7 +663,6 @@ class CsvParser {
   }
 }
 
-
 // Currently only used when csv ends with a quoted field without the end quote.
 // If we find start throwing this exception for other "errors".  We have to
 // move the error message to another place.
@@ -714,9 +670,8 @@ class CsvParser {
 class InvalidCsvException extends FormatException {
   const InvalidCsvException(String textEndDelimiter)
       : super('The text end delimiter ($textEndDelimiter) for the last field '
-              'is missing.');
+            'is missing.');
 }
-
 
 /// The possible reason why parsing a field stopped.
 class ParsingStopReason {
@@ -732,7 +687,6 @@ class ParsingStopReason {
 
 /// Information after the parsing of a field has stopped.
 class ParsingResult {
-
   /// The reason for the stop.
   final ParsingStopReason stopReason;
 
