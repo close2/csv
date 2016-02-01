@@ -1,3 +1,8 @@
+# Changes from version 2 to 3:
+
+* `parseNumbers` renamed to `shouldParseNumbers'
+
+* 
 # csv
 
 A dart csv to list codec / converter.
@@ -85,7 +90,7 @@ the `convert` function:
  common value is `';'`.
 * `textDelimiter`: the quotation string.  By default `'"'`.
 * `textEndDelimiter`: the end quotation string.  By default equals
- `textDelimiter`.  This is the string used to end a quoted string.
+ `textDelimiter`.  The string used to end a quoted string.
 * `eol`: The new line string.  By default `'\r\n'`.  Another common value: `'\n'`
 
 *All configuration values may be multiple characters!:*
@@ -128,7 +133,7 @@ of values.
 The `CsvToListConverter` takes the same arguments as the `ListToCsvConverter`
 plus
 
-* `parseNumbers`: by default true.  If you want the output to be `String`s only
+* `shouldParseNumbers`: by default true.  If you want the output to be `String`s only
  set this to false.
 * `allowInvalid`: by default *true*.  The converter will by default never throw
  an exception.  Even if `fieldDelimiter`, `textDelimiter`,... don't make sense

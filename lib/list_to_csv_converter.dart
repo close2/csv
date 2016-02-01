@@ -71,8 +71,8 @@ part of csv;
 ///    double quote.  For example:
 ///
 ///     "aaa","b""bb","ccc"
-class ListToCsvConverter extends Converter<List<List>, String> implements StreamTransformer {
-
+class ListToCsvConverter extends Converter<List<List>, String>
+    implements StreamTransformer {
   /// The separator between fields in the outputstring.
   final String fieldDelimiter;
 
@@ -94,19 +94,17 @@ class ListToCsvConverter extends Converter<List<List>, String> implements Stream
   /// own and appended to the previous one with this separator.
   final String eol;
 
-
   /// The default values for [fieldDelimiter], [textDelimiter] and [eol]
   /// are consistend with [rfc4180](http://tools.ietf.org/html/rfc4180).
   ///
-  const ListToCsvConverter({this.fieldDelimiter: defaultFieldDelimiter,
-                           String textDelimiter: defaultTextDelimiter,
-                           String textEndDelimiter,
-                           this.eol: defaultEol})
+  const ListToCsvConverter(
+      {this.fieldDelimiter: defaultFieldDelimiter,
+      String textDelimiter: defaultTextDelimiter,
+      String textEndDelimiter,
+      this.eol: defaultEol})
       : this.textDelimiter = textDelimiter,
-        this.textEndDelimiter = textEndDelimiter != null ?
-                                textEndDelimiter :
-                                textDelimiter;
-
+        this.textEndDelimiter =
+            textEndDelimiter != null ? textEndDelimiter : textDelimiter;
 
   /// Converts rows -- a [List] of [List]s into a csv String.
   ///
@@ -122,14 +120,13 @@ class ListToCsvConverter extends Converter<List<List>, String> implements Stream
   /// If [rows] is null an empty String is returned.
   @override
   String convert(List<List> rows,
-                 {String fieldDelimiter,
-                  String textDelimiter,
-                  String textEndDelimiter,
-                  String eol}) {
-
+      {String fieldDelimiter,
+      String textDelimiter,
+      String textEndDelimiter,
+      String eol}) {
     if (rows == null) return '';
 
-    if (eol == null) eol = this.eol;
+    eol ??= this.eol;
 
     if (eol == null) {
       throw new ArgumentError('Eol string must not be null');
@@ -138,18 +135,16 @@ class ListToCsvConverter extends Converter<List<List>, String> implements Stream
     var sb = new StringBuffer();
     var sep = '';
     rows.forEach((r) {
-        sb.write(sep);
-        sep = eol;
-        convertSingleRow(sb,
-                         r,
-                         fieldDelimiter: fieldDelimiter,
-                         textDelimiter: textDelimiter,
-                         textEndDelimiter: textEndDelimiter,
-                         eol: eol);
+      sb.write(sep);
+      sep = eol;
+      convertSingleRow(sb, r,
+          fieldDelimiter: fieldDelimiter,
+          textDelimiter: textDelimiter,
+          textEndDelimiter: textEndDelimiter,
+          eol: eol);
     });
     return sb.toString();
   }
-
 
   /// Returns an input Sink into which the caller may [add](List2CsvSink.add)
   /// single rows.  A single row is a List.  The signature of the input sink
@@ -169,7 +164,6 @@ class ListToCsvConverter extends Converter<List<List>, String> implements Stream
     return new List2CsvSink(this, outputSink);
   }
 
-
   /// Converts a list of values representing a row into a value separated
   /// string.
   ///
@@ -185,36 +179,26 @@ class ListToCsvConverter extends Converter<List<List>, String> implements Stream
   /// If in such a case the value also contains [textDelimiter] those
   /// [textDelimiter] instances are doubled (see _Definition of the CSV
   /// Format_ Rule 7 [rfc4180](http://tools.ietf.org/html/rfc4180)).
-  String convertSingleRow(StringBuffer sb,
-                          List rowValues,
-                          {String fieldDelimiter,
-                           String textDelimiter,
-                           String textEndDelimiter,
-                           String eol}) {
-
+  String convertSingleRow(StringBuffer sb, List rowValues,
+      {String fieldDelimiter,
+      String textDelimiter,
+      String textEndDelimiter,
+      String eol}) {
     if (rowValues == null || rowValues.isEmpty) return '';
 
-    fieldDelimiter = fieldDelimiter != null ?
-                     fieldDelimiter :
-                     this.fieldDelimiter;
-    textDelimiter = textDelimiter != null ?
-                    textDelimiter :
-                    this.textDelimiter;
-    if (textEndDelimiter == null) {
-      textEndDelimiter = this.textEndDelimiter != null ?
-                         this.textEndDelimiter :
-                         textDelimiter;
-    }
-    eol = eol != null ?
-          eol :
-          this.eol;
+    fieldDelimiter ??= this.fieldDelimiter;
+    textDelimiter ??= this.textDelimiter;
+    textEndDelimiter ??= this.textEndDelimiter;
+    eol ?? this.eol;
 
     if (fieldDelimiter == null || textDelimiter == null) {
-      throw new ArgumentError('Field Delimiter ($fieldDelimiter) and Text Delimiter ($textDelimiter) must not be null.');
+      throw new ArgumentError(
+          'Field Delimiter ($fieldDelimiter) and Text Delimiter ($textDelimiter) must not be null.');
     }
 
     if (fieldDelimiter == textDelimiter) {
-      throw new ArgumentError('Field Delimiter ($fieldDelimiter) and Text Delimiter ($textDelimiter) must not be equal.');
+      throw new ArgumentError(
+          'Field Delimiter ($fieldDelimiter) and Text Delimiter ($textDelimiter) must not be equal.');
     }
 
     var fieldDel = '';
@@ -222,17 +206,13 @@ class ListToCsvConverter extends Converter<List<List>, String> implements Stream
     // Comments assume field and text delimiter are default.
     // [val] _in the comments changes_ depending on the operation after the comment.
     rowValues.fold(sb, (StringBuffer sb, val) {
-
       // double => 4.2
       String valString = val.toString();
 
       // 5,3 should become "5,3"
 
-      if (_containsAny(valString, [fieldDelimiter,
-                                   textDelimiter,
-                                   textEndDelimiter,
-                                   eol])) {
-
+      if (_containsAny(
+          valString, [fieldDelimiter, textDelimiter, textEndDelimiter, eol])) {
         // ab"cd => ab""cd
         if (_containsAny(valString, [textEndDelimiter])) {
           var newEndDelimiter = "$textEndDelimiter$textEndDelimiter";
@@ -240,10 +220,10 @@ class ListToCsvConverter extends Converter<List<List>, String> implements Stream
         }
 
         sb
-            ..write(fieldDel)          // ,
-            ..write(textDelimiter)     // "
-            ..write(valString)         // 5,3
-            ..write(textEndDelimiter); // "
+          ..write(fieldDel) // ,
+          ..write(textDelimiter) // "
+          ..write(valString) // 5,3
+          ..write(textEndDelimiter); // "
       } else {
         sb..write(fieldDel)..write(valString);
       }
@@ -265,23 +245,19 @@ class ListToCsvConverter extends Converter<List<List>, String> implements Stream
   }
 }
 
-
 /// The input sink for a chunked list to csv conversion.
 ///
 /// A single row represented by a [List] may be [add]ed an
 /// the conversion is added to the output sink.
 class List2CsvSink extends ChunkedConversionSink<List> {
-
-  /// This is the List2CsvConverter which has the configurations
-  /// (fieldDelimiter, textDel., eol)
+  /// The List2CsvConverter which has the configurations (fieldDelimiter,
+  /// textDel., eol)
   final ListToCsvConverter _converter;
 
   /// Rows converted to csv are added to this sink.
   final Sink<String> _outSink;
 
-
   List2CsvSink(this._converter, this._outSink);
-
 
   @override
   void add(List oneRow) {
