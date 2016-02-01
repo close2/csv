@@ -23,7 +23,6 @@ String csv = const ListToCsvConverter().convert(yourListOfLists);
 ```
 
 The default (RFC conform) configuration is:
-
 * _,_ as field separator
 * _"_ as text delimiter and
 * _\r\n_ as eol.
