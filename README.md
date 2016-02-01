@@ -1,25 +1,37 @@
 # Changes from version 2 to 3:
 
 * `parseNumbers` has been renamed to `shouldParseNumbers`
-* `FirstOccurenceSettingsDetector` has been renamed to `FirstOccurrenceSettingsDetector`
+* `FirstOccurenceSettingsDetector` has been renamed to
+  `FirstOccurrenceSettingsDetector`
 * Speed improvements.
 
 # csv
 
 A dart csv to list codec / converter.
 
-If you have a `String` of all rows with RFC conform separators and delimiters, simply convert them with:
+If you have a `String` of all rows with RFC conform separators and delimiters,
+simply convert them with:
 ```dart
 List<List<dynamic>> rowsAsListOfValues = const CsvToListConverter().convert(yourString);
 ```
 
-To convert to a Csv string your values must be in a `List<List<dynamic>>` representing a List of Rows where every Row
-is a List of values.  You can then convert with:
+To convert to a Csv string your values must be in a `List<List<dynamic>>`
+representing a List of Rows where every Row is a List of values.
+You can then convert with:
 ```dart
 String csv = const ListToCsvConverter().convert(yourListOfLists);
 ```
 
-This converter is implemented as codec and may be used as transformer for streams:
+The default (RFC conform) configuration is:
+
+* _,_ as field separator
+* _"_ as text delimiter and
+* _\r\n_ as eol.
+
+See below if you need other settings, or want to autodetect them.
+
+This converter is implemented as codec and may be used as transformer for
+streams:
 
 ```dart
 final csvCodec = new CsvCodec();
@@ -35,10 +47,12 @@ final input = new File('a/csv/file.txt').openRead();
 final fields = await input.transform(UTF8.decoder).transform(csvCodec.decoder).toList();
 ```
 
-The converter is highly customizable and even allows multiple characters as delimiters or separators.
+The converter is highly customizable and even allows multiple characters as
+delimiters or separators.
 
     
 [![Build Status](https://drone.io/github.com/close2/csv/status.png)](https://drone.io/github.com/close2/csv/latest)
+
 
 ### The decoder
 
@@ -150,8 +164,8 @@ plus
  or the csv-String is invalid.  This may for instance happen if the csv-String
  ends with a quoted String without the end-quote (`textEndDelimiter`) string.
 * `csvSettingsDetector`: must be an object which extends from
- `CsvSettingsDetector`.  There is a simple implementation which simply uses the
- first occurrence of a list of possible values as value.
+ `CsvSettingsDetector`.  There implementation simply selects the first occurrence
+  of a list of possible values as value.
  
  ```dart
  var d = new FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n'],
@@ -165,7 +179,12 @@ those 2 comes first in the csv string.  Note that the
 `FirstOccurrenceSettingsDetector` doesn't parse the csv string!  For instance
 if eol should be `'\r\n'` but there is a field with a correctly quoted `'\n'`
 in the first row, `'\n'` is used instead.
-    
+
+If you csv String contains a (simple) header row, or all eols are equal this
+is good enough.
+
+Feel free to submit something more intelligent.
+
 
 To check your configuration values there is `CsvToListConverter.verifySettings`
 and `verifyCurrentSettings`.  Both return an empty list if all settings are valid,
