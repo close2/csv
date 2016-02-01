@@ -2,7 +2,7 @@ library list2csv_test;
 
 import 'dart:async';
 
-import 'package:unittest/unittest.dart';
+import "package:test/test.dart";
 import 'package:csv/csv.dart';
 
 import 'test_data.dart';
@@ -169,7 +169,7 @@ main() {
   });
 
   test('Throw an exception if eol is null', () {
-    expect(() => new ListToCsvConverter(eol: null).convert(singleRow),
+    expect(() => new ListToCsvConverter(eol: null).convert([singleRow]),
         throwsArgumentError);
   });
 

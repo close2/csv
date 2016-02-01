@@ -99,7 +99,7 @@ part 'csv_argument_errors.dart';
 // !! If they all start with the same character all three counters will be
 //    incremented !!
 //
-// If _c_ matches a delimiter we will not add it the the field stringbuffer!
+// If _c_ matches a delimiter we will not add it the the field stringBuffer!
 //
 // This goes on until a delimiter is completely matched (the counter == the
 // delimiter.length) or the character doesn't match any of the delimiters.
@@ -161,7 +161,7 @@ class CsvParser {
   /// unsuccessful.  This field is null otherwise.
   String _pushbackBuffer;
 
-  /// Are we inside a text/string (not necessarely quoted).
+  /// Are we inside a text/string (not necessarily quoted).
   bool _insideString;
 
   /// Are we inside a quoted text/string ([_insideString] must be true as well
@@ -205,7 +205,7 @@ class CsvParser {
     return userValue;
   }
 
-  /// The default values are consistend with
+  /// The default values are consistent with
   /// [rfc4180](http://tools.ietf.org/html/rfc4180).
   ///
   /// The arguments are only checked if [allowInvalid] is false.
@@ -510,10 +510,11 @@ class CsvParser {
     if (!shouldParseNumbers || quoted)
       row.add(value);
     else {
-      var addValueAsString = (s) {
+      int addValueAsString(String s) {
         row.add(value);
         return null;
-      };
+      }
+      ;
       num n;
       n = num.parse(value, addValueAsString);
       if (n != null) row.add(n);

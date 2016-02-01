@@ -5,7 +5,7 @@ part of csv;
 ///
 /// This converter follows the rules of
 /// [rfc4180](http://tools.ietf.org/html/rfc4180).
-/// Except for the possibility to override the separater character
+/// Except for the possibility to override the separator character
 /// ([fieldDelimiter]), the text delimiter ([textDelimiter]) and the [eol]
 /// string.
 ///
@@ -13,7 +13,7 @@ part of csv;
 /// by checking *every* character _on it's own_ if the value is longer than
 /// one character.
 ///
-/// For instance if the overriden field delimiter is _'<->'_ and a field
+/// For instance if the overridden field delimiter is _'<->'_ and a field
 /// contains *either* '<' or '-' or '>' the conversion code follows the RFC as
 /// if the character the value overrides is present.  (This is also the case
 /// for the default [eol] \r\n and follows the RFC).
@@ -73,7 +73,7 @@ part of csv;
 ///     "aaa","b""bb","ccc"
 class ListToCsvConverter extends Converter<List<List>, String>
     implements StreamTransformer {
-  /// The separator between fields in the outputstring.
+  /// The separator between fields in the outputString.
   final String fieldDelimiter;
 
   /// The delimiter which surrounds text / fields which have a
@@ -95,7 +95,7 @@ class ListToCsvConverter extends Converter<List<List>, String>
   final String eol;
 
   /// The default values for [fieldDelimiter], [textDelimiter] and [eol]
-  /// are consistend with [rfc4180](http://tools.ietf.org/html/rfc4180).
+  /// are consistent with [rfc4180](http://tools.ietf.org/html/rfc4180).
   ///
   const ListToCsvConverter(
       {this.fieldDelimiter: defaultFieldDelimiter,
@@ -159,9 +159,12 @@ class ListToCsvConverter extends Converter<List<List>, String>
   /// [convert] function does not output an eol for the last line.  Note that
   /// the rfc says, that the eol for the last row is optional.  Which means
   /// that the output is still rfc conform.
+  ///
+  /// [outputSink] must be of type Sink<String>.  (Strong mode prevents us from
+  /// specifying the type here.)
   @override
-  List2CsvSink startChunkedConversion(Sink<String> outputSink) {
-    return new List2CsvSink(this, outputSink);
+  List2CsvSink startChunkedConversion(Sink outputSink) {
+    return new List2CsvSink(this, outputSink as Sink<String>);
   }
 
   /// Converts a list of values representing a row into a value separated

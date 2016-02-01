@@ -2,7 +2,7 @@ library csv_to_list_test;
 
 import 'dart:async';
 
-import 'package:unittest/unittest.dart';
+import "package:test/test.dart";
 import 'package:csv/csv.dart';
 import 'package:csv/src/csv_parser.dart';
 import 'package:csv/csv_settings_autodetection.dart';

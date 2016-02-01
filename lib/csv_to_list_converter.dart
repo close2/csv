@@ -31,7 +31,7 @@ class CsvToListConverter extends Converter<String, List<List>>
   /// An optional csvSettingsDetector.  See [CsvSettingsDetector].
   final CsvSettingsDetector csvSettingsDetector;
 
-  /// The default values for the optional arguments are consistend with
+  /// The default values for the optional arguments are consistent with
   /// [rfc4180](http://tools.ietf.org/html/rfc4180).
   ///
   /// Note that by default invalid values are allowed and no exceptions are
@@ -84,10 +84,12 @@ class CsvToListConverter extends Converter<String, List<List>>
   }
 
   // Implementation so that this converter can be used as transformer.
+  /// [outputSink] must be of type Sink<List>.  (Strong mode prevents us from
+  /// specifying the type here.)
   @override
-  CsvToListSink startChunkedConversion(Sink<List> outputSink) {
+  CsvToListSink startChunkedConversion(Sink outputSink) {
     return new CsvToListSink(
-        outputSink,
+        outputSink as Sink<List>,
         fieldDelimiter,
         textDelimiter,
         textEndDelimiter,
@@ -199,7 +201,7 @@ class CsvToListSink extends ChunkedConversionSink<String> {
     _unparsedCsvChunks.add(newCsvChunk);
 
     // Unless this is the last chunk (fieldCompleteWhenEndOfString) we might
-    // have to wait for another chunk to autodetect / find the first occurence
+    // have to wait for another chunk to autodetect / find the first occurrence
     // of a setting string.
     if (_parser == null) {
       _parser = _buildNewParserWithSettings(

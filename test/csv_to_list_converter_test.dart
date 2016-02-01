@@ -253,7 +253,7 @@ main_converter() {
   });
 
   test('Autodetecting settings works in converter mode', () {
-    var det = new FirstOccurenceSettingsDetector(
+    var det = new FirstOccurrenceSettingsDetector(
         fieldDelimiters: [',', ';'],
         textDelimiters: ['"', "'"],
         textEndDelimiters: ['"', "'"],
@@ -263,7 +263,7 @@ main_converter() {
             csvSettingsDetector: det, shouldParseNumbers: true),
         equals([simpleStringsSingleRow]));
 
-    det = new FirstOccurenceSettingsDetector(
+    det = new FirstOccurrenceSettingsDetector(
         fieldDelimiters: [',', 'b'],
         textDelimiters: ["'", '"'],
         textEndDelimiters: ['.', '"'],
@@ -273,7 +273,7 @@ main_converter() {
             csvSettingsDetector: det, shouldParseNumbers: false),
         equals([singleRowAllText]));
 
-    det = new FirstOccurenceSettingsDetector(
+    det = new FirstOccurrenceSettingsDetector(
         fieldDelimiters: ['aa', '2'],
         textDelimiters: ['bb', '"'],
         textEndDelimiters: ['"', 'bb']);
@@ -284,14 +284,14 @@ main_converter() {
   });
 
   test('Autodetects settings for a multiline csv string correctly', () {
-    var det = new FirstOccurenceSettingsDetector(eols: ['\r\n', '\n']);
+    var det = new FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n']);
     var converter = new CsvToListConverter(csvSettingsDetector: det);
     var eol = '\n';
     var csv =
         csvSingleRowComma + eol + csvSingleRowComma + eol + csvSingleRowComma;
     expect(converter.convert(csv), equals(multipleRows));
 
-    det = new FirstOccurenceSettingsDetector(
+    det = new FirstOccurrenceSettingsDetector(
         eols: ['\r\n', '\n'],
         textDelimiters: ['""', "'"],
         textEndDelimiters: ['««', '!']);

@@ -1,36 +1,42 @@
 # Changes from version 2 to 3:
 
-* `parseNumbers` renamed to `shouldParseNumbers'
+* `parseNumbers` has been renamed to `shouldParseNumbers`
+* `FirstOccurenceSettingsDetector` has been renamed to `FirstOccurrenceSettingsDetector`
+* Speed improvements.
 
-* 
 # csv
 
 A dart csv to list codec / converter.
 
-`final csvCodec = new CsvCodec();`
+If you have a `List<String>` of rows with RFC conform separators and delimiters, simply convert them with:
+```dart
+List<List<dynamic>> rowsAsListOfValues = const CsvToListConverter().convert(yourStringList);
+```
 
-    csvCodec.encoder.convert([['a', 'b'], [1, 2]]);
-    // or
-    final encoder = ListToCsvConverter();
-    encoder.convert([['a', 'b'], [1, 2]]);
+To convert to a Csv string your values must be in a `List<List<dynamic>>` representing a List of Rows where every Row
+is a List of values.  You can then convert with:
+```dart
+List<String> csvRows = const ListToCsvConverter().convert(yourListOfLists);
+```
 
-    final stream = new Stream.fromIterable([['a', 'b'], [1, 2]]);
-    final csvRowStream = stream.transform(csvCodec.encoder);
+This converter is implemented as codec and may be used as transformer for streams:
 
+```dart
+final csvCodec = new CsvCodec();
 
-    csvCodec.decoder.convert('a,b\r\n12,3.14');
-    // or
-    final decoder = CsvToListConverter();
-    decoder.convert('a,b\r\n12,3.14');
-    
-    final stream = new Stream.fromIterable(['a,', 'b\r\n12,3.14']);
-    final listStream = stream.transform(csvCodec.decoder);
-    
-    var det = new FirstOccurenceSettingsDetector(eols: ['\r\n', '\n']);
-    var converter = new CsvToListConverter(csvSettingsDetector: det);
-    // assume someStream is a string stream
-    someStream.transform(converter); // will output another stream of lists.
-    
+final stream = new Stream.fromIterable([['a', 'b'], [1, 2]]);
+final csvRowStream = stream.transform(csvCodec.encoder);
+```
+
+Or the decoder side:
+
+```dart
+final input = new File('a/csv/file.txt').openRead();
+final fields = await input.transform(UTF8.decoder).transform(csvCodec.decoder).toList();
+```
+
+The converter is highly customizable and even allows multiple characters as delimiters or separators.
+
     
 [![Build Status](https://drone.io/github.com/close2/csv/status.png)](https://drone.io/github.com/close2/csv/latest)
 
@@ -80,7 +86,7 @@ call `convert`:
 There are 2 interesting things to note:
 
 * Not all rows have to be the same length.
-* The default eol is `'\r\n'` and `'\n'` is also quoted.  The apparence of only
+* The default eol is `'\r\n'` and `'\n'` is also quoted.  The appearance of only
  one character is enough for the string to be quoted.
 
 The converter takes the following configurations either in the constructor or
@@ -141,24 +147,28 @@ plus
  ends with a quoted String without the end-quote (`textEndDelimiter`) string.
 * `csvSettingsDetector`: must be an object which extends from
  `CsvSettingsDetector`.  There is a simple implementation which simply uses the
- first occurence of a list of possible values as value.
+ first occurrence of a list of possible values as value.
  
-    var d = new FirstOccurenceSettingsDetector(eols: ['\r\n', '\n'],
-                                               textDelimiters: ['""', "'"]);
+    var d = new FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n'],
+                                                textDelimiters: ['"', "'"]);
 
 
     new CsvToListConverter(csvSettingsDetector: d);
     
 In this case `eol` will either be `'\r\n'` or `'\n'` depending on which of
 those 2 comes first in the csv string.  Note that the
-`FirstOccurenceSettingsDetector` doesn't parse the csv string!  For instance
-if eol should be `'\r\n'` but there is a field with `'\n'` in the first row,
-`'\n'` is used instead.
+`FirstOccurrenceSettingsDetector` doesn't parse the csv string!  For instance
+if eol should be `'\r\n'` but there is a field with a correctly quoted `'\n'`
+in the first row, `'\n'` is used instead.
     
 
 To check your configuration values there is `CsvToListConverter.verifySettings`
-and `verifyCurrentSettings`.  Both return a list of errors or if the optional
-`throwError` is true, throw in case there is an error.
+and `verifyCurrentSettings`.  Both return an empty list if all settings are valid,
+or a list of errors.  If the optional `throwError` is true an error is thrown in
+case the settings are invalid.
+
+All settings must be set, i.e. not be null, and delimiters, separators and eols must
+be distinguishable, i.e. they may not be the start of another settings.
 
 
 ## CSV rules -- copied from RFC4180 Chapter 2

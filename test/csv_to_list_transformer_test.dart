@@ -63,7 +63,7 @@ main_transformer() {
   });
 
   test('Autodetecting settings works in transformer mode', () {
-    var det = new FirstOccurenceSettingsDetector(
+    var det = new FirstOccurrenceSettingsDetector(
         fieldDelimiters: [',', ';'],
         textDelimiters: ['"', "'"],
         textEndDelimiters: ['"', "'"],
@@ -74,7 +74,7 @@ main_transformer() {
     var f_rows = stream.transform(converter).toList();
     expect(f_rows, completion([simpleStringsSingleRow]));
 
-    det = new FirstOccurenceSettingsDetector(
+    det = new FirstOccurrenceSettingsDetector(
         fieldDelimiters: [',', 'b'],
         textDelimiters: ["'", '"'],
         textEndDelimiters: ['.', '"'],
@@ -85,7 +85,7 @@ main_transformer() {
     f_rows = stream.transform(converter).toList();
     expect(f_rows, completion([singleRowAllText]));
 
-    det = new FirstOccurenceSettingsDetector(
+    det = new FirstOccurrenceSettingsDetector(
         fieldDelimiters: ['aa', '2'],
         textDelimiters: ['bb', '"'],
         textEndDelimiters: ['"', 'bb']);
@@ -97,7 +97,7 @@ main_transformer() {
   });
 
   test('Transformer autodetects settings for a multiline csv correctly', () {
-    var det = new FirstOccurenceSettingsDetector(eols: ['\r\n', '\n']);
+    var det = new FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n']);
     var converter = new CsvToListConverter(csvSettingsDetector: det);
     var eol = '\n';
     var csvStream = new Stream.fromIterable(
@@ -105,7 +105,7 @@ main_transformer() {
     var f_rows = csvStream.transform(converter).toList();
     expect(f_rows, completion(multipleRows));
 
-    det = new FirstOccurenceSettingsDetector(
+    det = new FirstOccurrenceSettingsDetector(
         eols: ['\r\n', '\n'],
         textDelimiters: ['""', "'"],
         textEndDelimiters: ['««', '!']);

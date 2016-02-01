@@ -1,6 +1,6 @@
 library test_data;
 
-const List singleRow = const [
+const List<dynamic> singleRow = const [
   1,
   'a',
   2,
@@ -143,7 +143,7 @@ const List<List> complexRows_ending2 = const [
   const ['']
 ];
 
-// fielDelimiter: ...*
+// fieldDelimiter: ...*
 // textDelimiter: ...#
 // eol: .*.*
 const String csvComplex2_part1 = '..*.*...*#a..*';

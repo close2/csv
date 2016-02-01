@@ -33,8 +33,8 @@ abstract class CsvSettingsDetector {
   CsvSettings detectFromString(String csv);
 
   CsvSettings detectFromCsvChunks(List<String> csvChunks, bool noMoreChunks) {
-    var nullToEmpy = (String chunk) => chunk == null ? '' : chunk;
-    return detectFromString(csvChunks.map(nullToEmpy).join());
+    var nullToEmpty = (String chunk) => chunk ?? '';
+    return detectFromString(csvChunks.map(nullToEmpty).join());
   }
 
   const CsvSettingsDetector();
@@ -73,13 +73,13 @@ String _findFirst(String csv, List<String> possibleValues) {
 
 /// This is a very simple detector, which simple returns the value which has
 /// the lowest start position inside the csv.
-class FirstOccurenceSettingsDetector extends CsvSettingsDetector {
+class FirstOccurrenceSettingsDetector extends CsvSettingsDetector {
   final List<String> fieldDelimiters;
   final List<String> textDelimiters;
   final List<String> textEndDelimiters;
   final List<String> eols;
 
-  const FirstOccurenceSettingsDetector(
+  const FirstOccurrenceSettingsDetector(
       {this.fieldDelimiters,
       this.textDelimiters,
       this.textEndDelimiters,
