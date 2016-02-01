@@ -1,5 +1,5 @@
 name: csv
-version: 3.0.0
+version: 3.0.1
 author: Christian Loitsch <christian@loitsch.com>
 description: |-
   A codec to transform between a string and a list of values.
@@ -7,5 +7,9 @@ description: |-
   The string must be comma (configurable) separated values.
 homepage: https://github.com/close2/csv
 documentation: https://github.com/close2/csv
+
+environment:
+  sdk: '>=1.11.0 <1.16.0'
+
 dev_dependencies:
   test: '>=0.12.8 <0.13.0'
