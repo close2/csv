@@ -189,7 +189,7 @@ class ListToCsvConverter extends Converter<List<List>, String>
     fieldDelimiter ??= this.fieldDelimiter;
     textDelimiter ??= this.textDelimiter;
     textEndDelimiter ??= this.textEndDelimiter;
-    eol ?? this.eol;
+    eol ??= this.eol;
 
     if (fieldDelimiter == null || textDelimiter == null) {
       throw new ArgumentError(
