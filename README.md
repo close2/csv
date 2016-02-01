@@ -81,7 +81,7 @@ not throw an error.
 In addition this converter supports multiple characters for all delimiters
 and eol.  Also the start text delimiter and end text delimiter may be
 different.  This means the following text can be parsed:
-`«abc«d»*|*«xy»»z»*|*123`
+`«abc«d»*|*«xy»»z»*|*123`  
 And (if configured correctly) will return `['abc«d', 'xy»z', 123]`
 
 
@@ -135,7 +135,7 @@ assert(res == res2);
 Note that:
 
 * `'>'` is quoted
-* `'<<' is quoted as well, but because it is "only" a start text delimiter
+* `'<<'` is quoted as well, but because it is "only" a start text delimiter
  it is *not* doubled. (See rule 7. below).
 * `'>>'` is quoted.  *Only the end-quote string is doubled!*
 
@@ -165,13 +165,13 @@ plus
 * `csvSettingsDetector`: must be an object which extends from
  `CsvSettingsDetector`.  There implementation simply selects the first occurrence
   of a list of possible values as value.
- 
- ```dart
- var d = new FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n'],
-                                             textDelimiters: ['"', "'"]);
-
- new CsvToListConverter(csvSettingsDetector: d);
- ```
+  
+  ```dart
+  var d = new FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n'],
+                                              textDelimiters: ['"', "'"]);
+  
+  new CsvToListConverter(csvSettingsDetector: d);
+  ```
     
 In this case `eol` will either be `'\r\n'` or `'\n'` depending on which of
 those 2 comes first in the csv string.  Note that the
