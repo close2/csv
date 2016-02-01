@@ -8,15 +8,15 @@
 
 A dart csv to list codec / converter.
 
-If you have a `List<String>` of rows with RFC conform separators and delimiters, simply convert them with:
+If you have a `String` of all rows with RFC conform separators and delimiters, simply convert them with:
 ```dart
-List<List<dynamic>> rowsAsListOfValues = const CsvToListConverter().convert(yourStringList);
+List<List<dynamic>> rowsAsListOfValues = const CsvToListConverter().convert(yourString);
 ```
 
 To convert to a Csv string your values must be in a `List<List<dynamic>>` representing a List of Rows where every Row
 is a List of values.  You can then convert with:
 ```dart
-List<String> csvRows = const ListToCsvConverter().convert(yourListOfLists);
+String csv = const ListToCsvConverter().convert(yourListOfLists);
 ```
 
 This converter is implemented as codec and may be used as transformer for streams:
