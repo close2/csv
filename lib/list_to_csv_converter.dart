@@ -190,7 +190,10 @@ class ListToCsvConverter extends Converter<List<List>, String>
     if (rowValues == null || rowValues.isEmpty) return '';
 
     fieldDelimiter ??= this.fieldDelimiter;
+    // assign given textDelimiter to textEndDelimiter
+    textEndDelimiter ??= textDelimiter;
     textDelimiter ??= this.textDelimiter;
+    // if textDelimiter was null use the default textEndDelimiter
     textEndDelimiter ??= this.textEndDelimiter;
     eol ??= this.eol;
 

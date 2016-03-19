@@ -12,6 +12,14 @@ const List<dynamic> singleRow = const [
   "g',h",
   5.6
 ];
+
+// see https://github.com/close2/csv/issues/5
+const List<List> testDataIssue5 = const [
+  const ['Alice', 'Austria', 1],
+  const ['Bob', ',Brazil', 2]
+];
+const testCsvIssue5 = 'Alice,Austria,1\r\nBob,#,Brazil#,2';
+
 const String csvSingleRowComma = '1,a,2,aabb,"c\nd",3,"e"",f",4,"g\',h",5.6';
 const String csvSingleRowSemicolon = '1;a;2;aabb;"c\nd";3;"e"",f";4;g\',h;5.6';
 const String csvSingleRowDotDoubleQuot =
