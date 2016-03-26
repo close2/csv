@@ -186,4 +186,10 @@ main() {
         multipleRowsStream.transform(commaDoubleQuotListToCsvConverter).join();
     expect(f_csv, completion(result));
   });
+
+  test('Issue 5. Quote correctly', () {
+    var csv =
+        const ListToCsvConverter().convert(testDataIssue5, textDelimiter: '#');
+    expect(csv, equals(testCsvIssue5));
+  });
 }
