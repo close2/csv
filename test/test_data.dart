@@ -21,6 +21,8 @@ const List<List> testDataIssue5 = const [
 const testCsvIssue5 = 'Alice,Austria,1\r\nBob,#,Brazil#,2';
 
 const String csvSingleRowComma = '1,a,2,aabb,"c\nd",3,"e"",f",4,"g\',h",5.6';
+const String csvSingleRowCommaDelimitAll =
+    '"1","a","2","aabb","c\nd","3","e"",f","4","g\',h","5.6"';
 const String csvSingleRowSemicolon = '1;a;2;aabb;"c\nd";3;"e"",f";4;g\',h;5.6';
 const String csvSingleRowDotDoubleQuot =
     '1.a.2.aabb."c\nd".3."e"",f".4.g\',h."5.6"';

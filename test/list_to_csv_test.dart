@@ -192,4 +192,10 @@ main() {
         const ListToCsvConverter().convert(testDataIssue5, textDelimiter: '#');
     expect(csv, equals(testCsvIssue5));
   });
+
+  test('Issue 7.  Test delimitAllFields', () {
+    var csv =
+        const ListToCsvConverter().convert([singleRow], delimitAllFields: true);
+    expect(csv, equals(csvSingleRowCommaDelimitAll));
+  });
 }

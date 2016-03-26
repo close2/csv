@@ -1,9 +1,18 @@
+*Specify (at least a major) version when adding this project as dependency.  Whenever the API has incompatible changes
+the major version changes!*
+
 # Changes from version 2 to 3:
 
 * `parseNumbers` has been renamed to `shouldParseNumbers`
 * `FirstOccurenceSettingsDetector` has been renamed to
   `FirstOccurrenceSettingsDetector`
 * Speed improvements.
+
+
+# Changes from version 3.0 to 3.1
+
+* added option `delimitAllFields`
+* fix issue #5 (endDelimiter was not always taken correctly from delimiter)
 
 # csv
 

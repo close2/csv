@@ -94,6 +94,10 @@ class ListToCsvConverter extends Converter<List<List>, String>
   /// own and appended to the previous one with this separator.
   final String eol;
 
+  /// Add delimiter to all fields, even if the field does not contain any
+  /// character, which would adding delimiters necessary.
+  final bool delimitAllFields;
+
   /// The default values for [fieldDelimiter], [textDelimiter] and [eol]
   /// are consistent with [rfc4180](http://tools.ietf.org/html/rfc4180).
   ///
@@ -101,7 +105,8 @@ class ListToCsvConverter extends Converter<List<List>, String>
       {this.fieldDelimiter: defaultFieldDelimiter,
       String textDelimiter: defaultTextDelimiter,
       String textEndDelimiter,
-      this.eol: defaultEol})
+      this.eol: defaultEol,
+      this.delimitAllFields: defaultDelimitAllFields})
       : this.textDelimiter = textDelimiter,
         this.textEndDelimiter =
             textEndDelimiter != null ? textEndDelimiter : textDelimiter;
@@ -110,9 +115,9 @@ class ListToCsvConverter extends Converter<List<List>, String>
   ///
   /// According to [rfc4180](http://tools.ietf.org/html/rfc4180).
   ///
-  /// [fieldDelimiter], [textDelimiter] and [eol] allow to override
-  /// the default rfc values.  If an optional argument is not given (or null)
-  /// its corresponding .this value ([this.fieldDelimiter],
+  /// [fieldDelimiter], [textDelimiter], [eol] and [delimitAllFields] allow to
+  /// override the default rfc values.  If an optional argument is not given
+  /// (or null) its corresponding .this value ([this.fieldDelimiter],
   /// [this.textDelimiter] or [this.eol]) is used instead.
   ///
   /// All other rfc rules are followed.
@@ -123,7 +128,8 @@ class ListToCsvConverter extends Converter<List<List>, String>
       {String fieldDelimiter,
       String textDelimiter,
       String textEndDelimiter,
-      String eol}) {
+      String eol,
+      bool delimitAllFields}) {
     if (rows == null) return '';
 
     eol ??= this.eol;
@@ -141,7 +147,8 @@ class ListToCsvConverter extends Converter<List<List>, String>
           fieldDelimiter: fieldDelimiter,
           textDelimiter: textDelimiter,
           textEndDelimiter: textEndDelimiter,
-          eol: eol);
+          eol: eol,
+          delimitAllFields: delimitAllFields);
     });
     return sb.toString();
   }
@@ -186,7 +193,8 @@ class ListToCsvConverter extends Converter<List<List>, String>
       {String fieldDelimiter,
       String textDelimiter,
       String textEndDelimiter,
-      String eol}) {
+      String eol,
+      bool delimitAllFields}) {
     if (rowValues == null || rowValues.isEmpty) return '';
 
     fieldDelimiter ??= this.fieldDelimiter;
@@ -196,6 +204,7 @@ class ListToCsvConverter extends Converter<List<List>, String>
     // if textDelimiter was null use the default textEndDelimiter
     textEndDelimiter ??= this.textEndDelimiter;
     eol ??= this.eol;
+    delimitAllFields ??= this.delimitAllFields;
 
     if (fieldDelimiter == null || textDelimiter == null) {
       throw new ArgumentError(
@@ -217,8 +226,9 @@ class ListToCsvConverter extends Converter<List<List>, String>
 
       // 5,3 should become "5,3"
 
-      if (_containsAny(
-          valString, [fieldDelimiter, textDelimiter, textEndDelimiter, eol])) {
+      if (delimitAllFields ||
+          _containsAny(valString,
+              [fieldDelimiter, textDelimiter, textEndDelimiter, eol])) {
         // ab"cd => ab""cd
         if (_containsAny(valString, [textEndDelimiter])) {
           var newEndDelimiter = "$textEndDelimiter$textEndDelimiter";

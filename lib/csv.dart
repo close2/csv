@@ -18,6 +18,8 @@ const String defaultTextDelimiter = '"';
 /// The RFC conform default value for eol.
 const String defaultEol = '\r\n';
 
+const bool defaultDelimitAllFields = false;
+
 /// A codec which converts a csv string ↔ List of rows.
 ///
 /// See [CsvToListConverter] and [ListToCsvConverter].
@@ -32,7 +34,8 @@ class CsvCodec extends Codec<List<List>, String> {
       String textEndDelimiter,
       String eol: defaultEol,
       bool shouldParseNumbers: true,
-      bool allowInvalid: true})
+      bool allowInvalid: true,
+      bool delimitAllFields: defaultDelimitAllFields})
       : decoder = new CsvToListConverter(
             fieldDelimiter: fieldDelimiter,
             textDelimiter: textDelimiter,
@@ -44,5 +47,6 @@ class CsvCodec extends Codec<List<List>, String> {
             fieldDelimiter: fieldDelimiter,
             textDelimiter: textDelimiter,
             textEndDelimiter: textEndDelimiter,
-            eol: eol);
+            eol: eol,
+            delimitAllFields: delimitAllFields);
 }
