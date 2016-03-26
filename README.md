@@ -5,6 +5,9 @@
   `FirstOccurrenceSettingsDetector`
 * Speed improvements.
 
+*Specify (at least a major) version when adding this project as dependency.  Whenever the API has incompatible changes
+the major version changes!*
+
 # csv
 
 A dart csv to list codec / converter.
