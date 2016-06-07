@@ -14,6 +14,10 @@ the major version changes!*
 * added option `delimitAllFields`
 * fix issue #5 (endDelimiter was not always taken correctly from delimiter)
 
+## Changes from version 3.1 to 3.1.1
+
+* fix issue #10 (SDK version was overlay restrictive)
+
 # csv
 
 A dart csv to list codec / converter.
