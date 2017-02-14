@@ -72,7 +72,7 @@ part of csv;
 ///
 ///     "aaa","b""bb","ccc"
 class ListToCsvConverter extends Converter<List<List>, String>
-    implements StreamTransformer {
+    implements StreamTransformer<List<List>, String> {
   /// The separator between fields in the outputString.
   final String fieldDelimiter;
 
@@ -170,8 +170,8 @@ class ListToCsvConverter extends Converter<List<List>, String>
   /// [outputSink] must be of type Sink<String>.  (Strong mode prevents us from
   /// specifying the type here.)
   @override
-  List2CsvSink startChunkedConversion(Sink outputSink) {
-    return new List2CsvSink(this, outputSink as Sink<String>);
+  List2CsvSink startChunkedConversion(Sink<String> outputSink) {
+    return new List2CsvSink(this, outputSink);
   }
 
   /// Converts a list of values representing a row into a value separated
@@ -265,7 +265,7 @@ class ListToCsvConverter extends Converter<List<List>, String>
 ///
 /// A single row represented by a [List] may be [add]ed an
 /// the conversion is added to the output sink.
-class List2CsvSink extends ChunkedConversionSink<List> {
+class List2CsvSink extends ChunkedConversionSink<List<List>> {
   /// The List2CsvConverter which has the configurations (fieldDelimiter,
   /// textDel., eol)
   final ListToCsvConverter _converter;

@@ -6,7 +6,7 @@ part of csv;
 ///
 /// See the [CsvParser] for more information.
 class CsvToListConverter extends Converter<String, List<List>>
-    implements StreamTransformer {
+    implements StreamTransformer<String, List<List>> {
   /// The separator between fields.
   final String fieldDelimiter;
 
