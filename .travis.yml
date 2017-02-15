@@ -1,0 +1,6 @@
+language: dart
+dart:
+  # Install the latest stable release
+  - stable
+  # Install the latest dev release
+  - dev
