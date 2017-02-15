@@ -63,7 +63,7 @@ The converter is highly customizable and even allows multiple characters as
 delimiters or separators.
 
     
-[![Build Status](https://drone.io/github.com/close2/csv/status.png)](https://drone.io/github.com/close2/csv/latest)
+![Build Status](https://travis-ci.org/close2/csv.svg?branch=master)
 
 
 ### The decoder
