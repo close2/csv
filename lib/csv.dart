@@ -8,6 +8,7 @@ import 'csv_settings_autodetection.dart';
 
 part 'csv_to_list_converter.dart';
 part 'list_to_csv_converter.dart';
+part 'map_to_csv_converter.dart';
 
 /// The RFC conform default value for field delimiter.
 const String defaultFieldDelimiter = ',';
