@@ -173,15 +173,11 @@ main() {
         throwsArgumentError);
   });
 
-  var multipleRowsStream = new Stream.fromIterable(multipleRows);
+  var multipleRowsStream = new Stream<List<List>>.fromIterable([multipleRows]);
   test('Works as transformer', () {
     var eol = commaDoubleQuotListToCsvConverter.eol;
-    var result = csvSingleRowComma +
-        eol +
-        csvSingleRowComma +
-        eol +
-        csvSingleRowComma +
-        eol;
+    var result =
+        csvSingleRowComma + eol + csvSingleRowComma + eol + csvSingleRowComma;
     var f_csv =
         multipleRowsStream.transform(commaDoubleQuotListToCsvConverter).join();
     expect(f_csv, completion(result));

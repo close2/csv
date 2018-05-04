@@ -77,13 +77,15 @@ main() {
 main_transformer() {
   test('Works as transformer (simple test)', () {
     var stream = new Stream.fromIterable([csvSimpleStringsSingleRowComma]);
-    var f_rows = stream.transform(commaDoubleQuotCsvToListConverter).toList();
+    var f_rows = stream.transform(commaDoubleQuotCsvToListConverter).fold(
+        <List>[], (List<List> prev, List<List> current) => prev + current);
     expect(f_rows, completion([simpleStringsSingleRow]));
   });
 
   test('Works as transformer (complex multicharacter delimiters)', () {
     var csvStream = new Stream.fromIterable(csvComplex_parts);
-    var f_rows = csvStream.transform(complexConverter).toList();
+    var f_rows = csvStream.transform(complexConverter).fold(
+        <List>[], (List<List> prev, List<List> current) => prev + current);
     expect(f_rows, completion(complexRows));
   });
 
@@ -91,11 +93,13 @@ main_transformer() {
       'Works as transformer '
       '(complex multicharacter delimiters, difficult line endings)', () {
     var csvStream = new Stream.fromIterable(csvComplex_parts_ending1);
-    var f_rows = csvStream.transform(complexConverter).toList();
+    var f_rows = csvStream.transform(complexConverter).fold(
+        <List>[], (List<List> prev, List<List> current) => prev + current);
     expect(f_rows, completion(complexRows_ending1));
 
     var csvStream2 = new Stream.fromIterable(csvComplex_parts_ending2);
-    var f_rows2 = csvStream2.transform(complexConverter).toList();
+    var f_rows2 = csvStream2.transform(complexConverter).fold(
+        <List>[], (List<List> prev, List<List> current) => prev + current);
     expect(f_rows2, completion(complexRows_ending2));
   });
 
@@ -103,7 +107,8 @@ main_transformer() {
       'Works as transformer '
       '(complex multicharacter delimiters, repeating patterns)', () {
     var csvStream = new Stream.fromIterable(csvComplex2_parts);
-    var f_rows = csvStream.transform(complex2Converter).toList();
+    var f_rows = csvStream.transform(complex2Converter).fold(
+        <List>[], (List<List> prev, List<List> current) => prev + current);
     expect(f_rows, completion(complexRows2));
   });
 
@@ -111,7 +116,8 @@ main_transformer() {
       'Works as transformer '
       '(complex multicharacter delimiters, "embedded" patterns)', () {
     var csvStream = new Stream.fromIterable(csvComplex3_parts);
-    var f_rows = csvStream.transform(complex3Converter).toList();
+    var f_rows = csvStream.transform(complex3Converter).fold(
+        <List>[], (List<List> prev, List<List> current) => prev + current);
     expect(f_rows, completion(complexRows3));
   });
 
@@ -145,7 +151,8 @@ main_transformer() {
     var converter = new CsvToListConverter(
         csvSettingsDetector: det, shouldParseNumbers: true);
     var stream = new Stream.fromIterable([csvSimpleStringsSingleRowComma]);
-    var f_rows = stream.transform(converter).toList();
+    var f_rows = stream.transform(converter).fold(
+        <List>[], (List<List> prev, List<List> current) => prev + current);
     expect(f_rows, completion([simpleStringsSingleRow]));
 
     det = new FirstOccurrenceSettingsDetector(
@@ -156,7 +163,8 @@ main_transformer() {
     converter = new CsvToListConverter(
         csvSettingsDetector: det, shouldParseNumbers: false);
     stream = new Stream.fromIterable([csvSingleRowComma]);
-    f_rows = stream.transform(converter).toList();
+    f_rows = stream.transform(converter).fold(
+        <List>[], (List<List> prev, List<List> current) => prev + current);
     expect(f_rows, completion([singleRowAllText]));
 
     det = new FirstOccurrenceSettingsDetector(
@@ -166,7 +174,8 @@ main_transformer() {
     converter = new CsvToListConverter(
         csvSettingsDetector: det, shouldParseNumbers: true);
     stream = new Stream.fromIterable([csvSingleRowAaBb]);
-    f_rows = stream.transform(converter).toList();
+    f_rows = stream.transform(converter).fold(
+        <List>[], (List<List> prev, List<List> current) => prev + current);
     expect(f_rows, completion([singleRow]));
   });
 
@@ -176,7 +185,8 @@ main_transformer() {
     var eol = '\n';
     var csvStream = new Stream.fromIterable(
         [csvSingleRowComma, eol, csvSingleRowComma, eol, csvSingleRowComma]);
-    var f_rows = csvStream.transform(converter).toList();
+    var f_rows = csvStream.transform(converter).fold(
+        <List>[], (List<List> prev, List<List> current) => prev + current);
     expect(f_rows, completion(multipleRows));
 
     det = new FirstOccurrenceSettingsDetector(
@@ -185,7 +195,8 @@ main_transformer() {
         textEndDelimiters: ['««', '!']);
     converter = new CsvToListConverter(csvSettingsDetector: det);
     csvStream = new Stream.fromIterable(autodetectCsv_parts);
-    f_rows = csvStream.transform(converter).toList();
+    f_rows = csvStream.transform(converter).fold(
+        <List>[], (List<List> prev, List<List> current) => prev + current);
     expect(f_rows, completion(autodetectRows));
   });
 }

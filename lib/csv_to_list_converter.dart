@@ -84,12 +84,10 @@ class CsvToListConverter extends Converter<String, List<List>>
   }
 
   // Implementation so that this converter can be used as transformer.
-  /// [outputSink] must be of type Sink<List>.  (Strong mode prevents us from
-  /// specifying the type here.)
   @override
-  CsvToListSink startChunkedConversion(Sink outputSink) {
+  CsvToListSink startChunkedConversion(Sink<List<List>> outputSink) {
     return new CsvToListSink(
-        outputSink as Sink<List>,
+        outputSink,
         fieldDelimiter,
         textDelimiter,
         textEndDelimiter,
@@ -166,7 +164,7 @@ CsvParser _buildNewParserWithSettings(
 /// The input sink for a chunked csv-string to list conversion.
 class CsvToListSink extends ChunkedConversionSink<String> {
   /// Rows converted to Lists are added to this sink.
-  final Sink<List> _outSink;
+  final Sink<List<List>> _outSink;
 
   /// The csv parser which has the configurations (delimiter, eol,...) already
   /// set.
@@ -235,11 +233,11 @@ class CsvToListSink extends ChunkedConversionSink<String> {
 
         if (result.stopReason == ParsingStopReason.EndOfString) {
           if (_currentRow.isNotEmpty && end) {
-            _outSink.add(_currentRow);
+            _outSink.add([_currentRow]);
           }
           break;
         }
-        _outSink.add(_currentRow);
+        _outSink.add([_currentRow]);
         _currentRow = [];
       }
     }
