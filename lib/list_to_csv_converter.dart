@@ -71,8 +71,8 @@ part of csv;
 ///    double quote.  For example:
 ///
 ///     "aaa","b""bb","ccc"
-class ListToCsvConverter extends Converter<List<List>, String>
-    implements StreamTransformer<List<List>, String> {
+class ListToCsvConverter extends StreamTransformerBase<List, String>
+    implements ComplexChunkedConverter<List<List>, String> {
   /// The separator between fields in the outputString.
   final String fieldDelimiter;
 
@@ -123,7 +123,6 @@ class ListToCsvConverter extends Converter<List<List>, String>
   /// All other rfc rules are followed.
   ///
   /// If [rows] is null an empty String is returned.
-  @override
   String convert(List<List> rows,
       {String fieldDelimiter,
       String textDelimiter,
@@ -258,6 +257,11 @@ class ListToCsvConverter extends Converter<List<List>, String>
       if (chars.contains(it.current)) return true;
     }
     return false;
+  }
+
+  Stream<String> bind(Stream<List> stream) {
+    return new Stream<String>.eventTransformed(stream,
+        (EventSink sink) => new ComplexConverterStreamEventSink(this, sink));
   }
 }
 

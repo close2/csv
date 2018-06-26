@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:async';
 
 import 'src/csv_parser.dart';
+import 'src/complex_converter.dart';
 import 'csv_settings_autodetection.dart';
 
 part 'csv_to_list_converter.dart';
@@ -20,10 +21,8 @@ const String defaultEol = '\r\n';
 
 const bool defaultDelimitAllFields = false;
 
-/// A codec which converts a csv string ↔ List of rows.
-///
 /// See [CsvToListConverter] and [ListToCsvConverter].
-class CsvCodec extends Codec<List<List>, String> {
+class CsvCodec {
   final CsvToListConverter decoder;
 
   final ListToCsvConverter encoder;
