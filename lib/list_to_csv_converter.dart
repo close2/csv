@@ -280,8 +280,8 @@ class List2CsvSink extends ChunkedConversionSink<List<List>> {
   List2CsvSink(this._converter, this._outSink);
 
   @override
-  void add(List oneRow) {
-    _outSink.add(_converter.convert([oneRow, null]));
+  void add(List<List> oneTable) {
+    _outSink.add(_converter.convert(oneTable));
   }
 
   @override
