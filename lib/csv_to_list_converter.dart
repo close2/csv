@@ -5,8 +5,8 @@ part of csv;
 /// This converter follows the rules of [rfc4180](http://tools.ietf.org/html/rfc4180).
 ///
 /// See the [CsvParser] for more information.
-class CsvToListConverter extends Converter<String, List<List>>
-    implements StreamTransformer<String, List<List>> {
+class CsvToListConverter extends StreamTransformerBase<String, List>
+    implements ComplexChunkedConverter<String, List<List>> {
   /// The separator between fields.
   final String fieldDelimiter;
 
@@ -100,7 +100,6 @@ class CsvToListConverter extends Converter<String, List<List>>
   }
 
   /// Parses the [csv] and returns a List (rows) of Lists (columns).
-  @override
   List<List> convert(String csv,
       {String fieldDelimiter,
       String textDelimiter,
@@ -129,6 +128,11 @@ class CsvToListConverter extends Converter<String, List<List>>
         allowInvalid);
 
     return parser.convert(csv);
+  }
+
+  Stream<List> bind(Stream<String> stream) {
+    return new Stream<List>.eventTransformed(stream,
+        (EventSink sink) => new ComplexConverterStreamEventSink(this, sink));
   }
 }
 

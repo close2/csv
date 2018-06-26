@@ -510,14 +510,7 @@ class CsvParser {
     if (!shouldParseNumbers || quoted)
       row.add(value);
     else {
-      int addValueAsString(String s) {
-        row.add(value);
-        return null;
-      }
-      ;
-      num n;
-      n = num.parse(value, addValueAsString);
-      if (n != null) row.add(n);
+      row.add(num.tryParse(value) ?? value);
     }
   }
 
