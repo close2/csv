@@ -1,6 +1,10 @@
 *Specify (at least a major) version when adding this project as dependency.  Whenever the API has incompatible changes
 the major version changes!*
 
+# Changes from version 3 to 4:
+* no new functionality.
+* adapted to dart2.  This library is no longer a codec!
+
 # Changes from version 2 to 3:
 
 * `parseNumbers` has been renamed to `shouldParseNumbers`
