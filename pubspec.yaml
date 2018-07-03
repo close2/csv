@@ -9,7 +9,7 @@ homepage: https://github.com/close2/csv
 documentation: https://github.com/close2/csv
 
 environment:
-  sdk: '>=1.11.0 <2.1.0'
+  sdk: '>=2.0.0-dev.0.0 <2.1.0'
 
 dev_dependencies:
   test: '>=0.12.8 <0.13.0'
