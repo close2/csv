@@ -60,7 +60,7 @@ Or the decoder side:
 
 ```dart
 final input = new File('a/csv/file.txt').openRead();
-final fields = await input.transform(UTF8.decoder).transform(csvCodec.decoder).toList();
+final fields = await input.transform(utf8.decoder).transform(csvCodec.decoder).toList();
 ```
 
 The converter is highly customizable and even allows multiple characters as
