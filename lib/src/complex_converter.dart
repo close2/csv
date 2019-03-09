@@ -4,20 +4,16 @@ abstract class ComplexChunkedConverter<S, T> {
   Sink<S> startChunkedConversion(Sink<T> sink);
 }
 
-/**
- * This class implements the logic for a chunked conversion as a
- * stream transformer.
- *
- * It is a copy of the [ConverterStreamEventSink].
- */
+/// This class implements the logic for a chunked conversion as a
+/// stream transformer.
+///
+/// It is a copy of the [ConverterStreamEventSink].
 class ComplexConverterStreamEventSink<S, T> implements EventSink<S> {
-  /** The output sink for the converter. */
+  /// The output sink for the converter.
   final EventSink<T> _eventSink;
 
-  /**
-   * The input sink for new data. All data that is received with
-   * [handleData] is added into this sink.
-   */
+  /// The input sink for new data. All data that is received with
+  /// [handleData] is added into this sink.
   final Sink<S> _chunkedSink;
 
   ComplexConverterStreamEventSink(
