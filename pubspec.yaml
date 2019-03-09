@@ -1,5 +1,5 @@
 name: csv
-version: 4.0.1
+version: 4.0.2
 author: Christian Loitsch <christian@loitsch.com>
 description: |-
   A codec to transform between a string and a list of values.
@@ -13,3 +13,4 @@ environment:
 
 dev_dependencies:
   test: ^1.0.0
+  pedantic: '1.4.0'

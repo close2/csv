@@ -37,10 +37,10 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
   /// Note that by default invalid values are allowed and no exceptions are
   /// thrown.
   const CsvToListConverter(
-      {this.fieldDelimiter: defaultFieldDelimiter,
-      String textDelimiter: defaultTextDelimiter,
+      {this.fieldDelimiter = defaultFieldDelimiter,
+      String textDelimiter = defaultTextDelimiter,
       String textEndDelimiter,
-      this.eol: defaultEol,
+      this.eol = defaultEol,
       this.csvSettingsDetector,
       bool shouldParseNumbers,
       bool allowInvalid})

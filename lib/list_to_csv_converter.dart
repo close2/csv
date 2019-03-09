@@ -102,11 +102,11 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
   /// are consistent with [rfc4180](http://tools.ietf.org/html/rfc4180).
   ///
   const ListToCsvConverter(
-      {this.fieldDelimiter: defaultFieldDelimiter,
-      String textDelimiter: defaultTextDelimiter,
+      {this.fieldDelimiter = defaultFieldDelimiter,
+      String textDelimiter = defaultTextDelimiter,
       String textEndDelimiter,
-      this.eol: defaultEol,
-      this.delimitAllFields: defaultDelimitAllFields})
+      this.eol = defaultEol,
+      this.delimitAllFields = defaultDelimitAllFields})
       : this.textDelimiter = textDelimiter,
         this.textEndDelimiter =
             textEndDelimiter != null ? textEndDelimiter : textDelimiter;

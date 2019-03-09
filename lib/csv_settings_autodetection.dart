@@ -55,7 +55,7 @@ String _findFirst(String csv, List<String> possibleValues) {
   }
 
   var bestMatchIndex = csv.length;
-  var bestMatch = null;
+  String bestMatch;
 
   possibleValues.forEach((val) {
     if (val == null) return;

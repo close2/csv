@@ -28,13 +28,13 @@ class CsvCodec {
   final ListToCsvConverter encoder;
 
   CsvCodec(
-      {String fieldDelimiter: defaultFieldDelimiter,
-      String textDelimiter: defaultTextDelimiter,
+      {String fieldDelimiter = defaultFieldDelimiter,
+      String textDelimiter = defaultTextDelimiter,
       String textEndDelimiter,
-      String eol: defaultEol,
-      bool shouldParseNumbers: true,
-      bool allowInvalid: true,
-      bool delimitAllFields: defaultDelimitAllFields})
+      String eol = defaultEol,
+      bool shouldParseNumbers = true,
+      bool allowInvalid = true,
+      bool delimitAllFields = defaultDelimitAllFields})
       : decoder = new CsvToListConverter(
             fieldDelimiter: fieldDelimiter,
             textDelimiter: textDelimiter,

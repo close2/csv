@@ -213,10 +213,10 @@ class CsvParser {
   /// In [allowInvalid] is false the arguments are checked with
   /// [verifyArgument].
   CsvParser(
-      {String fieldDelimiter: ',',
-      String textDelimiter: '"',
+      {String fieldDelimiter = ',',
+      String textDelimiter = '"',
       String textEndDelimiter,
-      String eol: '\r\n',
+      String eol = '\r\n',
       bool shouldParseNumbers,
       bool allowInvalid})
       : this.fieldDelimiter = _argValue(allowInvalid, fieldDelimiter, ','),
