@@ -24,7 +24,7 @@ the major version changes!*
 
 # csv
 
-A dart csv to list codec / converter.
+A dart csv to list converter.
 
 If you have a `String` of all rows with RFC conform separators and delimiters,
 simply convert them with:
@@ -46,21 +46,19 @@ The default (RFC conform) configuration is:
 
 See below if you need other settings, or want to autodetect them.
 
-This converter is implemented as codec and may be used as transformer for
+This converter may be used as transformer for
 streams:
 
 ```dart
-final csvCodec = new CsvCodec();
-
 final stream = new Stream.fromIterable([['a', 'b'], [1, 2]]);
-final csvRowStream = stream.transform(csvCodec.encoder);
+final csvRowStream = stream.transform(new ListToCsvConverter());
 ```
 
 Or the decoder side:
 
 ```dart
 final input = new File('a/csv/file.txt').openRead();
-final fields = await input.transform(utf8.decoder).transform(csvCodec.decoder).toList();
+final fields = await input.transform(utf8.decoder).transform(new CsvToListConverter()).toList();
 ```
 
 The converter is highly customizable and even allows multiple characters as
