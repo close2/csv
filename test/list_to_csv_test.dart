@@ -193,9 +193,20 @@ main() {
     expect(csv, equals(testCsvIssue5));
   });
 
-  test('Issue 7.  Test delimitAllFields', () {
+  test('Issue 7. Test delimitAllFields', () {
     var csv =
         const ListToCsvConverter().convert([singleRow], delimitAllFields: true);
     expect(csv, equals(csvSingleRowCommaDelimitAll));
+  });
+
+  test('Issue 34. Performance', () {
+    const converter = const ListToCsvConverter();
+    final stopwatch = Stopwatch()..start();
+    final sb = StringBuffer();
+    for (var i = 0; i < 10000; i++) {
+      converter.convertSingleRow(sb, singleRow, returnString: false);
+    }
+    stopwatch.stop();
+    expect(stopwatch.elapsedMilliseconds, lessThan(1000));
   });
 }

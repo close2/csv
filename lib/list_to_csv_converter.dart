@@ -147,7 +147,8 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
           textDelimiter: textDelimiter,
           textEndDelimiter: textEndDelimiter,
           eol: eol,
-          delimitAllFields: delimitAllFields);
+          delimitAllFields: delimitAllFields,
+          returnString: false);
     });
     return sb.toString();
   }
@@ -188,12 +189,17 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
   /// If in such a case the value also contains [textDelimiter] those
   /// [textDelimiter] instances are doubled (see _Definition of the CSV
   /// Format_ Rule 7 [rfc4180](http://tools.ietf.org/html/rfc4180)).
+  ///
+  /// If [returnString] is true (default), returns the converted String.
+  /// Otherwise output is only written to provided StringBuffer [sb].  Set to
+  /// false to improve performance.
   String convertSingleRow(StringBuffer sb, List rowValues,
       {String fieldDelimiter,
       String textDelimiter,
       String textEndDelimiter,
       String eol,
-      bool delimitAllFields}) {
+      bool delimitAllFields,
+      bool returnString = true}) {
     if (rowValues == null || rowValues.isEmpty) return '';
 
     fieldDelimiter ??= this.fieldDelimiter;
@@ -246,7 +252,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
       return sb;
     });
 
-    return sb.toString();
+    return returnString ? sb.toString() : null;
   }
 
   bool _containsAny(String s, List<String> charsToSearchFor) {
