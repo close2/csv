@@ -90,7 +90,7 @@ class FirstOccurrenceSettingsDetector extends CsvSettingsDetector {
     var needMoreData = false;
 
     var tryValues = (List<String> values) {
-      var value;
+      String value;
       if (values != null && values.isNotEmpty) {
         value = _findFirst(csv, values);
         if (value == null) needMoreData = true;

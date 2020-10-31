@@ -1,3 +1,7 @@
+# 4.1.0
+Add `returnString` option to work around a major performance bug.  
+Thanks: @boukeversteegh
+
 # 4.0.3
 Remove codec documentation in README
 

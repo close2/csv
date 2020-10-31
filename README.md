@@ -112,6 +112,9 @@ final res = const ListToCsvConverter().convert([[',b', 3.1, 42], ['n\n']]);
 assert(res == '",b",3.1,42\r\n"n\n"');
 ```
 
+Consider using the `returnString = false` option to work around a performance bug.
+
+ 
 There are 2 interesting things to note:
 
 * Not all rows have to be the same length.
