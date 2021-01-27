@@ -6,23 +6,23 @@ class CsvSettings {
   /// All fields which haven't been detected are null.
   /// Note however, that a null field could also mean, that the Detected
   /// doesn't care about this field.
-  final bool needMoreData;
+  final bool? needMoreData;
 
   /// If this value is null it wasn't detected (only possible if [needMoreDate]
   /// is true or the detector doesn't care about this field.
-  final String fieldDelimiter;
+  final String? fieldDelimiter;
 
   /// If this value is null it wasn't detected (only possible if [needMoreDate]
   /// is true or the detector doesn't care about this field.
-  final String textDelimiter;
+  final String? textDelimiter;
 
   /// If this value is null it wasn't detected (only possible if [needMoreDate]
   /// is true or the detector doesn't care about this field.
-  final String textEndDelimiter;
+  final String? textEndDelimiter;
 
   /// If this value is null it wasn't detected (only possible if [needMoreDate]
   /// is true or the detector doesn't care about this field.
-  final String eol;
+  final String? eol;
 
   const CsvSettings(this.fieldDelimiter, this.textDelimiter,
       this.textEndDelimiter, this.eol, this.needMoreData);
@@ -32,8 +32,8 @@ class CsvSettings {
 abstract class CsvSettingsDetector {
   CsvSettings detectFromString(String csv);
 
-  CsvSettings detectFromCsvChunks(List<String> csvChunks, bool noMoreChunks) {
-    var nullToEmpty = (String chunk) => chunk ?? '';
+  CsvSettings detectFromCsvChunks(List<String?> csvChunks, bool? noMoreChunks) {
+    var nullToEmpty = (String? chunk) => chunk ?? '';
     return detectFromString(csvChunks.map(nullToEmpty).join());
   }
 
@@ -47,7 +47,7 @@ abstract class CsvSettingsDetector {
 /// If there is only one possible value it returns this value immediately.
 ///
 /// If [csv] is null it becomes ''.
-String _findFirst(String csv, List<String> possibleValues) {
+String? _findFirst(String? csv, List<String> possibleValues) {
   csv ??= '';
 
   if (possibleValues.length == 1) {
@@ -55,12 +55,12 @@ String _findFirst(String csv, List<String> possibleValues) {
   }
 
   var bestMatchIndex = csv.length;
-  String bestMatch;
+  String? bestMatch;
 
   possibleValues.forEach((val) {
     if (val == null) return;
 
-    final currentIndex = csv.indexOf(val);
+    final currentIndex = csv!.indexOf(val);
 
     if (currentIndex != -1 && currentIndex < bestMatchIndex) {
       bestMatchIndex = currentIndex;
@@ -74,10 +74,10 @@ String _findFirst(String csv, List<String> possibleValues) {
 /// This is a very simple detector, which simple returns the value which has
 /// the lowest start position inside the csv.
 class FirstOccurrenceSettingsDetector extends CsvSettingsDetector {
-  final List<String> fieldDelimiters;
-  final List<String> textDelimiters;
-  final List<String> textEndDelimiters;
-  final List<String> eols;
+  final List<String>? fieldDelimiters;
+  final List<String>? textDelimiters;
+  final List<String>? textEndDelimiters;
+  final List<String>? eols;
 
   const FirstOccurrenceSettingsDetector(
       {this.fieldDelimiters,
@@ -89,8 +89,8 @@ class FirstOccurrenceSettingsDetector extends CsvSettingsDetector {
   CsvSettings detectFromString(String csv) {
     var needMoreData = false;
 
-    var tryValues = (List<String> values) {
-      String value;
+    var tryValues = (List<String>? values) {
+      String? value;
       if (values != null && values.isNotEmpty) {
         value = _findFirst(csv, values);
         if (value == null) needMoreData = true;
@@ -98,10 +98,10 @@ class FirstOccurrenceSettingsDetector extends CsvSettingsDetector {
       return value;
     };
 
-    String fieldDelimiter = tryValues(fieldDelimiters);
-    String textDelimiter = tryValues(textDelimiters);
-    String textEndDelimiter = tryValues(textEndDelimiters);
-    String eol = tryValues(eols);
+    String? fieldDelimiter = tryValues(fieldDelimiters);
+    String? textDelimiter = tryValues(textDelimiters);
+    String? textEndDelimiter = tryValues(textEndDelimiters);
+    String? eol = tryValues(eols);
 
     return new CsvSettings(
         fieldDelimiter, textDelimiter, textEndDelimiter, eol, needMoreData);

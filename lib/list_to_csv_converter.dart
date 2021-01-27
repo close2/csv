@@ -104,7 +104,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
   const ListToCsvConverter(
       {this.fieldDelimiter = defaultFieldDelimiter,
       String textDelimiter = defaultTextDelimiter,
-      String textEndDelimiter,
+      String? textEndDelimiter,
       this.eol = defaultEol,
       this.delimitAllFields = defaultDelimitAllFields})
       : this.textDelimiter = textDelimiter,
@@ -123,18 +123,18 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
   /// All other rfc rules are followed.
   ///
   /// If [rows] is null an empty String is returned.
-  String convert(List<List> rows,
-      {String fieldDelimiter,
-      String textDelimiter,
-      String textEndDelimiter,
-      String eol,
-      bool delimitAllFields}) {
+  String convert(List<List?>? rows,
+      {String? fieldDelimiter,
+      String? textDelimiter,
+      String? textEndDelimiter,
+      String? eol,
+      bool? delimitAllFields}) {
     if (rows == null) return '';
 
     eol ??= this.eol;
 
     var sb = new StringBuffer();
-    var sep = '';
+    String? sep = '';
     rows.forEach((r) {
       sb.write(sep);
       sep = eol;
@@ -189,12 +189,12 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
   /// If [returnString] is true (default), returns the converted String.
   /// Otherwise output is only written to provided StringBuffer [sb].  Set to
   /// false to improve performance.
-  String convertSingleRow(StringBuffer sb, List rowValues,
-      {String fieldDelimiter,
-      String textDelimiter,
-      String textEndDelimiter,
-      String eol,
-      bool delimitAllFields,
+  String? convertSingleRow(StringBuffer sb, List? rowValues,
+      {String? fieldDelimiter,
+      String? textDelimiter,
+      String? textEndDelimiter,
+      String? eol,
+      bool? delimitAllFields,
       bool returnString = true}) {
     if (rowValues == null || rowValues.isEmpty) return '';
 
@@ -217,7 +217,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
           'Field Delimiter ($fieldDelimiter) and Text Delimiter ($textDelimiter) must not be equal.');
     }
 
-    var fieldDel = '';
+    String? fieldDel = '';
 
     // Comments assume field and text delimiter are default.
     // [val] _in the comments changes_ depending on the operation after the comment.
@@ -227,13 +227,13 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
 
       // 5,3 should become "5,3"
 
-      if (delimitAllFields ||
+      if (delimitAllFields! ||
           _containsAny(valString,
               [fieldDelimiter, textDelimiter, textEndDelimiter, eol])) {
         // ab"cd => ab""cd
         if (_containsAny(valString, [textEndDelimiter])) {
           var newEndDelimiter = "$textEndDelimiter$textEndDelimiter";
-          valString = valString.replaceAll(textEndDelimiter, newEndDelimiter);
+          valString = valString.replaceAll(textEndDelimiter!, newEndDelimiter);
         }
 
         sb
@@ -251,9 +251,9 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
     return returnString ? sb.toString() : null;
   }
 
-  bool _containsAny(String s, List<String> charsToSearchFor) {
+  bool _containsAny(String s, List<String?> charsToSearchFor) {
     var chars = new Set<int>();
-    charsToSearchFor.forEach((word) => chars.addAll(word.codeUnits));
+    charsToSearchFor.forEach((word) => chars.addAll(word!.codeUnits));
     var it = s.codeUnits.iterator;
     while (it.moveNext()) {
       if (chars.contains(it.current)) return true;

@@ -382,14 +382,14 @@ main_converter() {
       () => expect(commaDoubleQuotCsvToListConverter.convert(''), equals([])));
 
   test('Parses a multiline csv string correctly (different eols)', () {
-    var eol = commaDoubleQuotCsvToListConverterParseNumbers.eol;
+    var eol = commaDoubleQuotCsvToListConverterParseNumbers.eol!;
     expect(eol, equals('\r\n'));
     var csv =
         csvSingleRowComma + eol + csvSingleRowComma + eol + csvSingleRowComma;
     expect(commaDoubleQuotCsvToListConverterParseNumbers.convert(csv),
         equals(multipleRows));
 
-    eol = dotSingleQuotCsvToListConverterUnixEol.eol;
+    eol = dotSingleQuotCsvToListConverterUnixEol.eol!;
     expect(eol, equals('\n'));
     csv = csvSingleRowDotSingleQuot +
         eol +
