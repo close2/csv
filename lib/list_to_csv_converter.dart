@@ -133,10 +133,6 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
 
     eol ??= this.eol;
 
-    if (eol == null) {
-      throw new ArgumentError('Eol string must not be null');
-    }
-
     var sb = new StringBuffer();
     var sep = '';
     rows.forEach((r) {
