@@ -80,7 +80,7 @@ output csv row.  The string representation of values is obtained by calling
 `toString`.
 
 This converter follows the rules of
-[rfc4180](http://tools.ietf.org/html/rfc4180).
+[rfc4180](https://tools.ietf.org/html/rfc4180).
 
 This means that text fields containing any delimiter or an eol are quoted.
 
