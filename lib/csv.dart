@@ -30,7 +30,7 @@ class CsvCodec {
   CsvCodec(
       {String fieldDelimiter = defaultFieldDelimiter,
       String textDelimiter = defaultTextDelimiter,
-      String textEndDelimiter,
+      String? textEndDelimiter,
       String eol = defaultEol,
       bool shouldParseNumbers = true,
       bool allowInvalid = true,

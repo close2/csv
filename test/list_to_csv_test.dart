@@ -97,22 +97,18 @@ main() {
   });
 
   test(
-      'Throw an exception if field Delimiter and text Delimiter are equal or '
-      'either is null', () {
+      'Throw an exception if field Delimiter and text Delimiter are equal', () {
     sb.clear();
     expect(() {
       var converter =
           const ListToCsvConverter(fieldDelimiter: 'a', textDelimiter: 'a');
       converter.convertSingleRow(sb, singleRow);
     }, throwsArgumentError);
+
     expect(() {
       var converter = commaDoubleQuotListToCsvConverter;
       converter.convertSingleRow(sb, singleRow,
           fieldDelimiter: 'a', textDelimiter: 'a');
-    }, throwsArgumentError);
-    expect(() {
-      new ListToCsvConverter(fieldDelimiter: null, textDelimiter: null)
-          .convertSingleRow(sb, singleRow);
     }, throwsArgumentError);
   });
 
@@ -166,11 +162,6 @@ main() {
   test('Returns an empty string when rows is null or empty', () {
     expect(commaDoubleQuotListToCsvConverter.convert(null), equals(''));
     expect(commaDoubleQuotListToCsvConverter.convert([]), equals(''));
-  });
-
-  test('Throw an exception if eol is null', () {
-    expect(() => new ListToCsvConverter(eol: null).convert([singleRow]),
-        throwsArgumentError);
   });
 
   var multipleRowsStream = new Stream.fromIterable(multipleRows);

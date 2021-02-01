@@ -8,19 +8,19 @@ part of csv;
 class CsvToListConverter extends StreamTransformerBase<String, List>
     implements ComplexChunkedConverter<String, List<List>> {
   /// The separator between fields.
-  final String fieldDelimiter;
+  final String? fieldDelimiter;
 
   /// The delimiter which (optionally) surrounds text / fields.
-  final String textDelimiter;
+  final String? textDelimiter;
 
   /// The end delimiter for text.  This allows text to be quoted with different
   /// start / end delimiters: Example:  «abc».
-  final String textEndDelimiter;
+  final String? textEndDelimiter;
 
   /// The end of line character which is expected after "row".
   ///
   /// The eol is optional for the last row.
-  final String eol;
+  final String? eol;
 
   /// Should we try to parse unquoted text to numbers (int and doubles)
   final bool shouldParseNumbers;
@@ -29,7 +29,7 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
   final bool allowInvalid;
 
   /// An optional csvSettingsDetector.  See [CsvSettingsDetector].
-  final CsvSettingsDetector csvSettingsDetector;
+  final CsvSettingsDetector? csvSettingsDetector;
 
   /// The default values for the optional arguments are consistent with
   /// [rfc4180](http://tools.ietf.org/html/rfc4180).
@@ -38,12 +38,12 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
   /// thrown.
   const CsvToListConverter(
       {this.fieldDelimiter = defaultFieldDelimiter,
-      String textDelimiter = defaultTextDelimiter,
-      String textEndDelimiter,
+      String? textDelimiter = defaultTextDelimiter,
+      String? textEndDelimiter,
       this.eol = defaultEol,
       this.csvSettingsDetector,
-      bool shouldParseNumbers,
-      bool allowInvalid})
+      bool? shouldParseNumbers,
+      bool? allowInvalid})
       : this.textDelimiter = textDelimiter,
         this.textEndDelimiter =
             textEndDelimiter != null ? textEndDelimiter : textDelimiter,
@@ -61,7 +61,7 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
   ///
   /// Returns either an empty list, if there are not errors, or a list of
   /// errors.  If [throwError] throws an error if a setting is invalid.
-  List<ArgumentError> verifyCurrentSettings({bool throwError}) {
+  List<ArgumentError> verifyCurrentSettings({bool? throwError}) {
     return verifySettings(fieldDelimiter, textDelimiter, textEndDelimiter, eol,
         throwError: throwError);
   }
@@ -76,9 +76,9 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
   ///
   /// Returns either an empty list, if there are not errors, or a list of
   /// errors.  If [throwError] throws an error if a setting is invalid.
-  static List<ArgumentError> verifySettings(String fieldDelimiter,
-      String textDelimiter, String textEndDelimiter, String eol,
-      {bool throwError}) {
+  static List<ArgumentError> verifySettings(String? fieldDelimiter,
+      String? textDelimiter, String? textEndDelimiter, String? eol,
+      {bool? throwError}) {
     return CsvParser.verifySettings(
         fieldDelimiter, textDelimiter, textEndDelimiter, eol);
   }
@@ -100,14 +100,14 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
   }
 
   /// Parses the [csv] and returns a List (rows) of Lists (columns).
-  List<List> convert(String csv,
-      {String fieldDelimiter,
-      String textDelimiter,
-      String textEndDelimiter,
-      String eol,
-      CsvSettingsDetector csvSettingsDetector,
-      bool shouldParseNumbers,
-      bool allowInvalid}) {
+  List<List> convert(String? csv,
+      {String? fieldDelimiter,
+      String? textDelimiter,
+      String? textEndDelimiter,
+      String? eol,
+      CsvSettingsDetector? csvSettingsDetector,
+      bool? shouldParseNumbers,
+      bool? allowInvalid}) {
     fieldDelimiter ??= this.fieldDelimiter;
     textDelimiter ??= this.textDelimiter;
     textEndDelimiter ??= this.textEndDelimiter;
@@ -125,7 +125,7 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
         textEndDelimiter,
         eol,
         shouldParseNumbers,
-        allowInvalid);
+        allowInvalid)!;
 
     return parser.convert(csv);
   }
@@ -136,21 +136,21 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
   }
 }
 
-CsvParser _buildNewParserWithSettings(
-    List<String> unparsedCsvChunks,
-    bool noMoreChunks,
-    CsvSettingsDetector csvSettingsDetector,
-    String fieldDelimiter,
-    String textDelimiter,
-    String textEndDelimiter,
-    String eol,
+CsvParser? _buildNewParserWithSettings(
+    List<String?> unparsedCsvChunks,
+    bool? noMoreChunks,
+    CsvSettingsDetector? csvSettingsDetector,
+    String? fieldDelimiter,
+    String? textDelimiter,
+    String? textEndDelimiter,
+    String? eol,
     bool shouldParseNumbers,
     bool allowInvalid) {
   if (csvSettingsDetector != null) {
     var settings = csvSettingsDetector.detectFromCsvChunks(
         unparsedCsvChunks, noMoreChunks);
 
-    if (settings.needMoreData && !noMoreChunks) return null;
+    if (settings.needMoreData! && !noMoreChunks!) return null;
 
     fieldDelimiter = settings.fieldDelimiter ?? fieldDelimiter;
     textDelimiter = settings.textDelimiter ?? textDelimiter;
@@ -174,17 +174,17 @@ class CsvToListSink extends ChunkedConversionSink<String> {
 
   /// The csv parser which has the configurations (delimiter, eol,...) already
   /// set.
-  CsvParser _parser;
+  CsvParser? _parser;
 
-  List<String> _unparsedCsvChunks;
+  List<String?> _unparsedCsvChunks;
 
   List _currentRow;
 
-  final String _fieldDelimiter;
-  final String _textDelimiter;
-  final String _textEndDelimiter;
-  final String _eol;
-  final CsvSettingsDetector _csvSettingsDetector;
+  final String? _fieldDelimiter;
+  final String? _textDelimiter;
+  final String? _textEndDelimiter;
+  final String? _eol;
+  final CsvSettingsDetector? _csvSettingsDetector;
   bool _shouldParseNumbers;
   bool _allowInvalid;
 
@@ -200,7 +200,7 @@ class CsvToListSink extends ChunkedConversionSink<String> {
       : _currentRow = [],
         _unparsedCsvChunks = [];
 
-  _add(String newCsvChunk, {bool fieldCompleteWhenEndOfString}) {
+  _add(String? newCsvChunk, {bool? fieldCompleteWhenEndOfString}) {
     newCsvChunk ??= '';
     _unparsedCsvChunks.add(newCsvChunk);
 
@@ -218,12 +218,12 @@ class CsvToListSink extends ChunkedConversionSink<String> {
           _eol,
           _shouldParseNumbers,
           _allowInvalid);
-      assert(_parser != null || !fieldCompleteWhenEndOfString);
+      assert(_parser != null || !fieldCompleteWhenEndOfString!);
       if (_parser == null) return; // and wait for another chunk
     }
 
     for (int i = 0; i < _unparsedCsvChunks.length; ++i) {
-      String csvChunk = _unparsedCsvChunks[i];
+      String? csvChunk = _unparsedCsvChunks[i];
 
       final isLastCsvChunk = (i + 1) == _unparsedCsvChunks.length;
 
@@ -231,8 +231,8 @@ class CsvToListSink extends ChunkedConversionSink<String> {
 
       // Parse rows until EndOfString.
       for (;;) {
-        final end = isLastCsvChunk && fieldCompleteWhenEndOfString;
-        final result = _parser.convertRow(csvChunk, _currentRow,
+        final end = isLastCsvChunk && fieldCompleteWhenEndOfString!;
+        final result = _parser!.convertRow(csvChunk, _currentRow,
             continueCsv: continueCsv, fieldCompleteWhenEndOfString: end);
 
         continueCsv = true;

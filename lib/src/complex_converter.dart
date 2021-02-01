@@ -25,7 +25,7 @@ class ComplexConverterStreamEventSink<S, T> implements EventSink<S> {
     _chunkedSink.add(o);
   }
 
-  void addError(Object error, [StackTrace stackTrace]) {
+  void addError(Object error, [StackTrace? stackTrace]) {
     _eventSink.addError(error, stackTrace);
   }
 
