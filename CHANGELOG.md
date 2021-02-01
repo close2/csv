@@ -1,3 +1,7 @@
+# 5.0.0-nullsafety.0
+nullsafety
+Thanks to: https://github.com/darwingr
+
 # 4.1.0
 Add `returnString` option to work around a major performance bug.  
 Thanks: @boukeversteegh
