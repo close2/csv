@@ -2,7 +2,7 @@ library csv_to_list_test;
 
 import 'dart:async';
 
-import "package:test/test.dart";
+import 'package:test/test.dart';
 import 'package:csv/csv.dart';
 import 'package:csv/src/csv_parser.dart';
 import 'package:csv/csv_settings_autodetection.dart';
@@ -10,48 +10,48 @@ import 'package:csv/csv_settings_autodetection.dart';
 import 'test_data.dart';
 
 final commaDoubleQuotCsvToListConverter =
-    new CsvToListConverter(shouldParseNumbers: false);
-final commaDoubleQuotCsvToListConverterParseNumbers = new CsvToListConverter();
+    CsvToListConverter(shouldParseNumbers: false);
+final commaDoubleQuotCsvToListConverterParseNumbers = CsvToListConverter();
 final semicolonDoubleQuotCsvToListConverter =
-    new CsvToListConverter(fieldDelimiter: ';', shouldParseNumbers: false);
+    CsvToListConverter(fieldDelimiter: ';', shouldParseNumbers: false);
 final dotDoubleQuotCsvToListConverter =
-    new CsvToListConverter(fieldDelimiter: '.', shouldParseNumbers: false);
-final dotSingleQuotCsvToListConverterUnixEol = new CsvToListConverter(
+    CsvToListConverter(fieldDelimiter: '.', shouldParseNumbers: false);
+final dotSingleQuotCsvToListConverterUnixEol = CsvToListConverter(
     fieldDelimiter: '.',
     textDelimiter: "'",
     eol: '\n',
     shouldParseNumbers: false);
-final dotSingleQuotCsvToListConverterUnixEol_double = new CsvToListConverter(
+final dotSingleQuotCsvToListConverterUnixEol_double = CsvToListConverter(
     fieldDelimiter: '.',
     textDelimiter: "'",
     textEndDelimiter: '"',
     eol: '\n',
     shouldParseNumbers: false);
-final aaBbCsvToListConverter = new CsvToListConverter(
+final aaBbCsvToListConverter = CsvToListConverter(
     fieldDelimiter: 'aa', textDelimiter: 'bb', shouldParseNumbers: false);
-final complexConverter = new CsvToListConverter(
+final complexConverter = CsvToListConverter(
     fieldDelimiter: '...*',
     textDelimiter: '...#',
     eol: '....',
     shouldParseNumbers: true);
-final complex2Converter = new CsvToListConverter(
+final complex2Converter = CsvToListConverter(
     fieldDelimiter: '...*',
     textDelimiter: '...#',
     eol: '.*.*',
     shouldParseNumbers: true);
-final complex3Converter = new CsvToListConverter(
+final complex3Converter = CsvToListConverter(
     fieldDelimiter: ',',
     textDelimiter: '.,a,b,__',
     eol: '_xyz',
     shouldParseNumbers: true);
 
-main() {
+void main() {
   main_converter();
 
   main_transformer();
 
   test('Argument verification works', () {
-    final parser = new CsvParser();
+    final parser = CsvParser();
     expect(parser.verifyCurrentSettings(), equals([]));
 
     var errors =
@@ -74,15 +74,15 @@ main() {
   });
 }
 
-main_transformer() {
+void main_transformer() {
   test('Works as transformer (simple test)', () {
-    var stream = new Stream.fromIterable([csvSimpleStringsSingleRowComma]);
+    var stream = Stream.fromIterable([csvSimpleStringsSingleRowComma]);
     var f_rows = stream.transform(commaDoubleQuotCsvToListConverter).toList();
     expect(f_rows, completion([simpleStringsSingleRow]));
   });
 
   test('Works as transformer (complex multicharacter delimiters)', () {
-    var csvStream = new Stream.fromIterable(csvComplex_parts);
+    var csvStream = Stream.fromIterable(csvComplex_parts);
     var f_rows = csvStream.transform(complexConverter).toList();
     expect(f_rows, completion(complexRows));
   });
@@ -90,11 +90,11 @@ main_transformer() {
   test(
       'Works as transformer '
       '(complex multicharacter delimiters, difficult line endings)', () {
-    var csvStream = new Stream.fromIterable(csvComplex_parts_ending1);
+    var csvStream = Stream.fromIterable(csvComplex_parts_ending1);
     var f_rows = csvStream.transform(complexConverter).toList();
     expect(f_rows, completion(complexRows_ending1));
 
-    var csvStream2 = new Stream.fromIterable(csvComplex_parts_ending2);
+    var csvStream2 = Stream.fromIterable(csvComplex_parts_ending2);
     var f_rows2 = csvStream2.transform(complexConverter).toList();
     expect(f_rows2, completion(complexRows_ending2));
   });
@@ -102,7 +102,7 @@ main_transformer() {
   test(
       'Works as transformer '
       '(complex multicharacter delimiters, repeating patterns)', () {
-    var csvStream = new Stream.fromIterable(csvComplex2_parts);
+    var csvStream = Stream.fromIterable(csvComplex2_parts);
     var f_rows = csvStream.transform(complex2Converter).toList();
     expect(f_rows, completion(complexRows2));
   });
@@ -110,7 +110,7 @@ main_transformer() {
   test(
       'Works as transformer '
       '(complex multicharacter delimiters, "embedded" patterns)', () {
-    var csvStream = new Stream.fromIterable(csvComplex3_parts);
+    var csvStream = Stream.fromIterable(csvComplex3_parts);
     var f_rows = csvStream.transform(complex3Converter).toList();
     expect(f_rows, completion(complexRows3));
   });
@@ -118,9 +118,9 @@ main_transformer() {
   test(
       'Transformer throws an exception if not allowInvalid and csv ends '
       'without text end delimiter', () {
-    const List<String> csv = const ['abc,"d', 'ef,xyz'];
-    final csvStream = new Stream.fromIterable(csv);
-    final converter = new CsvToListConverter(allowInvalid: false);
+    const csv = ['abc,"d', 'ef,xyz'];
+    final csvStream = Stream.fromIterable(csv);
+    final converter = CsvToListConverter(allowInvalid: false);
 
     var fun = () => csvStream.transform(converter).toList();
 
@@ -129,68 +129,68 @@ main_transformer() {
 
   test('Transformer throws an exception if not allowInvalid and eol is null',
       () {
-    var csvStream = new Stream.fromIterable(csvComplex3_parts);
-    final converter = new CsvToListConverter(eol: null, allowInvalid: false);
+    var csvStream = Stream.fromIterable(csvComplex3_parts);
+    final converter = CsvToListConverter(eol: null, allowInvalid: false);
 
     var fun = () => csvStream.transform(converter).toList();
     expect(fun(), throwsArgumentError);
   });
 
   test('Autodetecting settings works in transformer mode', () {
-    var det = new FirstOccurrenceSettingsDetector(
+    var det = FirstOccurrenceSettingsDetector(
         fieldDelimiters: [',', ';'],
         textDelimiters: ['"', "'"],
         textEndDelimiters: ['"', "'"],
         eols: ['\r\n', '\n']);
-    var converter = new CsvToListConverter(
-        csvSettingsDetector: det, shouldParseNumbers: true);
-    var stream = new Stream.fromIterable([csvSimpleStringsSingleRowComma]);
+    var converter =
+        CsvToListConverter(csvSettingsDetector: det, shouldParseNumbers: true);
+    var stream = Stream.fromIterable([csvSimpleStringsSingleRowComma]);
     var f_rows = stream.transform(converter).toList();
     expect(f_rows, completion([simpleStringsSingleRow]));
 
-    det = new FirstOccurrenceSettingsDetector(
+    det = FirstOccurrenceSettingsDetector(
         fieldDelimiters: [',', 'b'],
         textDelimiters: ["'", '"'],
         textEndDelimiters: ['.', '"'],
         eols: ['\n']);
-    converter = new CsvToListConverter(
-        csvSettingsDetector: det, shouldParseNumbers: false);
-    stream = new Stream.fromIterable([csvSingleRowComma]);
+    converter =
+        CsvToListConverter(csvSettingsDetector: det, shouldParseNumbers: false);
+    stream = Stream.fromIterable([csvSingleRowComma]);
     f_rows = stream.transform(converter).toList();
     expect(f_rows, completion([singleRowAllText]));
 
-    det = new FirstOccurrenceSettingsDetector(
+    det = FirstOccurrenceSettingsDetector(
         fieldDelimiters: ['aa', '2'],
         textDelimiters: ['bb', '"'],
         textEndDelimiters: ['"', 'bb']);
-    converter = new CsvToListConverter(
-        csvSettingsDetector: det, shouldParseNumbers: true);
-    stream = new Stream.fromIterable([csvSingleRowAaBb]);
+    converter =
+        CsvToListConverter(csvSettingsDetector: det, shouldParseNumbers: true);
+    stream = Stream.fromIterable([csvSingleRowAaBb]);
     f_rows = stream.transform(converter).toList();
     expect(f_rows, completion([singleRow]));
   });
 
   test('Transformer autodetects settings for a multiline csv correctly', () {
-    var det = new FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n']);
-    var converter = new CsvToListConverter(csvSettingsDetector: det);
+    var det = FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n']);
+    var converter = CsvToListConverter(csvSettingsDetector: det);
     var eol = '\n';
-    var csvStream = new Stream.fromIterable(
+    var csvStream = Stream.fromIterable(
         [csvSingleRowComma, eol, csvSingleRowComma, eol, csvSingleRowComma]);
     var f_rows = csvStream.transform(converter).toList();
     expect(f_rows, completion(multipleRows));
 
-    det = new FirstOccurrenceSettingsDetector(
+    det = FirstOccurrenceSettingsDetector(
         eols: ['\r\n', '\n'],
         textDelimiters: ['""', "'"],
         textEndDelimiters: ['««', '!']);
-    converter = new CsvToListConverter(csvSettingsDetector: det);
-    csvStream = new Stream.fromIterable(autodetectCsv_parts);
+    converter = CsvToListConverter(csvSettingsDetector: det);
+    csvStream = Stream.fromIterable(autodetectCsv_parts);
     f_rows = csvStream.transform(converter).toList();
     expect(f_rows, completion(autodetectRows));
   });
 }
 
-main_converter() {
+void main_converter() {
   test('Csv converter has sane default values and stores parameters', () {
     expect(commaDoubleQuotCsvToListConverter.fieldDelimiter, equals(','));
     expect(commaDoubleQuotCsvToListConverter.textDelimiter, equals('"'));
@@ -307,7 +307,7 @@ main_converter() {
   test('Can parse different formats when text end delimiter is different', () {
     expect(
         commaDoubleQuotCsvToListConverterParseNumbers
-            .convert(csvSingleRowComma_endQuotXY, textEndDelimiter: "XY"),
+            .convert(csvSingleRowComma_endQuotXY, textEndDelimiter: 'XY'),
         equals([singleRow]));
     expect(
         semicolonDoubleQuotCsvToListConverter.convert(
@@ -334,7 +334,7 @@ main_converter() {
         equals([singleRowNoDouble]));
     expect(
         aaBbCsvToListConverter.convert(csvSingleRowAaBbXy,
-            shouldParseNumbers: true, textEndDelimiter: "XY"),
+            shouldParseNumbers: true, textEndDelimiter: 'XY'),
         equals([singleRow]));
   });
 
@@ -342,7 +342,7 @@ main_converter() {
       'Throw an exception if allowInvalid is false and field Delimiter and '
       'text Delimiter are equal or either is null', () {
     expect(
-        () => new CsvToListConverter(
+        () => CsvToListConverter(
                 fieldDelimiter: 'a', textDelimiter: 'a', allowInvalid: false)
             .convert('a,b'),
         throwsArgumentError);
@@ -351,7 +351,7 @@ main_converter() {
             fieldDelimiter: 'a', textDelimiter: 'a', allowInvalid: false),
         throwsArgumentError);
     expect(
-        () => new CsvToListConverter(
+        () => CsvToListConverter(
                 fieldDelimiter: null, textDelimiter: null, allowInvalid: false)
             .convert('a,b'),
         throwsArgumentError);
@@ -361,7 +361,7 @@ main_converter() {
       'Doesn\'t throw an exception if allowInvalid and field Delimiter and '
       'text Delimiter are equal or either is null', () {
     expect(
-        new CsvToListConverter(fieldDelimiter: 'a', textDelimiter: 'a')
+        CsvToListConverter(fieldDelimiter: 'a', textDelimiter: 'a')
             .convert('a,b'),
         isNotNull);
     expect(
@@ -369,7 +369,7 @@ main_converter() {
             fieldDelimiter: 'a', textDelimiter: 'a'),
         isNotNull);
     expect(
-        () => new CsvToListConverter(fieldDelimiter: null, textDelimiter: null)
+        () => CsvToListConverter(fieldDelimiter: null, textDelimiter: null)
             .convert('a,b'),
         isNotNull);
   });
@@ -402,14 +402,13 @@ main_converter() {
 
   test('Throw an exception if allowInvalid is false and eol is null', () {
     expect(
-        () =>
-            new CsvToListConverter(eol: null, allowInvalid: false).convert('a'),
+        () => CsvToListConverter(eol: null, allowInvalid: false).convert('a'),
         throwsArgumentError);
   });
 
   test('Doesn\'t throw an exception if allowInvalid and eol is null', () {
     expect(
-        new CsvToListConverter(eol: null).convert('a'),
+        CsvToListConverter(eol: null).convert('a'),
         equals([
           ['a']
         ]));
@@ -437,13 +436,13 @@ main_converter() {
   test(
       'Throws an exception if not allowInvalid and csv ends without '
       'text end delimiter', () {
-    const String csv = 'abc,"def,xyz';
-    expect(() => new CsvToListConverter(allowInvalid: false).convert(csv),
+    const csv = 'abc,"def,xyz';
+    expect(() => CsvToListConverter(allowInvalid: false).convert(csv),
         throwsFormatException);
   });
 
   test('Autodetecting settings works in converter mode', () {
-    var det = new FirstOccurrenceSettingsDetector(
+    var det = FirstOccurrenceSettingsDetector(
         fieldDelimiters: [',', ';'],
         textDelimiters: ['"', "'"],
         textEndDelimiters: ['"', "'"],
@@ -453,7 +452,7 @@ main_converter() {
             csvSettingsDetector: det, shouldParseNumbers: true),
         equals([simpleStringsSingleRow]));
 
-    det = new FirstOccurrenceSettingsDetector(
+    det = FirstOccurrenceSettingsDetector(
         fieldDelimiters: [',', 'b'],
         textDelimiters: ["'", '"'],
         textEndDelimiters: ['.', '"'],
@@ -463,7 +462,7 @@ main_converter() {
             csvSettingsDetector: det, shouldParseNumbers: false),
         equals([singleRowAllText]));
 
-    det = new FirstOccurrenceSettingsDetector(
+    det = FirstOccurrenceSettingsDetector(
         fieldDelimiters: ['aa', '2'],
         textDelimiters: ['bb', '"'],
         textEndDelimiters: ['"', 'bb']);
@@ -474,20 +473,19 @@ main_converter() {
   });
 
   test('Autodetects settings for a multiline csv string correctly', () {
-    var det = new FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n']);
-    var converter = new CsvToListConverter(csvSettingsDetector: det);
+    var det = FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n']);
+    var converter = CsvToListConverter(csvSettingsDetector: det);
     var eol = '\n';
     var csv =
         csvSingleRowComma + eol + csvSingleRowComma + eol + csvSingleRowComma;
     expect(converter.convert(csv), equals(multipleRows));
 
-    det = new FirstOccurrenceSettingsDetector(
+    det = FirstOccurrenceSettingsDetector(
         eols: ['\r\n', '\n'],
         textDelimiters: ['""', "'"],
         textEndDelimiters: ['««', '!']);
     csv = autodetectCsv;
-    expect(new CsvToListConverter(csvSettingsDetector: det).convert(csv),
+    expect(CsvToListConverter(csvSettingsDetector: det).convert(csv),
         equals(autodetectRows));
   });
 }
-

@@ -35,14 +35,14 @@ class CsvCodec {
       bool shouldParseNumbers = true,
       bool allowInvalid = true,
       bool delimitAllFields = defaultDelimitAllFields})
-      : decoder = new CsvToListConverter(
+      : decoder = CsvToListConverter(
             fieldDelimiter: fieldDelimiter,
             textDelimiter: textDelimiter,
             textEndDelimiter: textEndDelimiter,
             eol: eol,
             shouldParseNumbers: shouldParseNumbers,
             allowInvalid: allowInvalid),
-        encoder = new ListToCsvConverter(
+        encoder = ListToCsvConverter(
             fieldDelimiter: fieldDelimiter,
             textDelimiter: textDelimiter,
             textEndDelimiter: textEndDelimiter,

@@ -103,7 +103,7 @@ class FirstOccurrenceSettingsDetector extends CsvSettingsDetector {
     String? textEndDelimiter = tryValues(textEndDelimiters);
     String? eol = tryValues(eols);
 
-    return new CsvSettings(
+    return CsvSettings(
         fieldDelimiter, textDelimiter, textEndDelimiter, eol, needMoreData);
   }
 }
