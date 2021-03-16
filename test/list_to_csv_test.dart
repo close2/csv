@@ -8,29 +8,28 @@ import 'package:csv/csv.dart';
 import 'test_data.dart';
 
 main() {
-  const commaDoubleQuotListToCsvConverter = const ListToCsvConverter();
+  const commaDoubleQuotListToCsvConverter = ListToCsvConverter();
   const semicolonDoubleQuotListToCsvConverter =
-      const ListToCsvConverter(fieldDelimiter: ';');
+      ListToCsvConverter(fieldDelimiter: ';');
   const dotDoubleQuotListToCsvConverter =
-      const ListToCsvConverter(fieldDelimiter: '.');
-  const dotSingleQuotListToCsvConverterUnixEol = const ListToCsvConverter(
-      fieldDelimiter: '.', textDelimiter: "'", eol: '\n');
+      ListToCsvConverter(fieldDelimiter: '.');
+  const dotSingleQuotListToCsvConverterUnixEol =
+      ListToCsvConverter(fieldDelimiter: '.', textDelimiter: "'", eol: '\n');
   const aaBbListToCsvConverter =
-      const ListToCsvConverter(fieldDelimiter: 'aa', textDelimiter: 'bb');
+      ListToCsvConverter(fieldDelimiter: 'aa', textDelimiter: 'bb');
 
   const commaDoubleQuotListToCsvConverter_xy =
-      const ListToCsvConverter(textEndDelimiter: 'XY');
+      ListToCsvConverter(textEndDelimiter: 'XY');
   const semicolonDoubleQuotListToCsvConverter_xy =
-      const ListToCsvConverter(fieldDelimiter: ';', textEndDelimiter: 'XY');
+      ListToCsvConverter(fieldDelimiter: ';', textEndDelimiter: 'XY');
   const dotDoubleQuotListToCsvConverter_xy =
-      const ListToCsvConverter(fieldDelimiter: '.', textEndDelimiter: 'XY');
-  const dotSingleQuotListToCsvConverterUnixEol_double =
-      const ListToCsvConverter(
-          fieldDelimiter: '.',
-          textDelimiter: "'",
-          textEndDelimiter: '"',
-          eol: '\n');
-  const aaBbListToCsvConverter_xy = const ListToCsvConverter(
+      ListToCsvConverter(fieldDelimiter: '.', textEndDelimiter: 'XY');
+  const dotSingleQuotListToCsvConverterUnixEol_double = ListToCsvConverter(
+      fieldDelimiter: '.',
+      textDelimiter: "'",
+      textEndDelimiter: '"',
+      eol: '\n');
+  const aaBbListToCsvConverter_xy = ListToCsvConverter(
       fieldDelimiter: 'aa', textDelimiter: 'bb', textEndDelimiter: 'XY');
 
   test('Csv converter has sane default values and stores parameters', () {
@@ -45,7 +44,7 @@ main() {
     expect(dotSingleQuotListToCsvConverterUnixEol.eol, equals('\n'));
   });
 
-  var sb = new StringBuffer();
+  var sb = StringBuffer();
 
   test(
       'A single simple row converts into a separated value string '
@@ -89,15 +88,15 @@ main() {
     expect(sb.toString(), equals(csvSingleRowAaBbXy));
   });
 
-  test("Can override field and text delimiter", () {
+  test('Can override field and text delimiter', () {
     dotSingleQuotListToCsvConverterUnixEol.convertSingleRow(
         sb..clear(), singleRow,
         fieldDelimiter: ',', textDelimiter: '"', textEndDelimiter: '"');
     expect(sb.toString(), equals(csvSingleRowComma));
   });
 
-  test(
-      'Throw an exception if field Delimiter and text Delimiter are equal', () {
+  test('Throw an exception if field Delimiter and text Delimiter are equal',
+      () {
     sb.clear();
     expect(() {
       var converter =
@@ -164,7 +163,7 @@ main() {
     expect(commaDoubleQuotListToCsvConverter.convert([]), equals(''));
   });
 
-  var multipleRowsStream = new Stream.fromIterable(multipleRows);
+  var multipleRowsStream = Stream.fromIterable(multipleRows);
   test('Works as transformer', () {
     var eol = commaDoubleQuotListToCsvConverter.eol;
     var result = csvSingleRowComma +
@@ -191,7 +190,7 @@ main() {
   });
 
   test('Issue 34. Performance', () {
-    const converter = const ListToCsvConverter();
+    const converter = ListToCsvConverter();
     final stopwatch = Stopwatch()..start();
     final sb = StringBuffer();
     for (var i = 0; i < 10000; i++) {

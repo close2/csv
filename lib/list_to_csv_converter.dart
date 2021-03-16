@@ -133,7 +133,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
 
     eol ??= this.eol;
 
-    var sb = new StringBuffer();
+    var sb = StringBuffer();
     String? sep = '';
     rows.forEach((r) {
       sb.write(sep);
@@ -167,7 +167,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
   /// specifying the type here.)
   @override
   List2CsvSink startChunkedConversion(Sink<String> outputSink) {
-    return new List2CsvSink(this, outputSink);
+    return List2CsvSink(this, outputSink);
   }
 
   /// Converts a list of values representing a row into a value separated
@@ -208,12 +208,12 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
     delimitAllFields ??= this.delimitAllFields;
 
     if (fieldDelimiter == null || textDelimiter == null) {
-      throw new ArgumentError(
+      throw ArgumentError(
           'Field Delimiter ($fieldDelimiter) and Text Delimiter ($textDelimiter) must not be null.');
     }
 
     if (fieldDelimiter == textDelimiter) {
-      throw new ArgumentError(
+      throw ArgumentError(
           'Field Delimiter ($fieldDelimiter) and Text Delimiter ($textDelimiter) must not be equal.');
     }
 
@@ -252,7 +252,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
   }
 
   bool _containsAny(String s, List<String?> charsToSearchFor) {
-    var chars = new Set<int>();
+    var chars = Set<int>();
     charsToSearchFor.forEach((word) => chars.addAll(word!.codeUnits));
     var it = s.codeUnits.iterator;
     while (it.moveNext()) {
@@ -262,8 +262,8 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
   }
 
   Stream<String> bind(Stream<List> stream) {
-    return new Stream<String>.eventTransformed(stream,
-        (EventSink sink) => new ComplexConverterStreamEventSink(this, sink));
+    return Stream<String>.eventTransformed(stream,
+        (EventSink sink) => ComplexConverterStreamEventSink(this, sink));
   }
 }
 

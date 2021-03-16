@@ -88,7 +88,7 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
   /// specifying the type here.)
   @override
   CsvToListSink startChunkedConversion(Sink outputSink) {
-    return new CsvToListSink(
+    return CsvToListSink(
         outputSink as Sink<List>,
         fieldDelimiter,
         textDelimiter,
@@ -131,8 +131,8 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
   }
 
   Stream<List> bind(Stream<String> stream) {
-    return new Stream<List>.eventTransformed(stream,
-        (EventSink sink) => new ComplexConverterStreamEventSink(this, sink));
+    return Stream<List>.eventTransformed(stream,
+        (EventSink sink) => ComplexConverterStreamEventSink(this, sink));
   }
 }
 
@@ -158,7 +158,7 @@ CsvParser? _buildNewParserWithSettings(
     eol = settings.eol ?? eol;
   }
 
-  return new CsvParser(
+  return CsvParser(
       fieldDelimiter: fieldDelimiter,
       textDelimiter: textDelimiter,
       textEndDelimiter: textEndDelimiter,

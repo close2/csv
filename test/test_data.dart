@@ -1,6 +1,6 @@
 library test_data;
 
-const List<dynamic> singleRow = const [
+const List<dynamic> singleRow = [
   1,
   'a',
   2,
@@ -14,9 +14,9 @@ const List<dynamic> singleRow = const [
 ];
 
 // see https://github.com/close2/csv/issues/5
-const List<List> testDataIssue5 = const [
-  const ['Alice', 'Austria', 1],
-  const ['Bob', ',Brazil', 2]
+const List<List> testDataIssue5 = [
+  ['Alice', 'Austria', 1],
+  ['Bob', ',Brazil', 2]
 ];
 const testCsvIssue5 = 'Alice,Austria,1\r\nBob,#,Brazil#,2';
 
@@ -42,12 +42,12 @@ const String csvSingleRowDotSingleQuot_endQuotDouble =
 const String csvSingleRowAaBbXy =
     '1aabbaXYaa2aabbaabbXYaabbc\ndXYaa3aae",faa4aag\',haa5.6';
 
-const List<List> multipleRows = const [singleRow, singleRow, singleRow];
+const List<List> multipleRows = [singleRow, singleRow, singleRow];
 
 const String csvSimpleStringsSingleRowComma = 'a,b';
-const List simpleStringsSingleRow = const ['a', 'b'];
+const List simpleStringsSingleRow = ['a', 'b'];
 
-const List singleRowAllText = const [
+const List singleRowAllText = [
   '1',
   'a',
   '2',
@@ -59,7 +59,7 @@ const List singleRowAllText = const [
   "g',h",
   '5.6'
 ];
-const List singleRowNoDouble = const [
+const List singleRowNoDouble = [
   1,
   'a',
   2,
@@ -72,12 +72,12 @@ const List singleRowNoDouble = const [
   '5.6'
 ];
 
-const List<List> multipleRowsAllText = const [
+const List<List> multipleRowsAllText = [
   singleRowAllText,
   singleRowAllText,
   singleRowAllText
 ];
-const List<List> multipleRowsNoDouble = const [
+const List<List> multipleRowsNoDouble = [
   singleRowNoDouble,
   singleRowNoDouble,
   singleRowNoDouble
@@ -95,20 +95,20 @@ const String csvComplex_part4 =
 const String csvComplex_ending1 = '...';
 const String csvComplex_ending2 = '...#...#';
 
-const List<String> csvComplex_parts = const [
+const List<String> csvComplex_parts = [
   csvComplex_part1,
   csvComplex_part2,
   csvComplex_part3,
   csvComplex_part4
 ];
-const List<String> csvComplex_parts_ending1 = const [
+const List<String> csvComplex_parts_ending1 = [
   csvComplex_part1,
   csvComplex_part2,
   csvComplex_part3,
   csvComplex_part4,
   csvComplex_ending1
 ];
-const List<String> csvComplex_parts_ending2 = const [
+const List<String> csvComplex_parts_ending2 = [
   csvComplex_part1,
   csvComplex_part2,
   csvComplex_part3,
@@ -131,26 +131,26 @@ const String csvComplexRows_ending2 = '$csvComplex_part1'
     '$csvComplex_part4'
     '$csvComplex_ending2';
 
-const List<List> complexRows = const [
-  const ['', 'a...*...#', '', 1.2, ''],
-  const ['1.2', '', '...#'],
-  const [''],
-  const ['', '']
+const List<List> complexRows = [
+  ['', 'a...*...#', '', 1.2, ''],
+  ['1.2', '', '...#'],
+  [''],
+  ['', '']
 ];
 
-const List<List> complexRows_ending1 = const [
-  const ['', 'a...*...#', '', 1.2, ''],
-  const ['1.2', '', '...#'],
-  const [''],
-  const ['', ''],
-  const ['...']
+const List<List> complexRows_ending1 = [
+  ['', 'a...*...#', '', 1.2, ''],
+  ['1.2', '', '...#'],
+  [''],
+  ['', ''],
+  ['...']
 ];
-const List<List> complexRows_ending2 = const [
-  const ['', 'a...*...#', '', 1.2, ''],
-  const ['1.2', '', '...#'],
-  const [''],
-  const ['', ''],
-  const ['']
+const List<List> complexRows_ending2 = [
+  ['', 'a...*...#', '', 1.2, ''],
+  ['1.2', '', '...#'],
+  [''],
+  ['', ''],
+  ['']
 ];
 
 // fieldDelimiter: ...*
@@ -160,21 +160,18 @@ const String csvComplex2_part1 = '..*.*...*#a..*';
 const String csvComplex2_part2 = '.*..*.';
 
 const String csvComplex2Rows = '$csvComplex2_part1$csvComplex2_part2';
-const List<String> csvComplex2_parts = const [
-  csvComplex2_part1,
-  csvComplex2_part2
-];
+const List<String> csvComplex2_parts = [csvComplex2_part1, csvComplex2_part2];
 
-const List<List> complexRows2 = const [
-  const ['.'],
-  const ['', '#a.'],
-  const ['..*.']
+const List<List> complexRows2 = [
+  ['.'],
+  ['', '#a.'],
+  ['..*.']
 ];
 
 // fieldDelimiter: ,
 // textDelimiter: .,a,b,__
 // eol: _xyz
-const List<String> csvComplex3_parts = const [
+const List<String> csvComplex3_parts = [
   '.,a,b,_',
   'xy',
   'z.,a,b,_',
@@ -186,13 +183,13 @@ const List<String> csvComplex3_parts = const [
 
 final csvComplex3Rows = csvComplex3_parts.join();
 
-const List<List> complexRows3 = const [
-  const ['.', 'a', 'b', ''],
-  const ['_xyz'],
-  const ['', '.', 'a', 'b', '_']
+const List<List> complexRows3 = [
+  ['.', 'a', 'b', ''],
+  ['_xyz'],
+  ['', '.', 'a', 'b', '_']
 ];
 
-const List<String> autodetectCsv_parts = const [
+const List<String> autodetectCsv_parts = [
   'ab',
   'c,2',
   ',\n"',
@@ -203,8 +200,8 @@ const List<String> autodetectCsv_parts = const [
 
 final String autodetectCsv = autodetectCsv_parts.join();
 
-const List<List> autodetectRows = const [
-  const ['abc', 2, ''],
-  const ['3,', "'\r"],
-  const ['!', "'"]
+const List<List> autodetectRows = [
+  ['abc', 2, ''],
+  ['3,', "'\r"],
+  ['!', "'"]
 ];
