@@ -584,7 +584,7 @@ class CsvParser {
   /// the values from a previous call to this function.
   ///
   /// If there was no previous call [csv] is still used!
-  ParsingResult convertRow(String? csv, List currentRow,
+  ParsingResult convertRow<E>(String? csv, List currentRow,
       {bool? continueCsv, bool? fieldCompleteWhenEndOfString}) {
     continueCsv ??= false;
     fieldCompleteWhenEndOfString ??= true;
@@ -637,13 +637,13 @@ class CsvParser {
   }
 
   /// Parses the [csv] and returns a List (rows) of Lists (columns).
-  List<List> convert(String? csv) {
-    var rows = <List>[];
+  List<List<E>> convert<E>(String? csv) {
+    var rows = <List<E>>[];
 
     for (;;) {
-      final currentRow = [];
+      final currentRow = <E>[];
 
-      final result = convertRow(csv, currentRow, continueCsv: true);
+      final result = convertRow<E>(csv, currentRow, continueCsv: true);
 
       if (currentRow.isNotEmpty) {
         rows.add(currentRow);
