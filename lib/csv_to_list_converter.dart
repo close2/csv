@@ -114,7 +114,7 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
     eol ??= this.eol;
     csvSettingsDetector ??= this.csvSettingsDetector;
     shouldParseNumbers ??= this.shouldParseNumbers;
-    assert(shouldParseNumbers ? true : E == dynamic);
+    assert(shouldParseNumbers ? E == dynamic : true);
     allowInvalid ??= this.allowInvalid;
 
     var parser = _buildNewParserWithSettings(
