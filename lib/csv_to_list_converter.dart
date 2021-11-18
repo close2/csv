@@ -100,7 +100,7 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
   }
 
   /// Parses the [csv] and returns a List (rows) of Lists (columns).
-  List<List> convert(String? csv,
+  List<List<E>> convert<E extends dynamic>(String? csv,
       {String? fieldDelimiter,
       String? textDelimiter,
       String? textEndDelimiter,
@@ -114,6 +114,7 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
     eol ??= this.eol;
     csvSettingsDetector ??= this.csvSettingsDetector;
     shouldParseNumbers ??= this.shouldParseNumbers;
+    assert(shouldParseNumbers ? E == dynamic : true);
     allowInvalid ??= this.allowInvalid;
 
     var parser = _buildNewParserWithSettings(
@@ -127,7 +128,7 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
         shouldParseNumbers,
         allowInvalid)!;
 
-    return parser.convert(csv);
+    return parser.convert<E>(csv);
   }
 
   Stream<List> bind(Stream<String> stream) {
