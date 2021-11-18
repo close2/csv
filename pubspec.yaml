@@ -1,5 +1,5 @@
 name: csv
-version: 5.0.0
+version: 5.0.1
 description: |-
   A codec to transform between a string and a list of values.
 

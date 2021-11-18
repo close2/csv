@@ -1,3 +1,7 @@
+# 5.0.1
+fix bug #26 "A value of type 'dynamic' can't be assigned to a variable of type 'String'."
+thanks https://github.com/lil5
+
 # 5.0.0
 nullsafety
 updating dependencies to released nullsafety version
