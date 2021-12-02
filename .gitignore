@@ -54,6 +54,7 @@ crashlytics-build.properties
 .buildlog
 .pub/
 build/
+coverage/
 packages
 .packages
 .dart_tool/

@@ -488,4 +488,38 @@ void main_converter() {
     expect(CsvToListConverter(csvSettingsDetector: det).convert(csv),
         equals(autodetectRows));
   });
+
+  group('Use of Generic item type', () {
+    var det = FirstOccurrenceSettingsDetector(
+        fieldDelimiters: [',', ';'],
+        textDelimiters: ['"', "'"],
+        textEndDelimiters: ['"', "'"],
+        eols: ['\r\n', '\n']);
+    test('to return string only csv', () {
+      expect(
+          CsvToListConverter(csvSettingsDetector: det).convert<String>(
+            csvSingleRowComma,
+            shouldParseNumbers: false,
+          ),
+          [singleRowAllText]);
+    });
+    test(
+        'to throw exception if shouldParseNumbers is true and generic is string',
+        () {
+      expect(() {
+        CsvToListConverter(csvSettingsDetector: det).convert<String>(
+          csvSingleRowComma,
+          shouldParseNumbers: true,
+        );
+      }, throwsA(isA<AssertionError>()));
+    });
+    test('to return dynamic csv', () {
+      expect(
+          CsvToListConverter(csvSettingsDetector: det).convert<dynamic>(
+            csvSingleRowComma,
+            shouldParseNumbers: true, // default
+          ),
+          [singleRow]);
+    });
+  });
 }

@@ -231,8 +231,7 @@ class CsvParser {
         _matchingTextDelimiter = 0,
         _matchingTextEndDelimiter = 0,
         _matchingEol = 0,
-        _currentPos = 0
-  {
+        _currentPos = 0 {
     _field = new StringBuffer();
     _pushbackBuffer = null;
     _insideString = false;
@@ -647,8 +646,9 @@ class CsvParser {
 
       if (currentRow.isNotEmpty) {
         rows.add(currentRow);
-      } else
+      } else {
         assert(result.stopReason == ParsingStopReason.EndOfString);
+      }
 
       if (result.stopReason == ParsingStopReason.EndOfString) break;
     }
