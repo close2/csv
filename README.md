@@ -50,15 +50,15 @@ This converter may be used as transformer for
 streams:
 
 ```dart
-final stream = new Stream.fromIterable([['a', 'b'], [1, 2]]);
-final csvRowStream = stream.transform(new ListToCsvConverter());
+final stream = Stream.fromIterable([['a', 'b'], [1, 2]]);
+final csvRowStream = stream.transform(ListToCsvConverter());
 ```
 
 Or the decoder side:
 
 ```dart
-final input = new File('a/csv/file.txt').openRead();
-final fields = await input.transform(utf8.decoder).transform(new CsvToListConverter()).toList();
+final input = File('a/csv/file.txt').openRead();
+final fields = await input.transform(utf8.decoder).transform(CsvToListConverter()).toList();
 ```
 
 The converter is highly customizable and even allows multiple characters as
@@ -185,10 +185,10 @@ plus
   of a list of possible values as value.
   
   ```dart
-  var d = new FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n'],
+  var d = FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n'],
                                               textDelimiters: ['"', "'"]);
   
-  new CsvToListConverter(csvSettingsDetector: d);
+  CsvToListConverter(csvSettingsDetector: d);
   ```
     
 In this case `eol` will either be `'\r\n'` or `'\n'` depending on which of
