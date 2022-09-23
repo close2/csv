@@ -107,9 +107,9 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
       String? textEndDelimiter,
       this.eol = defaultEol,
       this.delimitAllFields = defaultDelimitAllFields})
-      : this.textDelimiter = textDelimiter,
-        this.textEndDelimiter =
-            textEndDelimiter != null ? textEndDelimiter : textDelimiter;
+      : textDelimiter = textDelimiter,
+        textEndDelimiter =
+            textEndDelimiter ?? textDelimiter;
 
   /// Converts rows -- a [List] of [List]s into a csv String.
   ///
@@ -207,11 +207,6 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
     eol ??= this.eol;
     delimitAllFields ??= this.delimitAllFields;
 
-    if (fieldDelimiter == null || textDelimiter == null) {
-      throw ArgumentError(
-          'Field Delimiter ($fieldDelimiter) and Text Delimiter ($textDelimiter) must not be null.');
-    }
-
     if (fieldDelimiter == textDelimiter) {
       throw ArgumentError(
           'Field Delimiter ($fieldDelimiter) and Text Delimiter ($textDelimiter) must not be equal.');
@@ -223,7 +218,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
     // [val] _in the comments changes_ depending on the operation after the comment.
     rowValues.fold(sb, (StringBuffer sb, val) {
       // double => 4.2
-      String valString = val.toString();
+      var valString = val.toString();
 
       // 5,3 should become "5,3"
 
@@ -232,7 +227,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
               [fieldDelimiter, textDelimiter, textEndDelimiter, eol])) {
         // ab"cd => ab""cd
         if (_containsAny(valString, [textEndDelimiter])) {
-          var newEndDelimiter = "$textEndDelimiter$textEndDelimiter";
+          var newEndDelimiter = '$textEndDelimiter$textEndDelimiter';
           valString = valString.replaceAll(textEndDelimiter!, newEndDelimiter);
         }
 
@@ -252,7 +247,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
   }
 
   bool _containsAny(String s, List<String?> charsToSearchFor) {
-    var chars = Set<int>();
+    var chars = <int>{};
     charsToSearchFor.forEach((word) => chars.addAll(word!.codeUnits));
     var it = s.codeUnits.iterator;
     while (it.moveNext()) {
@@ -261,6 +256,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
     return false;
   }
 
+  @override
   Stream<String> bind(Stream<List> stream) {
     return Stream<String>.eventTransformed(stream,
         (EventSink sink) => ComplexConverterStreamEventSink(this, sink));

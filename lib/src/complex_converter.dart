@@ -18,17 +18,20 @@ class ComplexConverterStreamEventSink<S, T> implements EventSink<S> {
 
   ComplexConverterStreamEventSink(
       ComplexChunkedConverter<S, T> converter, EventSink<T> sink)
-      : this._eventSink = sink,
+      : _eventSink = sink,
         _chunkedSink = converter.startChunkedConversion(sink);
 
+  @override
   void add(S o) {
     _chunkedSink.add(o);
   }
 
+  @override
   void addError(Object error, [StackTrace? stackTrace]) {
     _eventSink.addError(error, stackTrace);
   }
 
+  @override
   void close() {
     _chunkedSink.close();
   }

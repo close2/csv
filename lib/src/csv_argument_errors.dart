@@ -29,10 +29,10 @@ class SettingsValuesEqualError extends ArgumentError {
 
   SettingsValuesEqualError(
       String argument1, String val1, String argument2, String val2)
-      : this.argument1 = argument1,
-        this.argument2 = argument2,
-        this.value1 = val1,
-        this.value2 = val2,
+      : argument1 = argument1,
+        argument2 = argument2,
+        value1 = val1,
+        value2 = val2,
         super('$argument1 ($val1) and $argument2 ($val2) must be different '
             '(and one must not be the start of the other)');
 }
