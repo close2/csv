@@ -219,25 +219,25 @@ class CsvParser {
       String? eol = '\r\n',
       bool? shouldParseNumbers,
       bool? allowInvalid})
-      : this.fieldDelimiter = _argValue(allowInvalid, fieldDelimiter, ','),
-        this.textDelimiter = _argValue(allowInvalid, textDelimiter, '"'),
-        this.textEndDelimiter = _argValue(allowInvalid, textEndDelimiter, '"',
+      : fieldDelimiter = _argValue(allowInvalid, fieldDelimiter, ','),
+        textDelimiter = _argValue(allowInvalid, textDelimiter, '"'),
+        textEndDelimiter = _argValue(allowInvalid, textEndDelimiter, '"',
             userValue2: textDelimiter),
-        this.eol = _argValue(allowInvalid, eol, '\r\n'),
-        this.shouldParseNumbers =
-            shouldParseNumbers != null ? shouldParseNumbers : true,
-        this.allowInvalid = allowInvalid != null ? allowInvalid : true,
+        eol = _argValue(allowInvalid, eol, '\r\n'),
+        shouldParseNumbers =
+            shouldParseNumbers ?? true,
+        allowInvalid = allowInvalid ?? true,
         _matchingFieldDelimiter = 0,
         _matchingTextDelimiter = 0,
         _matchingTextEndDelimiter = 0,
         _matchingEol = 0,
         _currentPos = 0 {
-    _field = new StringBuffer();
+    _field = StringBuffer();
     _pushbackBuffer = null;
     _insideString = false;
     _insideQuotedString = false;
     _previousWasTextEndDelimiter = false;
-    _matchedChars = new StringBuffer();
+    _matchedChars = StringBuffer();
 
     if (!this.allowInvalid) {
       verifySettings(fieldDelimiter, textDelimiter, textEndDelimiter, eol,
@@ -246,7 +246,7 @@ class CsvParser {
   }
 
   /// Adds [c] to the stringBuffer which holds the value for the current field.
-  _addTextToField(String? c) {
+  void _addTextToField(String? c) {
     _field.write(c);
     _previousWasTextEndDelimiter = false;
     _insideString = true;
@@ -363,7 +363,7 @@ class CsvParser {
 
     final matchedCharsText = _matchedChars.toString();
 
-    String firstChar = matchedCharsText[0];
+    var firstChar = matchedCharsText[0];
 
     _addTextToField(firstChar);
 
@@ -377,7 +377,7 @@ class CsvParser {
 
   /// Consumes and sets the correct flags after a [textDelimiter] has been
   /// found.
-  _consumeTextDelimiter() {
+  void _consumeTextDelimiter() {
     _resetMatcher();
 
     // If we are not yet inside a string, we are now
@@ -389,7 +389,7 @@ class CsvParser {
 
   /// Consumes and sets the correct flags after a [textEndDelimiter] has been
   /// found.
-  _consumeTextEndDelimiter() {
+  void _consumeTextEndDelimiter() {
     _resetMatcher();
 
     // We must be inside a quoted string, otherwise textEndDelimiter isn't
@@ -414,10 +414,10 @@ class CsvParser {
     _insideString = false;
     _insideQuotedString = false;
 
-    bool? quoted = _previousWasTextEndDelimiter;
+    var quoted = _previousWasTextEndDelimiter;
     _previousWasTextEndDelimiter = false;
 
-    return new ParsingResult(ParsingStopReason.Eol, quoted);
+    return ParsingResult(ParsingStopReason.Eol, quoted);
   }
 
   /// Consumes and sets the correct flags after a [fieldDelimiter] has been
@@ -429,10 +429,10 @@ class CsvParser {
     assert(_insideQuotedString == false || _previousWasTextEndDelimiter!);
     _insideQuotedString = false;
 
-    bool? quoted = _previousWasTextEndDelimiter;
+    var quoted = _previousWasTextEndDelimiter;
     _previousWasTextEndDelimiter = false;
 
-    return new ParsingResult(ParsingStopReason.FieldDelimiter, quoted);
+    return ParsingResult(ParsingStopReason.FieldDelimiter, quoted);
   }
 
   /// Looks at matching counters to find out if we are currently in a
@@ -481,25 +481,25 @@ class CsvParser {
       }
 
       // otherwise treat complete matches
-      bool matchedTextDelimiter =
+      var matchedTextDelimiter =
           _matchingTextDelimiter == textDelimiter!.length;
       if (matchedTextDelimiter) _consumeTextDelimiter();
 
       // IMPORTANT: try to match a complete textEndDelimiter only _AFTER_
       // trying to match a complete textDelimiter!  They usually are the same!
-      bool matchedTextEndDelimiter =
+      var matchedTextEndDelimiter =
           _matchingTextEndDelimiter == textEndDelimiter!.length;
       if (matchedTextEndDelimiter) _consumeTextEndDelimiter();
 
-      bool matchedEol = _matchingEol == eol!.length;
+      var matchedEol = _matchingEol == eol!.length;
       if (matchedEol) return _consumeEol();
 
-      bool matchedFieldDelimiter =
+      var matchedFieldDelimiter =
           _matchingFieldDelimiter == fieldDelimiter!.length;
       if (matchedFieldDelimiter) return _consumeFieldDelimiter();
     }
 
-    return new ParsingResult(
+    return ParsingResult(
         ParsingStopReason.EndOfString, _previousWasTextEndDelimiter);
   }
 
@@ -507,9 +507,9 @@ class CsvParser {
   /// is false tries to convert value to a number.  (If possible int, otherwise
   /// double).
   void _addValueToRow(String value, List row, bool? quoted) {
-    if (!shouldParseNumbers || quoted!)
+    if (!shouldParseNumbers || quoted!) {
       row.add(value);
-    else {
+    } else {
       row.add(num.tryParse(value) ?? value);
     }
   }
@@ -533,10 +533,10 @@ class CsvParser {
       String? textDelimiter, String? textEndDelimiter, String? eol,
       {bool? throwError}) {
     final errors = <ArgumentError>[];
-    if (fieldDelimiter == null) errors.add(new FieldDelimiterNullError());
-    if (textDelimiter == null) errors.add(new TextDelimiterNullError());
-    if (textEndDelimiter == null) errors.add(new TextEndDelimiterNullError());
-    if (eol == null) errors.add(new EolNullError());
+    if (fieldDelimiter == null) errors.add(FieldDelimiterNullError());
+    if (textDelimiter == null) errors.add(TextDelimiterNullError());
+    if (textEndDelimiter == null) errors.add(TextEndDelimiterNullError());
+    if (eol == null) errors.add(EolNullError());
     throwError ??= false;
 
     final argumentMap = {
@@ -556,19 +556,19 @@ class CsvParser {
         if (name.compareTo(name2) >= 0) return;
         if (value == null || value2 == null) return;
 
-        bool valuesAreEqual = value == value2;
+        var valuesAreEqual = value == value2;
 
         if (valuesAreEqual ||
             !valuesAreEqual && value.startsWith(value2) ||
             !valuesAreEqual && value2.startsWith(value)) {
-          errors.add(new SettingsValuesEqualError(name, value, name2, value2));
+          errors.add(SettingsValuesEqualError(name, value, name2, value2));
         }
       });
     });
 
     if (throwError && errors.isNotEmpty) {
       if (errors.length == 1) throw errors.first;
-      throw new ArgumentError(errors.map((e) => e.toString()).join('\n'));
+      throw ArgumentError(errors.map((e) => e.toString()).join('\n'));
     }
     return errors;
   }
@@ -589,7 +589,7 @@ class CsvParser {
     fieldCompleteWhenEndOfString ??= true;
 
     if (!continueCsv || _csvText == null) {
-      _csvText = csv == null ? '' : csv;
+      _csvText = csv ?? '';
       _currentPos = 0;
     }
 
@@ -630,7 +630,7 @@ class CsvParser {
         result.stopReason == ParsingStopReason.EndOfString &&
         fieldCompleteWhenEndOfString &&
         _insideQuotedString!) {
-      throw new InvalidCsvException(textEndDelimiter);
+      throw InvalidCsvException(textEndDelimiter);
     }
     return result;
   }
@@ -672,11 +672,13 @@ class ParsingStopReason {
   final String _value;
 
   const ParsingStopReason._(this._value);
-  toString() => '$_value';
 
-  static const Eol = const ParsingStopReason._('Eol');
-  static const FieldDelimiter = const ParsingStopReason._('FieldDelimiter');
-  static const EndOfString = const ParsingStopReason._('EndOfString');
+  @override
+  String toString() => '$_value';
+
+  static const Eol = ParsingStopReason._('Eol');
+  static const FieldDelimiter = ParsingStopReason._('FieldDelimiter');
+  static const EndOfString = ParsingStopReason._('EndOfString');
 }
 
 /// Information after the parsing of a field has stopped.

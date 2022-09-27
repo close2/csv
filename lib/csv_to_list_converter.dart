@@ -44,12 +44,12 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
       this.csvSettingsDetector,
       bool? shouldParseNumbers,
       bool? allowInvalid})
-      : this.textDelimiter = textDelimiter,
-        this.textEndDelimiter =
-            textEndDelimiter != null ? textEndDelimiter : textDelimiter,
-        this.shouldParseNumbers =
-            shouldParseNumbers != null ? shouldParseNumbers : true,
-        this.allowInvalid = allowInvalid != null ? allowInvalid : true;
+      : textDelimiter = textDelimiter,
+        textEndDelimiter =
+            textEndDelimiter ?? textDelimiter,
+        shouldParseNumbers =
+            shouldParseNumbers ?? true,
+        allowInvalid = allowInvalid ?? true;
 
   /// Verifies current settings.
   ///
@@ -131,6 +131,7 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
     return parser.convert<E>(csv);
   }
 
+  @override
   Stream<List> bind(Stream<String> stream) {
     return Stream<List>.eventTransformed(stream,
         (EventSink sink) => ComplexConverterStreamEventSink(this, sink));
@@ -177,7 +178,7 @@ class CsvToListSink extends ChunkedConversionSink<String> {
   /// set.
   CsvParser? _parser;
 
-  List<String?> _unparsedCsvChunks;
+  final List<String?> _unparsedCsvChunks;
 
   List _currentRow;
 
@@ -186,8 +187,8 @@ class CsvToListSink extends ChunkedConversionSink<String> {
   final String? _textEndDelimiter;
   final String? _eol;
   final CsvSettingsDetector? _csvSettingsDetector;
-  bool _shouldParseNumbers;
-  bool _allowInvalid;
+  final bool _shouldParseNumbers;
+  final bool _allowInvalid;
 
   CsvToListSink(
       this._outSink,
@@ -201,7 +202,7 @@ class CsvToListSink extends ChunkedConversionSink<String> {
       : _currentRow = [],
         _unparsedCsvChunks = [];
 
-  _add(String? newCsvChunk, {bool? fieldCompleteWhenEndOfString}) {
+  void _add(String? newCsvChunk, {bool? fieldCompleteWhenEndOfString}) {
     newCsvChunk ??= '';
     _unparsedCsvChunks.add(newCsvChunk);
 
@@ -223,12 +224,12 @@ class CsvToListSink extends ChunkedConversionSink<String> {
       if (_parser == null) return; // and wait for another chunk
     }
 
-    for (int i = 0; i < _unparsedCsvChunks.length; ++i) {
-      String? csvChunk = _unparsedCsvChunks[i];
+    for (var i = 0; i < _unparsedCsvChunks.length; ++i) {
+      var csvChunk = _unparsedCsvChunks[i];
 
       final isLastCsvChunk = (i + 1) == _unparsedCsvChunks.length;
 
-      bool continueCsv = false;
+      var continueCsv = false;
 
       // Parse rows until EndOfString.
       for (;;) {
@@ -252,12 +253,12 @@ class CsvToListSink extends ChunkedConversionSink<String> {
   }
 
   @override
-  add(String csvChunk) {
+  void add(String csvChunk) {
     _add(csvChunk, fieldCompleteWhenEndOfString: false);
   }
 
   @override
-  close() {
+  void close() {
     _add(null, fieldCompleteWhenEndOfString: true);
 
     _outSink.close();

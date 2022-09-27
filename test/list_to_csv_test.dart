@@ -2,12 +2,12 @@ library list2csv_test;
 
 import 'dart:async';
 
-import "package:test/test.dart";
 import 'package:csv/csv.dart';
+import 'package:test/test.dart';
 
 import 'test_data.dart';
 
-main() {
+void main() {
   const commaDoubleQuotListToCsvConverter = ListToCsvConverter();
   const semicolonDoubleQuotListToCsvConverter =
       ListToCsvConverter(fieldDelimiter: ';');

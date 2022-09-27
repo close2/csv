@@ -313,13 +313,13 @@ void main_converter() {
         semicolonDoubleQuotCsvToListConverter.convert(
             csvSingleRowSemicolon_endQuotXY,
             shouldParseNumbers: true,
-            textEndDelimiter: "XY"),
+            textEndDelimiter: 'XY'),
         equals([singleRow]));
     expect(
         dotDoubleQuotCsvToListConverter.convert(
             csvSingleRowDotDoubleQuot_endQuotXY,
             shouldParseNumbers: true,
-            textEndDelimiter: "XY"),
+            textEndDelimiter: 'XY'),
         equals([singleRowNoDouble]));
     expect(
         dotSingleQuotCsvToListConverterUnixEol.convert(

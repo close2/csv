@@ -58,8 +58,6 @@ String? _findFirst(String? csv, List<String> possibleValues) {
   String? bestMatch;
 
   possibleValues.forEach((val) {
-    if (val == null) return;
-
     final currentIndex = csv!.indexOf(val);
 
     if (currentIndex != -1 && currentIndex < bestMatchIndex) {
@@ -98,10 +96,10 @@ class FirstOccurrenceSettingsDetector extends CsvSettingsDetector {
       return value;
     };
 
-    String? fieldDelimiter = tryValues(fieldDelimiters);
-    String? textDelimiter = tryValues(textDelimiters);
-    String? textEndDelimiter = tryValues(textEndDelimiters);
-    String? eol = tryValues(eols);
+    var fieldDelimiter = tryValues(fieldDelimiters);
+    var textDelimiter = tryValues(textDelimiters);
+    var textEndDelimiter = tryValues(textEndDelimiters);
+    var eol = tryValues(eols);
 
     return CsvSettings(
         fieldDelimiter, textDelimiter, textEndDelimiter, eol, needMoreData);
