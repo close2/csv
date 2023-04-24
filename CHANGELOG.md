@@ -1,5 +1,11 @@
+# 5.0.2
+fix bug #61 "Unexpected Error: The text end delimiter (") for the last field is missing."  
+thanks https://github.com/liam7800
+
+Improve nullsafety code.
+
 # 5.0.1
-fix bug #26 "A value of type 'dynamic' can't be assigned to a variable of type 'String'."
+fix bug #26 "A value of type 'dynamic' can't be assigned to a variable of type 'String'."  
 thanks https://github.com/lil5
 
 # 5.0.0
@@ -10,11 +16,11 @@ Removing unnecessary const and new keywords
 Thanks to: https://github.com/arnaudelub
 
 # 5.0.0-nullsafety.0
-nullsafety
+nullsafety  
 Thanks to: https://github.com/darwingr
 
 # 4.1.0
-Add `returnString` option to work around a major performance bug.
+Add `returnString` option to work around a major performance bug.  
 Thanks: @boukeversteegh
 
 # 4.0.3

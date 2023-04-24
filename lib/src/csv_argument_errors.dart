@@ -2,22 +2,26 @@ part of csv_parser;
 
 class EolNullError extends ArgumentError {
   static const String msg = 'The eol character must not be null';
+
   EolNullError() : super(msg);
 }
 
 class FieldDelimiterNullError extends ArgumentError {
   static const String msg = 'The field delimiter character must not be null';
+
   FieldDelimiterNullError() : super(msg);
 }
 
 class TextDelimiterNullError extends ArgumentError {
   static const String msg = 'The text delimiter character must not be null';
+
   TextDelimiterNullError() : super(msg);
 }
 
 class TextEndDelimiterNullError extends ArgumentError {
   static const String msg =
       'The text end delimiter character must not be null.';
+
   TextEndDelimiterNullError() : super(msg);
 }
 
