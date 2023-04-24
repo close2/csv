@@ -108,8 +108,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
       this.eol = defaultEol,
       this.delimitAllFields = defaultDelimitAllFields})
       : textDelimiter = textDelimiter,
-        textEndDelimiter =
-            textEndDelimiter ?? textDelimiter;
+        textEndDelimiter = textEndDelimiter ?? textDelimiter;
 
   /// Converts rows -- a [List] of [List]s into a csv String.
   ///
@@ -237,7 +236,9 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
           ..write(valString) // 5,3
           ..write(textEndDelimiter); // "
       } else {
-        sb..write(fieldDel)..write(valString);
+        sb
+          ..write(fieldDel)
+          ..write(valString);
       }
       fieldDel = fieldDelimiter;
       return sb;

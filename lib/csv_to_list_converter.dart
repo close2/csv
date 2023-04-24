@@ -45,10 +45,8 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
       bool? shouldParseNumbers,
       bool? allowInvalid})
       : textDelimiter = textDelimiter,
-        textEndDelimiter =
-            textEndDelimiter ?? textDelimiter,
-        shouldParseNumbers =
-            shouldParseNumbers ?? true,
+        textEndDelimiter = textEndDelimiter ?? textDelimiter,
+        shouldParseNumbers = shouldParseNumbers ?? true,
         allowInvalid = allowInvalid ?? true;
 
   /// Verifies current settings.

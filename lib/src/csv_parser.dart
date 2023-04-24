@@ -166,10 +166,10 @@ class CsvParser {
 
   /// Are we inside a quoted text/string ([_insideString] must be true as well
   /// if [_insideQuotedString] is true).
-  bool? _insideQuotedString;
+  bool _insideQuotedString = false;
 
   /// Did we just now parse a [textEndDelimiter]?
-  bool? _previousWasTextEndDelimiter;
+  bool _previousWasTextEndDelimiter = false;
 
   // Counters for multi-character matching:
 
@@ -224,8 +224,7 @@ class CsvParser {
         textEndDelimiter = _argValue(allowInvalid, textEndDelimiter, '"',
             userValue2: textDelimiter),
         eol = _argValue(allowInvalid, eol, '\r\n'),
-        shouldParseNumbers =
-            shouldParseNumbers ?? true,
+        shouldParseNumbers = shouldParseNumbers ?? true,
         allowInvalid = allowInvalid ?? true,
         _matchingFieldDelimiter = 0,
         _matchingTextDelimiter = 0,
@@ -290,15 +289,15 @@ class CsvParser {
   // See the implementation note at the start of this class.
   bool _match(String c, bool matching) {
     final onlyTextEndDelimiterMatches =
-        _insideQuotedString! && !_previousWasTextEndDelimiter!;
+        _insideQuotedString && !_previousWasTextEndDelimiter;
 
     // never look for a start text delimiter inside a quoted string.
     // (even if _previousWasTextEndDelimiter)
     final matchTextDelimiters =
-        !_insideQuotedString! && (!matching || _matchingTextDelimiter > 0);
+        !_insideQuotedString && (!matching || _matchingTextDelimiter > 0);
 
     final matchTextEndDelimiters =
-        _insideQuotedString! && (!matching || _matchingTextEndDelimiter > 0);
+        _insideQuotedString && (!matching || _matchingTextEndDelimiter > 0);
 
     final matchFieldDelimiters = !onlyTextEndDelimiterMatches &&
         (!matching || _matchingFieldDelimiter > 0);
@@ -395,7 +394,7 @@ class CsvParser {
     // We must be inside a quoted string, otherwise textEndDelimiter isn't
     // even considered.
 
-    if (_previousWasTextEndDelimiter!) {
+    if (_previousWasTextEndDelimiter) {
       // we have just read a textEndDelimiter
       // so this is the second textEndDelimiter → output textDelimiter
       _addTextToField(textEndDelimiter);
@@ -409,7 +408,7 @@ class CsvParser {
   ParsingResult _consumeEol() {
     _resetMatcher();
 
-    assert(_insideQuotedString == false || _previousWasTextEndDelimiter!);
+    assert(_insideQuotedString == false || _previousWasTextEndDelimiter);
 
     _insideString = false;
     _insideQuotedString = false;
@@ -426,7 +425,7 @@ class CsvParser {
     _resetMatcher();
 
     _insideString = false;
-    assert(_insideQuotedString == false || _previousWasTextEndDelimiter!);
+    assert(_insideQuotedString == false || _previousWasTextEndDelimiter);
     _insideQuotedString = false;
 
     var quoted = _previousWasTextEndDelimiter;
@@ -629,7 +628,7 @@ class CsvParser {
     if (!allowInvalid &&
         result.stopReason == ParsingStopReason.EndOfString &&
         fieldCompleteWhenEndOfString &&
-        _insideQuotedString!) {
+        (_insideQuotedString && !_previousWasTextEndDelimiter)) {
       throw InvalidCsvException(textEndDelimiter);
     }
     return result;

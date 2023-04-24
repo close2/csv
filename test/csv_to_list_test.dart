@@ -358,7 +358,7 @@ void main_converter() {
   });
 
   test(
-      'Doesn\'t throw an exception if allowInvalid and field Delimiter and '
+      "Doesn't throw an exception if allowInvalid and field Delimiter and "
       'text Delimiter are equal or either is null', () {
     expect(
         CsvToListConverter(fieldDelimiter: 'a', textDelimiter: 'a')
@@ -406,7 +406,7 @@ void main_converter() {
         throwsArgumentError);
   });
 
-  test('Doesn\'t throw an exception if allowInvalid and eol is null', () {
+  test("Doesn't throw an exception if allowInvalid and eol is null", () {
     expect(
         CsvToListConverter(eol: null).convert('a'),
         equals([
@@ -521,5 +521,16 @@ void main_converter() {
           ),
           [singleRow]);
     });
+  });
+
+  test('Issue61 No EOL and quote as last character', () {
+    var input = '"abc","def"';
+    var csv = CsvToListConverter(textDelimiter: '"', allowInvalid: false)
+        .convert(input);
+    expect(
+        csv,
+        equals([
+          ['abc', 'def']
+        ]));
   });
 }
