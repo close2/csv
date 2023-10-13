@@ -199,4 +199,18 @@ void main() {
     stopwatch.stop();
     expect(stopwatch.elapsedMilliseconds, lessThan(1000));
   });
+
+  test('dummy', () {
+    var csv = ListToCsvConverter().convert([
+      ['abc', null, 3]
+    ]);
+    expect(csv, equals('abc,null,3'));
+  });
+
+  test('Convert null to specified value', () {
+    var csv = const ListToCsvConverter(convertNullTo: 'a"b').convert([
+      ['abc', 3, null]
+    ]);
+    expect(csv, equals('abc,3,"a""b"'));
+  });
 }
