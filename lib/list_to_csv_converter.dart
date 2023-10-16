@@ -278,7 +278,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
 ///
 /// A single row represented by a [List] may be [add]ed an
 /// the conversion is added to the output sink.
-class List2CsvSink extends ChunkedConversionSink<List<List>> {
+class List2CsvSink implements ChunkedConversionSink<List<List>> {
   /// The List2CsvConverter which has the configurations (fieldDelimiter,
   /// textDel., eol)
   final ListToCsvConverter _converter;

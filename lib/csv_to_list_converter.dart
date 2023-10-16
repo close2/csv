@@ -178,7 +178,7 @@ CsvParser? _buildNewParserWithSettings(
 }
 
 /// The input sink for a chunked csv-string to list conversion.
-class CsvToListSink extends ChunkedConversionSink<String> {
+class CsvToListSink implements ChunkedConversionSink<String> {
   /// Rows converted to Lists are added to this sink.
   final Sink<List> _outSink;
 

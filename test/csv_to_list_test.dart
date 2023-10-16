@@ -516,7 +516,8 @@ void main_converter() {
           csvSingleRowComma,
           shouldParseNumbers: true,
         );
-      }, throwsA(isA<TypeError>()));
+      }, anyOf([throwsA(isA<TypeError>()), throwsA(isA<AssertionError>())]));
+      // dart 2 throws an `AssertionError`, dart 3 a `TypeError`
     });
     test('to return dynamic csv', () {
       expect(
