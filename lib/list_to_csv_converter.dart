@@ -98,6 +98,9 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
   /// character, which would adding delimiters necessary.
   final bool delimitAllFields;
 
+  /// Use this value instead of `null` if a field is null.
+  final convertNullTo;
+
   /// The default values for [fieldDelimiter], [textDelimiter] and [eol]
   /// are consistent with [rfc4180](http://tools.ietf.org/html/rfc4180).
   ///
@@ -106,7 +109,8 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
       String textDelimiter = defaultTextDelimiter,
       String? textEndDelimiter,
       this.eol = defaultEol,
-      this.delimitAllFields = defaultDelimitAllFields})
+      this.delimitAllFields = defaultDelimitAllFields,
+      this.convertNullTo})
       : textDelimiter = textDelimiter,
         textEndDelimiter = textEndDelimiter ?? textDelimiter;
 
@@ -127,7 +131,8 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
       String? textDelimiter,
       String? textEndDelimiter,
       String? eol,
-      bool? delimitAllFields}) {
+      bool? delimitAllFields,
+      var convertNullTo}) {
     if (rows == null) return '';
 
     eol ??= this.eol;
@@ -143,6 +148,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
           textEndDelimiter: textEndDelimiter,
           eol: eol,
           delimitAllFields: delimitAllFields,
+          convertNullTo: convertNullTo,
           returnString: false);
     });
     return sb.toString();
@@ -194,6 +200,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
       String? textEndDelimiter,
       String? eol,
       bool? delimitAllFields,
+      var convertNullTo,
       bool returnString = true}) {
     if (rowValues == null || rowValues.isEmpty) return '';
 
@@ -205,6 +212,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
     textEndDelimiter ??= this.textEndDelimiter;
     eol ??= this.eol;
     delimitAllFields ??= this.delimitAllFields;
+    convertNullTo ??= this.convertNullTo;
 
     if (fieldDelimiter == textDelimiter) {
       throw ArgumentError(
@@ -217,7 +225,9 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
     // [val] _in the comments changes_ depending on the operation after the comment.
     rowValues.fold(sb, (StringBuffer sb, val) {
       // double => 4.2
-      var valString = val.toString();
+      var valString = (convertNullTo != null && val == null)
+          ? convertNullTo.toString()
+          : val.toString();
 
       // 5,3 should become "5,3"
 
@@ -268,7 +278,7 @@ class ListToCsvConverter extends StreamTransformerBase<List, String>
 ///
 /// A single row represented by a [List] may be [add]ed an
 /// the conversion is added to the output sink.
-class List2CsvSink extends ChunkedConversionSink<List<List>> {
+class List2CsvSink implements ChunkedConversionSink<List<List>> {
   /// The List2CsvConverter which has the configurations (fieldDelimiter,
   /// textDel., eol)
   final ListToCsvConverter _converter;

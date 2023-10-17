@@ -71,6 +71,18 @@ const List singleRowNoDouble = [
   "g',h",
   '5.6'
 ];
+const List singleRowWithNullValue = [
+  1,
+  null,
+  2,
+  'aabb',
+  'c\nd',
+  3,
+  'e",f',
+  4,
+  "g',h",
+  '5.6'
+];
 
 const List<List> multipleRowsAllText = [
   singleRowAllText,

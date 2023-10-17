@@ -2,10 +2,10 @@ library csv_to_list_test;
 
 import 'dart:async';
 
-import 'package:test/test.dart';
 import 'package:csv/csv.dart';
-import 'package:csv/src/csv_parser.dart';
 import 'package:csv/csv_settings_autodetection.dart';
+import 'package:csv/src/csv_parser.dart';
+import 'package:test/test.dart';
 
 import 'test_data.dart';
 
@@ -214,6 +214,11 @@ void main_converter() {
   test(
       'Can parse different formats of csv into a list without parsing '
       'numbers', () {
+    expect(
+        commaDoubleQuotCsvToListConverter.convert('abc,,efx'),
+        equals([
+          ['abc', '', 'efx']
+        ]));
     expect(
         commaDoubleQuotCsvToListConverter
             .convert(csvSimpleStringsSingleRowComma),
@@ -511,7 +516,8 @@ void main_converter() {
           csvSingleRowComma,
           shouldParseNumbers: true,
         );
-      }, throwsA(isA<AssertionError>()));
+      }, anyOf([throwsA(isA<TypeError>()), throwsA(isA<AssertionError>())]));
+      // dart 2 throws an `AssertionError`, dart 3 a `TypeError`
     });
     test('to return dynamic csv', () {
       expect(
@@ -531,6 +537,68 @@ void main_converter() {
         csv,
         equals([
           ['abc', 'def']
+        ]));
+  });
+
+  test('Can specify empty value', () {
+    var input = ',faa4aag,6,haa5.6';
+
+    var csv = CsvToListConverter(convertEmptyTo: '3').convert(input);
+    expect(
+        csv,
+        equals([
+          ['3', 'faa4aag', 6, 'haa5.6']
+        ]));
+  });
+
+  test('Can specify any empty value', () {
+    var input = ',faa4aag,6,haa5.6';
+
+    var csv = CsvToListConverter(convertEmptyTo: [1, 2, 3]).convert(input);
+    expect(
+        csv,
+        equals([
+          [
+            [1, 2, 3],
+            'faa4aag',
+            6,
+            'haa5.6'
+          ]
+        ]));
+  });
+
+  test('Empty value is empty string', () {
+    var input = ',faa4aag,haa5.6';
+
+    var csv = CsvToListConverter().convert(input);
+    expect(
+        csv,
+        equals([
+          ['', 'faa4aag', 'haa5.6']
+        ]));
+  });
+
+  test('Specify empty value as null', () {
+    var input = ',faa4aag,haa5.6';
+
+    var csv =
+        CsvToListConverter(convertEmptyTo: EmptyValue.NULL).convert(input);
+    expect(
+        csv,
+        equals([
+          [null, 'faa4aag', 'haa5.6']
+        ]));
+  });
+
+  test('Specify quoted empty value should stay empty', () {
+    var input = '"",faa4aag,haa5.6';
+
+    var csv =
+        CsvToListConverter(convertEmptyTo: EmptyValue.NULL).convert(input);
+    expect(
+        csv,
+        equals([
+          ['', 'faa4aag', 'haa5.6']
         ]));
   });
 }

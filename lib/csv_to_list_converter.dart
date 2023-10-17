@@ -28,6 +28,9 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
   /// See [CsvParser.allowInvalid]
   final bool allowInvalid;
 
+  /// Convert empty value to this instead of `null`.
+  final convertEmptyTo;
+
   /// An optional csvSettingsDetector.  See [CsvSettingsDetector].
   final CsvSettingsDetector? csvSettingsDetector;
 
@@ -43,7 +46,8 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
       this.eol = defaultEol,
       this.csvSettingsDetector,
       bool? shouldParseNumbers,
-      bool? allowInvalid})
+      bool? allowInvalid,
+      this.convertEmptyTo})
       : textDelimiter = textDelimiter,
         textEndDelimiter = textEndDelimiter ?? textDelimiter,
         shouldParseNumbers = shouldParseNumbers ?? true,
@@ -94,7 +98,8 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
         eol,
         csvSettingsDetector,
         shouldParseNumbers,
-        allowInvalid);
+        allowInvalid,
+        convertEmptyTo);
   }
 
   /// Parses the [csv] and returns a List (rows) of Lists (columns).
@@ -105,7 +110,8 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
       String? eol,
       CsvSettingsDetector? csvSettingsDetector,
       bool? shouldParseNumbers,
-      bool? allowInvalid}) {
+      bool? allowInvalid,
+      var convertEmptyTo}) {
     fieldDelimiter ??= this.fieldDelimiter;
     textDelimiter ??= this.textDelimiter;
     textEndDelimiter ??= this.textEndDelimiter;
@@ -114,6 +120,7 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
     shouldParseNumbers ??= this.shouldParseNumbers;
     assert(shouldParseNumbers ? E == dynamic : true);
     allowInvalid ??= this.allowInvalid;
+    convertEmptyTo ??= this.convertEmptyTo;
 
     var parser = _buildNewParserWithSettings(
         [csv],
@@ -124,7 +131,8 @@ class CsvToListConverter extends StreamTransformerBase<String, List>
         textEndDelimiter,
         eol,
         shouldParseNumbers,
-        allowInvalid)!;
+        allowInvalid,
+        convertEmptyTo)!;
 
     return parser.convert<E>(csv);
   }
@@ -145,7 +153,8 @@ CsvParser? _buildNewParserWithSettings(
     String? textEndDelimiter,
     String? eol,
     bool shouldParseNumbers,
-    bool allowInvalid) {
+    bool allowInvalid,
+    var convertEmptyTo) {
   if (csvSettingsDetector != null) {
     var settings = csvSettingsDetector.detectFromCsvChunks(
         unparsedCsvChunks, noMoreChunks);
@@ -164,11 +173,12 @@ CsvParser? _buildNewParserWithSettings(
       textEndDelimiter: textEndDelimiter,
       eol: eol,
       shouldParseNumbers: shouldParseNumbers,
-      allowInvalid: allowInvalid);
+      allowInvalid: allowInvalid,
+      convertEmptyTo: convertEmptyTo);
 }
 
 /// The input sink for a chunked csv-string to list conversion.
-class CsvToListSink extends ChunkedConversionSink<String> {
+class CsvToListSink implements ChunkedConversionSink<String> {
   /// Rows converted to Lists are added to this sink.
   final Sink<List> _outSink;
 
@@ -187,6 +197,7 @@ class CsvToListSink extends ChunkedConversionSink<String> {
   final CsvSettingsDetector? _csvSettingsDetector;
   final bool _shouldParseNumbers;
   final bool _allowInvalid;
+  final _convertEmptyTo;
 
   CsvToListSink(
       this._outSink,
@@ -196,7 +207,8 @@ class CsvToListSink extends ChunkedConversionSink<String> {
       this._eol,
       this._csvSettingsDetector,
       this._shouldParseNumbers,
-      this._allowInvalid)
+      this._allowInvalid,
+      this._convertEmptyTo)
       : _currentRow = [],
         _unparsedCsvChunks = [];
 
@@ -217,7 +229,8 @@ class CsvToListSink extends ChunkedConversionSink<String> {
           _textEndDelimiter,
           _eol,
           _shouldParseNumbers,
-          _allowInvalid);
+          _allowInvalid,
+          _convertEmptyTo);
       assert(_parser != null || !fieldCompleteWhenEndOfString!);
       if (_parser == null) return; // and wait for another chunk
     }

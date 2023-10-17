@@ -1,5 +1,7 @@
 library csv_parser;
 
+import 'package:csv/csv.dart';
+
 part 'csv_argument_errors.dart';
 
 /// Parses a csv string into a List of rows.  Each row is represented by a
@@ -136,6 +138,9 @@ class CsvParser {
   /// Whether we try to parse unquoted text to numbers (int and doubles)
   final bool shouldParseNumbers;
 
+  /// If the csv has empty fields, use this value instead.
+  final convertEmptyTo;
+
   /// If this variable is true, don't throw an exception if the csv or the
   /// arguments ([fieldDelimiter], [textDelimiter], [textEndDelimiter] or
   /// [eol]) are invalid.  Try not to throw an exception even if the output
@@ -218,7 +223,8 @@ class CsvParser {
       String? textEndDelimiter,
       String? eol = '\r\n',
       bool? shouldParseNumbers,
-      bool? allowInvalid})
+      bool? allowInvalid,
+      this.convertEmptyTo})
       : fieldDelimiter = _argValue(allowInvalid, fieldDelimiter, ','),
         textDelimiter = _argValue(allowInvalid, textDelimiter, '"'),
         textEndDelimiter = _argValue(allowInvalid, textEndDelimiter, '"',
@@ -254,7 +260,7 @@ class CsvParser {
 
   /// Reparse the [_pushbackBuffer].
   ///
-  /// The [_csvText] is temporarely replaced with [_pushbackBuffer] before
+  /// The [_csvText] is temporarily replaced with [_pushbackBuffer] before
   /// calling [_parseField].
   /// Only call this if [_pushbackBuffer] is not null!
   /// It is possible that there is still something in the buffer after
@@ -506,10 +512,12 @@ class CsvParser {
   /// is false tries to convert value to a number.  (If possible int, otherwise
   /// double).
   void _addValueToRow(String value, List row, bool? quoted) {
-    if (!shouldParseNumbers || quoted!) {
-      row.add(value);
-    } else {
+    if (!quoted! && convertEmptyTo != null && value == '') {
+      row.add(convertEmptyTo == EmptyValue.NULL ? null : convertEmptyTo);
+    } else if (!quoted! && shouldParseNumbers) {
       row.add(num.tryParse(value) ?? value);
+    } else {
+      row.add(value);
     }
   }
 

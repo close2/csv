@@ -3,17 +3,17 @@ name: Dart
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [ master ]
   pull_request:
-    branches: [master]
+    branches: [ master ]
 
 jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        sdk: [stable] 
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        sdk: [ stable ]
     steps:
       - uses: actions/checkout@v2
       - uses: dart-lang/setup-dart@v1
