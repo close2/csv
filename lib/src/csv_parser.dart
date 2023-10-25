@@ -511,10 +511,10 @@ class CsvParser {
   /// Adds [value] to [row].  Unless value was [quoted] or [_shouldParseNumbers]
   /// is false tries to convert value to a number.  (If possible int, otherwise
   /// double).
-  void _addValueToRow(String value, List row, bool? quoted) {
-    if (!quoted! && convertEmptyTo != null && value == '') {
+  void _addValueToRow(String value, List row, bool quoted) {
+    if (!quoted && convertEmptyTo != null && value == '') {
       row.add(convertEmptyTo == EmptyValue.NULL ? null : convertEmptyTo);
-    } else if (!quoted! && shouldParseNumbers) {
+    } else if (!quoted && shouldParseNumbers) {
       row.add(num.tryParse(value) ?? value);
     } else {
       row.add(value);
@@ -621,7 +621,7 @@ class CsvParser {
       _field.clear();
 
       var isOptionalEolAtEnd = stopReason == ParsingStopReason.EndOfString &&
-          !result.quoted! &&
+          !result.quoted &&
           value.isEmpty &&
           currentRow.isEmpty;
 
@@ -695,7 +695,7 @@ class ParsingResult {
 
   /// Was the previous field quoted.  This information prevents quoted numbers
   /// to be converted to ints/doubles.
-  final bool? quoted;
+  final bool quoted;
 
   ParsingResult(this.stopReason, this.quoted);
 }
