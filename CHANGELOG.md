@@ -1,3 +1,6 @@
+# 5.1.1
+Fix warnings.  (Thanks https://github.com/thumbert for the bug report)
+
 # 5.1.0
 
 Implement feature request #29. It is now possible to specify a value for empty fields (CSV to List) and
