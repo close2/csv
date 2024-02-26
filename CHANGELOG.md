@@ -1,3 +1,8 @@
+# 6.0.0
+If inside an unquoted string, text-delimiters are ignored instead of swallowed.  
+This (partially?) fixes issue #70.  
+Example: `"A B", "C, D"` will now produce `[["A B",' "C',' D"']]` instead of `[["A B",' C',' D']]`.
+
 # 5.1.1
 Fix warnings.  (Thanks https://github.com/thumbert for the bug report)
 
