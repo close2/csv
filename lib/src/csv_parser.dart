@@ -89,7 +89,7 @@ part 'csv_argument_errors.dart';
 //
 // We have a counter for every delimiter.  Before adding a character _c_ to the
 // StringBuffer which represents the current field, we find out if _c_ is part
-// a delimiter.
+// of a delimiter.
 // Assume all counters are 0 (the start condition).  If any delimiter starts
 // with _c_ we increment the corresponding counter:
 // if (delim[delimCounter] == _c_) delimCounter++;
@@ -199,7 +199,8 @@ class CsvParser {
   /// non 0 counter and take a substring of the corresponding string.
   late StringBuffer _matchedChars;
 
-  /// If [allowInvalid] is true we only use the user supplied value if it isn't null.
+  /// If [allowInvalid] is true we only use the user supplied value if it isn't
+  /// null.
   static String? _argValue(
       bool? allowInvalid, String? userValue, String defaultValue,
       {String? userValue2}) {
@@ -297,10 +298,10 @@ class CsvParser {
     final onlyTextEndDelimiterMatches =
         _insideQuotedString && !_previousWasTextEndDelimiter;
 
-    // never look for a start text delimiter inside a quoted string.
+    // never look for a start text delimiter inside a string.
     // (even if _previousWasTextEndDelimiter)
     final matchTextDelimiters =
-        !_insideQuotedString && (!matching || _matchingTextDelimiter > 0);
+        !_insideString && (!matching || _matchingTextDelimiter > 0);
 
     final matchTextEndDelimiters =
         _insideQuotedString && (!matching || _matchingTextEndDelimiter > 0);
