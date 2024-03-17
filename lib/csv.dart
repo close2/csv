@@ -9,6 +9,7 @@ import 'src/csv_parser.dart';
 
 part 'csv_to_list_converter.dart';
 part 'list_to_csv_converter.dart';
+part 'map_to_csv_converter.dart';
 
 enum EmptyValue { NULL }
 
