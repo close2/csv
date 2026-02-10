@@ -22,6 +22,7 @@ class CsvCodec extends Codec<List<List<dynamic>>, String> {
   /// [parseHeaders]: Whether to treat the first row as headers and return [CsvRow] objects (default: false).
   /// [encoderTransform]: A function to transform fields before encoding.
   /// [decoderTransform]: A function to transform fields after decoding.
+  /// [dynamicTyping]: Whether to automatically parse numbers and booleans (default: false).
   CsvCodec({
     String fieldDelimiter = ',',
     String lineDelimiter = '\r\n',
@@ -34,6 +35,7 @@ class CsvCodec extends Codec<List<List<dynamic>>, String> {
     bool parseHeaders = false,
     dynamic Function(dynamic field, int index, String? header)? encoderTransform,
     dynamic Function(dynamic field, int index, String? header)? decoderTransform,
+    bool dynamicTyping = false,
   })  : _encoder = CsvEncoder(
           fieldDelimiter: fieldDelimiter,
           lineDelimiter: lineDelimiter,
@@ -50,6 +52,7 @@ class CsvCodec extends Codec<List<List<dynamic>>, String> {
           skipEmptyLines: skipEmptyLines,
           parseHeaders: parseHeaders,
           fieldTransform: decoderTransform,
+          dynamicTyping: dynamicTyping,
         );
 
   /// Creates a [CsvCodec] configured for Excel.

@@ -5,6 +5,7 @@ void main() async {
   print('--- CSV Benchmark ---');
 
   await runBenchmark('Default CSV', csv);
+  await runBenchmark('Dynamic Typing CSV', CsvCodec(dynamicTyping: true));
   await runBenchmark('Excel CSV', excel);
   await runBenchmark('Tab CSV', CsvCodec(fieldDelimiter: '\t'));
 

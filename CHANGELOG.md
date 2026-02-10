@@ -1,3 +1,6 @@
+# 7.1.0
+Implement dynamic typing for CSV.
+
 # 7.0.0
 Complete rewrite of the library, now compatible with `dart:convert`.
 Automatic delimiter detection and BOM support.

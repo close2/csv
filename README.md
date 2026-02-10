@@ -14,6 +14,7 @@ please consult [doc/README-v6.md](doc/README-v6.md) and continue using version 6
 - **Auto-detection**: Smartly detects delimiters and line endings.
 - **Robust Parsing**: Handles quoted fields, escaped quotes, and even malformed CSVs graciously (similar to PapaParse).
 - **Performance**: Optimized for speed and low memory usage.
+- **Dynamic Typing**: Optional automatic parsing of numbers and booleans (similar to PapaParse).
 
 
 ### Delimiters
@@ -83,6 +84,28 @@ void main() {
   
   final encoded = myCodec.encode([['a', 1, true], ['b', 2.5, false]]);
   // Output: "a",1,true\n"b",2.5,false
+}
+```
+
+### Dynamic Typing
+
+Automatically convert values that look like numbers or booleans into their respective Dart types.
+
+> [!NOTE]
+> Enabling `dynamicTyping` adds a small performance overhead (approx. 15% in benchmarks). For maximum performance on large files where you know the schema, using a manual `decoderTransform` or processing rows after decoding is faster.
+
+```dart
+import 'package:csv/csv.dart';
+
+void main() {
+  final input = 'Name,Age,Active\nAlice,30,true';
+  
+  // With dynamic typing enabled
+  final codec = CsvCodec(dynamicTyping: true);
+  final rows = codec.decode(input);
+  
+  print(rows[0][1].runtimeType); // int (30)
+  print(rows[0][2].runtimeType); // bool (true)
 }
 ```
 

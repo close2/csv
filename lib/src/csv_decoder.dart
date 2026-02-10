@@ -23,6 +23,9 @@ class CsvDecoder extends Converter<String, List<List<dynamic>>> {
   /// Whether to parse the first row as headers and return [CsvRow]s.
   final bool parseHeaders;
 
+  /// Whether to automatically parse numbers and booleans.
+  final bool dynamicTyping;
+
   /// Creates a [CsvDecoder].
   ///
   /// [fieldDelimiter] can be null for auto-detection.
@@ -36,6 +39,7 @@ class CsvDecoder extends Converter<String, List<List<dynamic>>> {
     this.skipEmptyLines = true,
     this.fieldTransform,
     this.parseHeaders = false,
+    this.dynamicTyping = false,
   }) : assert(
          quoteCharacter.length == 1,
          'quoteCharacter must be a single character',
@@ -73,6 +77,7 @@ class CsvDecoder extends Converter<String, List<List<dynamic>>> {
       skipEmptyLines,
       fieldTransform,
       parseHeaders,
+      dynamicTyping,
     );
   }
 }
@@ -86,6 +91,7 @@ class _CsvDecoderSink extends StringConversionSink {
   final dynamic Function(dynamic field, int index, String? header)?
   _fieldTransform;
   final bool _parseHeaders;
+  final bool _dynamicTyping;
 
   String? _delimiter;
   bool _inQuotes = false;
@@ -104,6 +110,7 @@ class _CsvDecoderSink extends StringConversionSink {
     this._skipEmptyLines,
     this._fieldTransform,
     this._parseHeaders,
+    this._dynamicTyping,
   ) {
     _delimiter = _presetDelimiter;
     if (_delimiter == null) {
@@ -437,13 +444,33 @@ class _CsvDecoderSink extends StringConversionSink {
   }
 
   dynamic _transform(String field) {
+    dynamic value = field;
+    if (_dynamicTyping) {
+      if (field == 'true') {
+        value = true;
+      } else if (field == 'false') {
+        value = false;
+      } else {
+        // Try parsing numbers
+        final asInt = int.tryParse(field);
+        if (asInt != null) {
+          value = asInt;
+        } else {
+          final asDouble = double.tryParse(field);
+          if (asDouble != null) {
+            value = asDouble;
+          }
+        }
+      }
+    }
+
     final transform = _fieldTransform;
-    if (transform == null) return field;
+    if (transform == null) return value;
 
     // Safely gets the header or null if index is out of bounds or list is null
     final header = _indexToHeader?.elementAtOrNull(_fieldIndex);
 
-    return transform(field, _fieldIndex, header);
+    return transform(value, _fieldIndex, header);
   }
 
   @override
