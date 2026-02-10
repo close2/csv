@@ -1,3 +1,9 @@
+# 7.0.0
+Complete rewrite of the library, now compatible with `dart:convert`.
+Automatic delimiter detection and BOM support.
+Optimized for performance and memory usage.
+If you need compatibility with the older API, please continue using version 6.
+
 # 6.0.0
 If inside an unquoted string, text-delimiters are ignored instead of swallowed.  
 This (partially?) fixes issue #70.  

@@ -1,264 +1,252 @@
-*Specify (at least a major) version when adding this project as dependency. Whenever the API has incompatible changes
-the major version changes!*
-
-# Changes from version 3 to 4:
-
-* no new functionality.
-* adapted to dart2. This library is no longer a codec!
-
-# Changes from version 2 to 3:
-
-* `parseNumbers` has been renamed to `shouldParseNumbers`
-* `FirstOccurenceSettingsDetector` has been renamed to
-  `FirstOccurrenceSettingsDetector`
-* Speed improvements.
-
-# Changes from version 3.0 to 3.1
-
-* added option `delimitAllFields`
-* fix issue #5 (endDelimiter was not always taken correctly from delimiter)
-
-## Changes from version 3.1 to 3.1.1
-
-* fix issue #10 (SDK version was overlay restrictive)
-
 # csv
 
-A dart csv to list converter.
+A high-quality, best-practice CSV library for Dart, inspired by PapaParse but built with Dart idioms in mind.
 
-If you have a `String` of all rows with RFC conform separators and delimiters,
-simply convert them with:
+## Upgrading from Version 6
+Version 7 is a complete rewrite and introduces breaking changes.
+If you rely on the specific flexibility of version 6 (e.g., complex eol handling not supported here),
+please consult [doc/README-v6.md](doc/README-v6.md) and continue using version 6.
 
-```dart
-List<List<dynamic>> rowsAsListOfValues = const CsvToListConverter().convert(yourString);
-```
+## Features
 
-To convert to a Csv string your values must be in a `List<List<dynamic>>`
-representing a List of Rows where every Row is a List of values.
-You can then convert with:
+- **Darty API**: Fully implements `Codec` and `Converter` interfaces from `dart:convert`.
+- **Easy Excel Compatibility**: Built-in support for Excel-compatible CSVs (UTF-8 BOM, `;` separator, `\r\n` line endings).
+- **Auto-detection**: Smartly detects delimiters and line endings.
+- **Robust Parsing**: Handles quoted fields, escaped quotes, and even malformed CSVs graciously (similar to PapaParse).
+- **Performance**: Optimized for speed and low memory usage.
 
-```dart
-String csv = const ListToCsvConverter().convert(yourListOfLists);
-```
 
-The default (RFC conform) configuration is:
+### Delimiters
 
-* _,_ as field separator
-* _"_ as text delimiter and
-* _\r\n_ as eol.
-
-See below if you need other settings, or want to autodetect them.
-
-This converter may be used as transformer for
-streams:
-
-```dart
-final stream = Stream.fromIterable([['a', 'b'], [1, 2]]);
-final csvRowStream = stream.transform(ListToCsvConverter());
-```
-
-Or the decoder side:
-
-```dart
-final input = File('a/csv/file.txt').openRead();
-final fields = await input.transform(utf8.decoder).transform(CsvToListConverter()).toList();
-```
-
-The converter is highly customizable and even allows multiple characters as
-delimiters or separators.
-
-![Build Status](https://travis-ci.org/close2/csv.svg?branch=master)
-
-### The decoder
-
-Every csv row is converted to a list of values. Unquoted strings looking like
-numbers (integers and doubles) are by default converted to `int`s or `double`s.
-
-### The encoder
-
-The input must be a `List` of `List`s. Every inner list is converted to one
-output csv row. The string representation of values is obtained by calling
-`toString`.
-
-This converter follows the rules of
-[rfc4180](https://tools.ietf.org/html/rfc4180).
-
-This means that text fields containing any delimiter or an eol are quoted.
-
-The default configuration is:
-
-* _,_ as field separator
-* _"_ as text delimiter and
-* _\r\n_ as eol.
-
-This parser will accept eol and text-delimiters inside unquoted text and
-not throw an error.
-
-In addition, this converter supports multiple characters for all delimiters
-and eol. Also, the start text delimiter and end text delimiter may be
-different. This means the following text can be parsed:
-`«abc«d»*|*«xy»»z»*|*123`  
-And (if configured correctly) will return `['abc«d', 'xy»z', 123]`
+The `CvCodec` and `CsvDecoder` support:
+*   **Field Delimiters**: Can be single or multi-character strings (e.g., `,`, `::`, `|`).
+*   **Quote Character**: Must be a **single character**. Defaults to `"`.
+*   **Escape Character**: Must be a **single character** (if provided). Defaults to the quote character.
+*   **Line Delimiters**: The decoder automatically handles `\r`, `\n`, and `\r\n`. The encoder allows specifying a custom `lineDelimiter` (defaults to `\r\n`).
 
 ## Usage
 
-### Encoder `List<List>` → `String`
-
-If the default values are fine, simply instantiate `ListToCsvConverter` and
-call `convert`:
+### Simple Example
 
 ```dart
-final res = const ListToCsvConverter().convert([[',b', 3.1, 42], ['n\n']]);
-assert(res == '",b",3.1,42\r\n"n\n"');
+import 'package:csv/csv.dart';
+
+void main() {
+  final data = [
+    ['Name', 'Age', 'City'],
+    ['Alice', 30, 'New York'],
+    ['Bob', 25, 'London'],
+  ];
+
+  // Encode
+  final String csvString = csv.encode(data);
+  print(csvString);
+
+  // Decode
+  final List<List<dynamic>> decodedData = csv.decode(csvString);
+  print(decodedData);
+}
 ```
 
-Consider using the `returnString = false` option to work around a performance bug.
+### Excel Compatible CSV
 
-There are 2 interesting things to note:
-
-* Not all rows have to be the same length.
-* The default eol is `'\r\n'` and `'\n'` is also quoted. The appearance of only
-  one character is enough for the string to be quoted.
-
-The converter takes the following configurations either in the constructor or
-the `convert` function:
-
-* `fieldDelimiter`: the separator between fields. By default `','` but another
-  common value is `';'`.
-* `textDelimiter`: the quotation string. By default `'"'`.
-* `textEndDelimiter`: the end quotation string. By default, equals
-  `textDelimiter`. The string used to end a quoted string.
-* `eol`: The new line string. By default `'\r\n'`. Another common value: `'\n'`
-* `convertNullTo`: If a value is `null`, use this value instead.  To get an empty entry instead of
-  string `null`, use `''`.
-
-*All configuration values may be multiple characters!:*
+Excel often requires a UTF-8 BOM and `;` as a separator to open files correctly in certain locales.
 
 ```dart
-const conv = const ListToCsvConverter(fieldDelimiter: '|*|',
-                                      textDelimiter: '<<',
-                                      textEndDelimiter: '>>',
-                                      eol: '**\n');
-final res = conv.convert([['a','>'], ['<<', '>>'], [1, 2]]);
-assert(res == 'a|*|<<>>>**\n<<<<>>|*|<<>>>>>>**\n1|*|2');
+import 'package:csv/csv.dart';
 
-final res2 = const ListToCsvConverter()
-    .convert([['a','>'], ['<<', '>>'], [1, 2]],
-             fieldDelimiter: '|*|',
-             textDelimiter: '<<',
-             textEndDelimiter: '>>',
-             eol: '**\n',
-             convertNullTo: '');
-assert(res == res2);
-```
+void main() {
+  final data = [
+    ['Header1', 'Header2'],
+    ['Value 1', 'Value 2'],
+  ];
 
-Note that:
-
-* `'>'` is quoted
-* `'<<'` is quoted as well, but because it is "only" a start text delimiter
-  it is *not* doubled. (See rule 7. below).
-* `'>>'` is quoted.  *Only the end-quote string is doubled!*
-
-### Decoder `String` → `List<List>`
-
-If the default values are fine, simply instantiate `CsvToListConverter` and
-call `convert`:
-
-```dart
-final res = const CsvToListConverter().convert('",b",3.1,42\r\n"n\n"');
-assert(res.toString() == [[',b', 3.1, 42], ['n\n']].toString());
-```
-
-Again please note that depending on the input not all rows have the same number
-of values.
-
-The `CsvToListConverter` takes the same arguments as the `ListToCsvConverter` (except for `convertNullTo`)
-plus
-
-* `shouldParseNumbers`: by default true. If you want the output to be `String`s only
-  set this to false.
-* `allowInvalid`: by default *true*. The converter will by default never throw
-  an exception. Even if `fieldDelimiter`, `textDelimiter`,... don't make sense
-  or the csv-String is invalid. This may for instance happen if the csv-String
-  ends with a quoted String without the end-quote (`textEndDelimiter`) string.
-* `csvSettingsDetector`: must be an object which extends from
-  `CsvSettingsDetector`. There implementation simply selects the first occurrence
-  of a list of possible values as value.
-* `convertEmptyTo`: If a field is empty (and not quoted!) use this value instead.  
-  `convertEmptyTo: [1, 2, 3]` would insert the list `[1, 2, 3]` whenever a field is empty.  
-  To convert empty fields to `null`, use the enum: `EmptyValue.NULL`: `var csv =
-  CsvToListConverter(convertEmptyTo: EmptyValue.NULL).convert(input);`
-
-  ```dart
-  var d = FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n'],
-                                              textDelimiters: ['"', "'"]);
+  // Use the built-in excel codec
+  final String excelCsv = excel.encode(data);
   
-  CsvToListConverter(csvSettingsDetector: d);
-  ```
+  // This automatically adds the BOM and uses ';' as delimiter
+}
+```
 
-In this case `eol` will either be `'\r\n'` or `'\n'` depending on which of
-those 2 comes first in the csv string. Note that the
-`FirstOccurrenceSettingsDetector` doesn't parse the csv string!  For instance
-if eol should be `'\r\n'` but there is a field with a correctly quoted `'\n'`
-in the first row, `'\n'` is used instead.
+### Custom Configuration
 
-If you csv String contains a (simple) header row, or all eols are equal this
-is good enough.
+```dart
+import 'package:csv/csv.dart';
 
-Feel free to submit something more intelligent.
+void main() {
+  final myCodec = CsvCodec(
+    fieldDelimiter: '\t',
+    lineDelimiter: '\n',
+    quoteMode: QuoteMode.strings, // Only quote strings, not numbers
+    escapeCharacter: '\\',       // Use backslash for escaping
+  );
+  
+  final encoded = myCodec.encode([['a', 1, true], ['b', 2.5, false]]);
+  // Output: "a",1,true\n"b",2.5,false
+}
+```
 
-To check your configuration values there is `CsvToListConverter.verifySettings`
-and `verifyCurrentSettings`. Both return an empty list if all settings are valid,
-or a list of errors. If the optional `throwError` is true an error is thrown in
-case the settings are invalid.
+### Advanced: Field Transformations
 
-All settings must be set, i.e. not be null, and delimiters, separators and eols must
-be distinguishable, i.e. they may not be the start of another settings.
+You can use the `encoderTransform` and `decoderTransform` hooks to process fields based on their value, column index, or header name to for example trim text, change decimal separators or format dates.
 
-## CSV rules -- copied from RFC4180 Chapter 2
+```dart
+import 'package:csv/csv.dart';
 
-Ad rule 3: removed as it is not relevant for this converter.
+void main() {
+  final customCodec = CsvCodec(
+    fieldDelimiter: ';',
+    parseHeaders: true, // Required if you want 'header' name in the transform
+    decoderTransform: (value, index, header) {
+      // Change column 3 (index 2) to uppercase
+      if (index == 2) return value.toUpperCase();
+      
+      // Convert 'Age' column to int
+      if (header == 'Age') return int.tryParse(value) ?? value;
+      
+      return value;
+    },
+  );
 
-1. Each record is located on a separate line, delimited by a line break
-   (CRLF). For example:
-   aaa,bbb,ccc CRLF
-   zzz,yyy,xxx CRLF
+  final input = 'Name;City;Age\nAlice;London;30';
+  final decoded = customCodec.decode(input);
+  
+  print(decoded[0]['Age']);   // 30 (as int)
+  print(decoded[0]['City']);  // LONDON
+}
+```
 
-2. The last record in the file may or may not have an ending line break.
-   For example:
-   `aaa,bbb,ccc CRLF`
-   zzz,yyy,xxx
+### Automated Delimiter Detection (including sep=;)
 
-3. ... (Header-lines)
+The library automatically detects common delimiters (`,`, `;`, `\t`, `|`). It also respects the `sep=;` header common in some Excel-exported CSV files.
 
-4. Within the header and each record, there may be one or more fields,
-   separated by commas. Each line should contain the same number of
-   fields throughout the file. Spaces are considered part of a field and
-   should not be ignored. The last field in the record must not be
-   followed by a comma. For example:
+```dart
+final decoded = csv.decode('sep=;\r\nA;B;C');
+// Result: [['A', 'B', 'C']]
+```
 
-   aaa,bbb,ccc
+### Map-like Row Access
 
-5. Each field may or may not be enclosed in double quotes (however some
-   programs, such as Microsoft Excel, do not use double quotes at all).
-   If fields are not enclosed with double quotes, then double quotes may
-   not appear inside the fields. For example:
+If you want to access values by their header names, use the `parseHeaders` option. It returns `CsvRow` objects which behave like both a `List` and a `Map`.
 
-   "aaa","bbb","ccc" CRLF
-   zzz,yyy,xxx
+```dart
+import 'package:csv/csv.dart';
 
-6. Fields containing line breaks (CRLF), double quotes, and commas should
-   be enclosed in double-quotes. For example:
+void main() {
+  final fileContents = 'id,name\n1,Alice\n2,Bob';
+  final codec = CsvCodec(parseHeaders: true);
+  
+  final rows = codec.decode(fileContents);
+  
+  // Access by header name
+  print(rows[0]['name']); // Alice
+  
+  // Still accessible by index
+  print(rows[0][1]);      // Alice
+  
+  // The first row of the file was used for headers and is not in the list.
+}
+```
 
-   "aaa","b CRLF
-   bb","ccc" CRLF
-   zzz,yyy,xxx
+### Stream Transformation (Read-Modify-Write)
 
-7. If double-quotes are used to enclose fields, then a double-quote
-   appearing inside a field must be escaped by preceding it with another
-   double quote. For example:
+You can use `fuse` to combine the encoder and decoder, or simply chain transformations to process large files efficiently.
 
-   "aaa","b""bb","ccc"
+```dart
+import 'dart:convert';
+import 'dart:io';
+import 'package:csv/csv.dart';
+
+void main() async {
+  final input = File('input.csv');
+  final output = File('output.csv');
+
+  await input.openRead()
+      .transform(utf8.decoder)
+      .transform(csv.decoder)
+      .map((row) {
+        // Modify the row
+        row.add('Processed');
+        return row;
+      })
+      .transform(csv.encoder)
+      .transform(utf8.encoder)
+      .pipe(output.openWrite());
+}
+```
+
+### Fusing Codecs
+
+You can also fuse the `csv.encoder` and `csv.decoder` (or any other compatible codecs) to create a new codec.
+
+```dart
+import 'dart:convert';
+import 'package:csv/csv.dart';
+
+void main() {
+  // Create a codec that converts List<List> -> String -> List<List>
+  // Ideally this is an identity transformation (Round Trip).
+  final fused = csv.encoder.fuse(csv.decoder);
+  
+  final data = [['a', 'b'], ['c', 'd']];
+  final result = fused.convert(data);
+  print(result); // [['a', 'b'], ['c', 'd']]
+}
+```
+
+### Advanced Fusing: Processing Pipeline
+
+You can create a `Codec` that reads a CSV string, processes the data, and outputs a new CSV string by fusing the decoder, a custom processor, and the encoder.
+
+```dart
+import 'dart:convert';
+import 'package:csv/csv.dart';
+
+// A simple converter that adds a column to every row.
+class AddColumnConverter extends Converter<List<List<dynamic>>, List<List<dynamic>>> {
+  @override
+  List<List<dynamic>> convert(List<List<dynamic>> input) {
+    return input.map((row) => [...row, 'Processed']).toList();
+  }
+}
+
+void main() {
+  final processor = AddColumnConverter();
+
+  // Create a pipeline: CSV String -> List<List> -> Modified List<List> -> CSV String
+  
+  // Let's create a "Processing Codec" that takes String and returns String (CSV -> CSV)
+  // We start with the decoder (String -> List)
+  // Fuse with processor (List -> List)
+  // Fuse with encoder (List -> String)
+  
+  final sanitizingCodec = csv.decoder.fuse(processor).fuse(csv.encoder);
+
+  final inputCsv = 'Name,Age\nAlice,30';
+  final outputCsv = sanitizingCodec.convert(inputCsv);
+
+  print(outputCsv);
+  // Output:
+  // Name,Age,Processed
+  // Alice,30,Processed
+}
+```
 
 
+## PapaParse Features
 
+This library incorporates many good ideas from PapaParse, such as:
+- Handling misplaced quotes gracefully.
+- Auto-detecting delimiters based on frequency and consistency.
+- Handling various line ending styles automatically in the decoder.
+- Support for `sep=` headers.
+- Header Parsing: Efficiently mapping headers to row indices (similar to `header: true` in PapaParse).
+
+## Installation
+
+Add this to your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  csv: any
+```
