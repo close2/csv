@@ -248,5 +248,5 @@ Add this to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  csv: any
+  csv: ^7.0.0
 ```
