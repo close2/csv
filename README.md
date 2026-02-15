@@ -25,6 +25,21 @@ The `CvCodec` and `CsvDecoder` support:
 *   **Escape Character**: Must be a **single character** (if provided). Defaults to the quote character.
 *   **Line Delimiters**: The decoder automatically handles `\r`, `\n`, and `\r\n`. The encoder allows specifying a custom `lineDelimiter` (defaults to `\r\n`).
 
+## ⚠️ Important: Line Endings & Windows
+
+The default line delimiter is `\r\n` (CRLF) as specified by RFC 4180.
+
+**Be careful on Windows!**
+If you write the CSV string directly to a file using certain methods (like `File.writeAsString` without specifying strict options or redirecting `stdout`), Windows file handling might automatically convert `\n` to `\r\n`. Since the CSV already contains `\r\n`, this can result in double carriage returns: `\r\r\n`.
+
+To avoid this, either:
+1.  **Use `\n` as the line delimiter:**
+    ```dart
+    final codec = CsvCodec(lineDelimiter: '\n');
+    final csvString = codec.encode(data);
+    ```
+2.  **Use a binary writer** (e.g., `File.openWrite()`) which writes bytes exactly as they are.
+
 ## Usage
 
 ### Simple Example
