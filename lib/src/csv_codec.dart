@@ -65,4 +65,25 @@ class CsvCodec extends Codec<List<List<dynamic>>, String> {
 
   @override
   CsvDecoder get decoder => _decoder;
+
+  /// Decodes the given [encoded] CSV string into a list of [CsvRow]s.
+  ///
+  /// This automatically uses header parsing, returning a properly typed
+  /// list of [CsvRow] objects, regardless of whether [parseHeaders]
+  /// was set to true when creating this codec.
+  List<CsvRow> decodeWithHeaders(String encoded) {
+    if (_decoder.parseHeaders) {
+      return _decoder.convert(encoded).cast<CsvRow>();
+    }
+    final decoder = CsvDecoder(
+      fieldDelimiter: _decoder.fieldDelimiter,
+      quoteCharacter: _decoder.quoteCharacter,
+      escapeCharacter: _decoder.escapeCharacter,
+      skipEmptyLines: _decoder.skipEmptyLines,
+      fieldTransform: _decoder.fieldTransform,
+      parseHeaders: true,
+      dynamicTyping: _decoder.dynamicTyping,
+    );
+    return decoder.convert(encoded).cast<CsvRow>();
+  }
 }

@@ -165,22 +165,34 @@ final decoded = csv.decode('sep=;\r\nA;B;C');
 
 ### Map-like Row Access
 
-If you want to access values by their header names, use the `parseHeaders` option. It returns `CsvRow` objects which behave like both a `List` and a `Map`.
+If you want to access values by their header names, you can use either `decodeWithHeaders()` or the `parseHeaders` option on the codec. Both return `CsvRow` objects which behave like both a `List` and a `Map`.
 
 ```dart
 import 'package:csv/csv.dart';
 
 void main() {
   final fileContents = 'id,name\n1,Alice\n2,Bob';
-  final codec = CsvCodec(parseHeaders: true);
   
-  final rows = codec.decode(fileContents);
+  // Method 1: Using decodeWithHeaders (Recommended)
+  // This automatically sets the parseHeaders flag and returns a properly typed List<CsvRow>.
+  final rowsWithHeaders = csv.decodeWithHeaders(fileContents);
   
-  // Access by header name
-  print(rows[0]['name']); // Alice
+  // Access by header name directly
+  print(rowsWithHeaders[0]['name']); // Alice
   
   // Still accessible by index
-  print(rows[0][1]);      // Alice
+  print(rowsWithHeaders[0][1]);      // Alice
+  
+  
+  // Method 2: Using CsvCodec(parseHeaders: true)
+  // This requires casting the returned rows to CsvRow manually.
+  final codec = CsvCodec(parseHeaders: true);
+  
+  final dynamicRows = codec.decode(fileContents);
+  
+  final row = dynamicRows[0] as CsvRow;
+  // Access by header name
+  print(row['name']); // Alice
   
   // The first row of the file was used for headers and is not in the list.
 }

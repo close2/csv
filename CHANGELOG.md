@@ -1,3 +1,7 @@
+# 7.2.0
+Document CsvRow map-like access and necessary casts.
+Add decodeWithHeaders() helper function.
+
 # 7.1.0
 Implement dynamic typing for CSV.
 
