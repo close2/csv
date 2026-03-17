@@ -4,7 +4,7 @@ import 'package:csv/csv.dart';
 void main() {
   test('decode parseHeaders to CsvRow map-like access', () {
     final fileContents = 'id,name\n1,Alice\n2,Bob';
-    final codec = CsvCodec(parseHeaders: true);
+    final codec = Csv(parseHeaders: true);
     
     final rows = codec.decode(fileContents);
     expect(rows.length, 2);

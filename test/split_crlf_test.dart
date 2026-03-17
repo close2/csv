@@ -1,5 +1,3 @@
-
-import 'dart:convert';
 import 'package:csv/csv.dart';
 import 'package:test/test.dart';
 
@@ -7,13 +5,7 @@ void main() {
   group('Split CRLF', () {
     test('Split CRLF', () {
       final output = <List<dynamic>>[];
-      final outSink = ChunkedConversionSink<List<List<dynamic>>>.withCallback((
-        accumulated,
-      ) {
-        for (final rows in accumulated) {
-          output.addAll(rows);
-        }
-      });
+      final outSink = _CollectorSink(output);
 
       final decoderSink = CsvDecoder(fieldDelimiter: ',').startChunkedConversion(outSink);
 
@@ -27,13 +19,7 @@ void main() {
 
     test('Split CRLF with skipEmptyLines: false', () {
       final output = <List<dynamic>>[];
-      final outSink = ChunkedConversionSink<List<List<dynamic>>>.withCallback((
-        accumulated,
-      ) {
-        for (final rows in accumulated) {
-          output.addAll(rows);
-        }
-      });
+      final outSink = _CollectorSink(output);
 
       final decoderSink = CsvDecoder(fieldDelimiter: ',', skipEmptyLines: false).startChunkedConversion(outSink);
 
@@ -45,4 +31,15 @@ void main() {
       expect(output, equals([['a'], ['b']]));
     });
   });
+}
+
+class _CollectorSink implements Sink<List<dynamic>> {
+  final List<List<dynamic>> _target;
+  _CollectorSink(this._target);
+
+  @override
+  void add(List<dynamic> data) => _target.add(data);
+
+  @override
+  void close() {}
 }

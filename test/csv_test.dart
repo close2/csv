@@ -198,29 +198,23 @@ void main() {
   group('Chunked Conversion', () {
     test('Chunked decoding: split row', () async {
       final input = Stream.fromIterable(['A,B,C\nd', ',e,f']);
-      final result = await input.transform(CsvCodec(fieldDelimiter: ',').decoder).toList();
+      final result = await input.transform(Csv(fieldDelimiter: ',').decoder).toList();
       expect(
         result,
         equals([
-          [
-            ['A', 'B', 'C'],
-          ],
-          [
-            ['d', 'e', 'f'],
-          ],
+          ['A', 'B', 'C'],
+          ['d', 'e', 'f'],
         ]),
       );
     });
 
     test('Chunked decoding: split quoted field', () async {
       final input = Stream.fromIterable(['A,"B\n', 'B",C']);
-      final result = await input.transform(CsvCodec(fieldDelimiter: ',').decoder).toList();
+      final result = await input.transform(Csv(fieldDelimiter: ',').decoder).toList();
       expect(
         result,
         equals([
-          [
-            ['A', 'B\nB', 'C'],
-          ],
+          ['A', 'B\nB', 'C'],
         ]),
       );
     });
@@ -228,13 +222,9 @@ void main() {
     test('Chunked encoding', () async {
       final input = Stream.fromIterable(
         [
-          [
-            ['A', 'B'],
-          ],
-          [
-            ['C', 'D'],
-          ],
-        ].cast<List<List<dynamic>>>(),
+          ['A', 'B'],
+          ['C', 'D'],
+        ].cast<List<dynamic>>(),
       );
       final result = await input.transform(csv.encoder).join();
       expect(result, equals('A,B\r\nC,D'));
@@ -243,7 +233,7 @@ void main() {
 
   group('Advanced Features', () {
     test('QuoteMode.strings', () {
-      final codec = CsvCodec(quoteMode: QuoteMode.strings);
+      final codec = Csv(quoteMode: QuoteMode.strings);
       final input = [
         [1, "1", true, "true"],
       ];
@@ -251,7 +241,7 @@ void main() {
     });
 
     test('QuoteMode.always', () {
-      final codec = CsvCodec(quoteMode: QuoteMode.always);
+      final codec = Csv(quoteMode: QuoteMode.always);
       final input = [
         [1, "A"],
       ];
@@ -279,7 +269,7 @@ void main() {
     });
 
     test('skipEmptyLines', () {
-      final codec = CsvCodec(skipEmptyLines: true);
+      final codec = Csv(skipEmptyLines: true);
       final input = 'A,B\n\nC,D\n\n';
       expect(
         codec.decode(input),
@@ -289,7 +279,7 @@ void main() {
         ]),
       );
 
-      final codecNoSkip = CsvCodec(skipEmptyLines: false);
+      final codecNoSkip = Csv(skipEmptyLines: false);
       expect(codecNoSkip.decode(input).length, equals(4));
     });
 
@@ -337,7 +327,7 @@ void main() {
 
     test('CsvRow and parseHeaders', () {
       final input = 'id,name\n1,Alice\n2,Bob';
-      final codec = CsvCodec(parseHeaders: true);
+      final codec = Csv(parseHeaders: true);
       final result = codec.decode(input);
 
       expect(result.length, equals(2));

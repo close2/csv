@@ -1,7 +1,8 @@
 name: csv
-version: 7.2.0
+version: 8.0.0
 description: |-
-  A codec to transform between a string and a list of values.
+  A high-quality CSV library. Encode and decode CSV strings, with
+  stream support (one row per event), auto-detection, and Excel compatibility.
 
   The string must be comma (configurable) separated values.
 homepage: https://github.com/close2/csv

@@ -1,5 +1,3 @@
-
-import 'dart:convert';
 import 'package:csv/csv.dart';
 import 'package:test/test.dart';
 
@@ -12,13 +10,7 @@ void main() {
 
     test('Split multi-char delimiter', () {
       final output = <List<dynamic>>[];
-      final outSink = ChunkedConversionSink<List<List<dynamic>>>.withCallback((
-        accumulated,
-      ) {
-        for (final rows in accumulated) {
-          output.addAll(rows);
-        }
-      });
+      final outSink = _CollectorSink(output);
 
       // Delimiter is '::'
       final decoderSink = CsvDecoder(fieldDelimiter: '::')
@@ -33,14 +25,8 @@ void main() {
     });
 
     test('Split multi-char delimiter after quote', () {
-       final output = <List<dynamic>>[];
-      final outSink = ChunkedConversionSink<List<List<dynamic>>>.withCallback((
-        accumulated,
-      ) {
-        for (final rows in accumulated) {
-          output.addAll(rows);
-        }
-      });
+      final output = <List<dynamic>>[];
+      final outSink = _CollectorSink(output);
 
       // Delimiter is '::'
       final decoderSink = CsvDecoder(fieldDelimiter: '::')
@@ -55,4 +41,15 @@ void main() {
       expect(output, equals([['a', 'b']]));
     });
   });
+}
+
+class _CollectorSink implements Sink<List<dynamic>> {
+  final List<List<dynamic>> _target;
+  _CollectorSink(this._target);
+
+  @override
+  void add(List<dynamic> data) => _target.add(data);
+
+  @override
+  void close() {}
 }

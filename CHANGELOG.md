@@ -1,3 +1,20 @@
+# 8.0.0
+Fix stream nesting issue (#77): `stream.transform(csv.decoder).toList()` now
+correctly returns `List<List<dynamic>>` instead of `List<List<List<dynamic>>>`.
+
+**Breaking changes:**
+- `CsvCodec` has been renamed to `Csv`. A deprecated `CsvCodec` typedef is
+  provided for migration.
+- `Csv` does not extend `dart:convert`'s `Codec`. Use `asCodec()` if you
+  need a `Codec` (e.g., for `.fuse()`).
+- `CsvDecoder` is now a `StreamTransformerBase<String, List<dynamic>>` instead of
+  a `Converter<String, List<List<dynamic>>>`. Each stream event is a single row.
+- `CsvEncoder` is now a `StreamTransformerBase<List<dynamic>, String>` instead of
+  a `Converter<List<List<dynamic>>, String>`. Each stream event is a single row.
+- `csv.decoder.fuse(...)` → use `csv.asCodec().decoder.fuse(...)` instead.
+
+See the "The Codec Problem" section in the README for a detailed explanation.
+
 # 7.2.0
 Document CsvRow map-like access and necessary casts.
 Add decodeWithHeaders() helper function.
