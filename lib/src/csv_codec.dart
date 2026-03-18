@@ -133,12 +133,32 @@ class Csv {
   ///
   /// For stream usage, prefer using [decoder] and [encoder] directly.
   ///
+  /// **Batching behavior**: When the codec's decoder is used for chunked
+  /// conversion (i.e., as a stream transformer), rows decoded from the same
+  /// input chunk are forwarded together as a single batch. This preserves
+  /// natural chunk boundaries and avoids creating a new list for every row.
+  ///
+  /// Use [maxRowsPerBatch] to cap the number of rows in each emitted batch.
+  /// This prevents a single large input chunk from producing a huge list.
+  /// For example, `maxRowsPerBatch: 1` gives single-row batches (one event
+  /// per row). When `null` (the default), all rows from a chunk are emitted
+  /// together.
+  ///
   /// Example:
   /// ```dart
   /// // Fuse with another codec
   /// final fused = csv.asCodec().decoder.fuse(someConverter);
+  ///
+  /// // Limit batch size to 100 rows
+  /// final codec = csv.asCodec(maxRowsPerBatch: 100);
   /// ```
-  Codec<List<List<dynamic>>, String> asCodec() => _CsvCodecAdapter(this);
+  Codec<List<List<dynamic>>, String> asCodec({int? maxRowsPerBatch}) {
+    assert(
+      maxRowsPerBatch == null || maxRowsPerBatch > 0,
+      'maxRowsPerBatch must be positive',
+    );
+    return _CsvCodecAdapter(this, maxRowsPerBatch: maxRowsPerBatch);
+  }
 }
 
 /// Deprecated: Use [Csv] instead.
@@ -151,12 +171,14 @@ typedef CsvCodec = Csv;
 /// at the cost of the stream nesting issue inherent in Dart's type system.
 class _CsvCodecAdapter extends Codec<List<List<dynamic>>, String> {
   final Csv _csv;
+  final int? _maxRowsPerBatch;
 
-  _CsvCodecAdapter(this._csv);
+  _CsvCodecAdapter(this._csv, {int? maxRowsPerBatch})
+      : _maxRowsPerBatch = maxRowsPerBatch;
 
   @override
   Converter<String, List<List<dynamic>>> get decoder =>
-      _CodecDecoderAdapter(_csv._decoder);
+      _CodecDecoderAdapter(_csv._decoder, maxRowsPerBatch: _maxRowsPerBatch);
 
   @override
   Converter<List<List<dynamic>>, String> get encoder =>
@@ -166,16 +188,19 @@ class _CsvCodecAdapter extends Codec<List<List<dynamic>>, String> {
 /// Wraps a [CsvDecoder] as a `Converter<String, List<List<dynamic>>>`.
 class _CodecDecoderAdapter extends Converter<String, List<List<dynamic>>> {
   final CsvDecoder _decoder;
+  final int? _maxRowsPerBatch;
 
-  _CodecDecoderAdapter(this._decoder);
+  _CodecDecoderAdapter(this._decoder, {int? maxRowsPerBatch})
+      : _maxRowsPerBatch = maxRowsPerBatch;
 
   @override
   List<List<dynamic>> convert(String input) => _decoder.convert(input);
 
   @override
   Sink<String> startChunkedConversion(Sink<List<List<dynamic>>> sink) {
-    // Wrap the batch sink so individual rows are collected into batches.
-    return _decoder.startChunkedConversion(_BatchingSink(sink));
+    final collector = _RowCollector(sink, _maxRowsPerBatch);
+    final decoderSink = _decoder.startChunkedConversion(collector);
+    return _ChunkBoundaryInputSink(decoderSink, collector);
   }
 }
 
@@ -189,27 +214,74 @@ class _CodecEncoderAdapter extends Converter<List<List<dynamic>>, String> {
   String convert(List<List<dynamic>> input) => _encoder.convert(input);
 }
 
-/// A sink adapter that collects individual rows into batches before
-/// forwarding them to a `Sink<List<List<dynamic>>>`.
-///
-/// This bridges the gap between the row-by-row output of [CsvDecoder]
-/// and the batch-oriented `Converter` sink interface.
-class _BatchingSink implements Sink<List<dynamic>> {
-  final Sink<List<List<dynamic>>> _target;
-  final _batch = <List<dynamic>>[];
+/// A [StringConversionSink] wrapper that flushes collected rows after each
+/// input chunk, establishing natural chunk-based batch boundaries.
+class _ChunkBoundaryInputSink extends StringConversionSink {
+  final StringConversionSink _inner;
+  final _RowCollector _collector;
 
-  _BatchingSink(this._target);
+  _ChunkBoundaryInputSink(this._inner, this._collector);
 
   @override
-  void add(List<dynamic> row) {
-    _batch.add(row);
+  void add(String chunk) {
+    _inner.add(chunk);
+    _collector.flush();
+  }
+
+  @override
+  void addSlice(String chunk, int start, int end, bool isLast) {
+    _inner.addSlice(chunk, start, end, isLast);
+    if (isLast) {
+      // close() on the inner sink was already triggered by addSlice with
+      // isLast=true, which will call _collector.close(). No extra flush.
+    } else {
+      _collector.flush();
+    }
   }
 
   @override
   void close() {
-    if (_batch.isNotEmpty) {
-      _target.add(_batch.toList());
+    _inner.close();
+    // _inner.close() calls _collector.close(), which flushes remaining rows.
+  }
+}
+
+/// Collects individual rows and forwards them as batches to the target sink.
+///
+/// Rows are accumulated until [flush] is called (typically at chunk
+/// boundaries) or until the batch reaches [_maxRowsPerBatch], whichever
+/// comes first.
+class _RowCollector implements Sink<List<dynamic>> {
+  final Sink<List<List<dynamic>>> _target;
+  final int? _maxRowsPerBatch;
+  final _batch = <List<dynamic>>[];
+
+  _RowCollector(this._target, this._maxRowsPerBatch);
+
+  @override
+  void add(List<dynamic> row) {
+    _batch.add(row);
+    final max = _maxRowsPerBatch;
+    if (max != null && _batch.length >= max) {
+      _emitBatch();
     }
+  }
+
+  /// Flushes any accumulated rows as a single batch.
+  void flush() {
+    if (_batch.isNotEmpty) {
+      _emitBatch();
+    }
+  }
+
+  void _emitBatch() {
+    _target.add(_batch.toList());
+    _batch.clear();
+  }
+
+  @override
+  void close() {
+    flush();
     _target.close();
   }
 }

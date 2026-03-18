@@ -9,7 +9,7 @@ produced an extra layer of nesting ([#77](https://github.com/close2/csv/issues/7
 - `CsvCodec` has been renamed to `Csv`. A deprecated `CsvCodec` typedef is
   available for migration.
 - `Csv` no longer extends `dart:convert`'s `Codec` class. If you need a `Codec`
-(e.g., for `.fuse()`), use [`asCodec()`](#the-codec-problem--ascodec).
+  (e.g., for `.fuse()`), use [`asCodec()`](#the-codec-problem--ascodec).
 
 If you rely on the version 6 API, please consult [doc/README-v6.md](doc/README-v6.md).
 
@@ -285,6 +285,19 @@ void main() {
 }
 ```
 
+**Controlling batch size**: When the codec's decoder is used as a stream
+transformer, rows from the same input chunk are emitted together in a single
+batch (a `List<List<dynamic>>`). You can limit the maximum number of rows per
+batch with `maxRowsPerBatch`:
+
+```dart
+// Each stream event contains at most 100 rows.
+final codec = csv.asCodec(maxRowsPerBatch: 100);
+
+// For single-row events (one row per stream event), use 1:
+final singleRowCodec = csv.asCodec(maxRowsPerBatch: 1);
+```
+
 ## PapaParse Features
 
 This library incorporates many good ideas from PapaParse, such as:
@@ -331,10 +344,10 @@ Concatenating chunks of bytes is natural.
 
 For a CSV decoder, the two roles need **different types**:
 
-| Role | Needs |
-|---|---|
+| Role                | Needs                                            |
+|---------------------|--------------------------------------------------|
 | Batch (`convert()`) | Returns `List<List<dynamic>>` — all rows at once |
-| Stream (each event) | Should be `List<dynamic>` — one row at a time |
+| Stream (each event) | Should be `List<dynamic>` — one row at a time    |
 
 There is no single type `T` that works for both. If we use
 `Converter<String, List<List<dynamic>>>` (as version 7 did), then:
@@ -371,8 +384,13 @@ final rows = await file.openRead()
 
 // asCodec(): for fuse() and other Codec APIs
 final fused = csv.asCodec().decoder.fuse(someConverter);
+
+// asCodec() with batch size limit
+final codec = csv.asCodec(maxRowsPerBatch: 100);
 ```
 
 If you use `asCodec().decoder` as a stream transformer, you will get the extra
 nesting — that is inherent to Dart's `Converter` type contract and cannot be
-avoided. Use `csv.decoder` directly for streams.
+avoided. Rows from the same input chunk are grouped together into a single batch.
+Use `maxRowsPerBatch` to limit the batch size, or use `csv.decoder` directly for
+streams.
