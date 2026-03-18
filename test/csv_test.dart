@@ -220,11 +220,11 @@ void main() {
     });
 
     test('Chunked encoding', () async {
-      final input = Stream.fromIterable(
+      final input = Stream<List<dynamic>>.fromIterable(
         [
           ['A', 'B'],
           ['C', 'D'],
-        ].cast<List<dynamic>>(),
+        ],
       );
       final result = await input.transform(csv.encoder).join();
       expect(result, equals('A,B\r\nC,D'));
