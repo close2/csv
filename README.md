@@ -2,14 +2,20 @@
 
 A high-quality, best-practice CSV library for Dart, inspired by PapaParse but built with Dart idioms in mind.
 
-## Upgrading from Version 6
-Version 7 is a complete rewrite and introduces breaking changes.
-If you rely on the specific flexibility of version 6 (e.g., complex eol handling not supported here),
-please consult [doc/README-v6.md](doc/README-v6.md) and continue using version 6.
+## Upgrading from Version 7
+Version 8 fixes an issue where using `csv.decoder` as a stream transformer
+produced an extra layer of nesting ([#77](https://github.com/close2/csv/issues/77)).
+
+- `CsvCodec` has been renamed to `Csv`. A deprecated `CsvCodec` typedef is
+  available for migration.
+- `Csv` no longer extends `dart:convert`'s `Codec` class. If you need a `Codec`
+  (e.g., for `.fuse()`), use [`asCodec()`](#the-codec-problem--ascodec).
+
+If you rely on the version 6 API, please consult [doc/README-v6.md](doc/README-v6.md).
 
 ## Features
 
-- **Darty API**: Fully implements `Codec` and `Converter` interfaces from `dart:convert`.
+- **Stream-friendly**: `decoder` and `encoder` are proper `StreamTransformer`s — one row per stream event.
 - **Easy Excel Compatibility**: Built-in support for Excel-compatible CSVs (UTF-8 BOM, `;` separator, `\r\n` line endings).
 - **Auto-detection**: Smartly detects delimiters and line endings.
 - **Robust Parsing**: Handles quoted fields, escaped quotes, and even malformed CSVs graciously (similar to PapaParse).
@@ -19,7 +25,7 @@ please consult [doc/README-v6.md](doc/README-v6.md) and continue using version 6
 
 ### Delimiters
 
-The `CvCodec` and `CsvDecoder` support:
+The `Csv` class and `CsvDecoder` support:
 *   **Field Delimiters**: Can be single or multi-character strings (e.g., `,`, `::`, `|`).
 *   **Quote Character**: Must be a **single character**. Defaults to `"`.
 *   **Escape Character**: Must be a **single character** (if provided). Defaults to the quote character.
@@ -35,7 +41,7 @@ If you write the CSV string directly to a file using certain methods (like `File
 To avoid this, either:
 1.  **Use `\n` as the line delimiter:**
     ```dart
-    final codec = CsvCodec(lineDelimiter: '\n');
+    final codec = Csv(lineDelimiter: '\n');
     final csvString = codec.encode(data);
     ```
 2.  **Use a binary writer** (e.g., `File.openWrite()`) which writes bytes exactly as they are.
@@ -61,6 +67,54 @@ void main() {
   // Decode
   final List<List<dynamic>> decodedData = csv.decode(csvString);
   print(decodedData);
+}
+```
+
+### Stream Transformation (e.g., reading a file)
+
+The decoder and encoder are `StreamTransformer`s that emit **one row per event**,
+so `stream.transform(csv.decoder).toList()` gives you a flat `List<List<dynamic>>`.
+
+```dart
+import 'dart:convert';
+import 'dart:io';
+import 'package:csv/csv.dart';
+
+void main() async {
+  final file = File('data.csv');
+
+  // Each event in the stream is a single row (List<dynamic>).
+  final List<List<dynamic>> rows = await file
+      .openRead()
+      .transform(utf8.decoder)
+      .transform(csv.decoder)
+      .toList();
+
+  print(rows.first); // e.g. ['Name', 'Age', 'City']
+}
+```
+
+### Stream Read-Modify-Write Pipeline
+
+```dart
+import 'dart:convert';
+import 'dart:io';
+import 'package:csv/csv.dart';
+
+void main() async {
+  final input = File('input.csv');
+  final output = File('output.csv');
+
+  await input.openRead()
+      .transform(utf8.decoder)
+      .transform(csv.decoder)
+      .map((row) {
+        row.add('Processed');
+        return row;
+      })
+      .transform(csv.encoder)
+      .transform(utf8.encoder)
+      .pipe(output.openWrite());
 }
 ```
 
@@ -90,7 +144,7 @@ void main() {
 import 'package:csv/csv.dart';
 
 void main() {
-  final myCodec = CsvCodec(
+  final myCodec = Csv(
     fieldDelimiter: '\t',
     lineDelimiter: '\n',
     quoteMode: QuoteMode.strings, // Only quote strings, not numbers
@@ -98,7 +152,7 @@ void main() {
   );
   
   final encoded = myCodec.encode([['a', 1, true], ['b', 2.5, false]]);
-  // Output: "a",1,true\n"b",2.5,false
+  // Output: "a"\t1\ttrue\n"b"\t2.5\tfalse
 }
 ```
 
@@ -116,7 +170,7 @@ void main() {
   final input = 'Name,Age,Active\nAlice,30,true';
   
   // With dynamic typing enabled
-  final codec = CsvCodec(dynamicTyping: true);
+  final codec = Csv(dynamicTyping: true);
   final rows = codec.decode(input);
   
   print(rows[0][1].runtimeType); // int (30)
@@ -132,7 +186,7 @@ You can use the `encoderTransform` and `decoderTransform` hooks to process field
 import 'package:csv/csv.dart';
 
 void main() {
-  final customCodec = CsvCodec(
+  final customCodec = Csv(
     fieldDelimiter: ';',
     parseHeaders: true, // Required if you want 'header' name in the transform
     decoderTransform: (value, index, header) {
@@ -184,9 +238,9 @@ void main() {
   print(rowsWithHeaders[0][1]);      // Alice
   
   
-  // Method 2: Using CsvCodec(parseHeaders: true)
+  // Method 2: Using Csv(parseHeaders: true)
   // This requires casting the returned rows to CsvRow manually.
-  final codec = CsvCodec(parseHeaders: true);
+  final codec = Csv(parseHeaders: true);
   
   final dynamicRows = codec.decode(fileContents);
   
@@ -198,55 +252,9 @@ void main() {
 }
 ```
 
-### Stream Transformation (Read-Modify-Write)
+### Using `asCodec()` for Fusing
 
-You can use `fuse` to combine the encoder and decoder, or simply chain transformations to process large files efficiently.
-
-```dart
-import 'dart:convert';
-import 'dart:io';
-import 'package:csv/csv.dart';
-
-void main() async {
-  final input = File('input.csv');
-  final output = File('output.csv');
-
-  await input.openRead()
-      .transform(utf8.decoder)
-      .transform(csv.decoder)
-      .map((row) {
-        // Modify the row
-        row.add('Processed');
-        return row;
-      })
-      .transform(csv.encoder)
-      .transform(utf8.encoder)
-      .pipe(output.openWrite());
-}
-```
-
-### Fusing Codecs
-
-You can also fuse the `csv.encoder` and `csv.decoder` (or any other compatible codecs) to create a new codec.
-
-```dart
-import 'dart:convert';
-import 'package:csv/csv.dart';
-
-void main() {
-  // Create a codec that converts List<List> -> String -> List<List>
-  // Ideally this is an identity transformation (Round Trip).
-  final fused = csv.encoder.fuse(csv.decoder);
-  
-  final data = [['a', 'b'], ['c', 'd']];
-  final result = fused.convert(data);
-  print(result); // [['a', 'b'], ['c', 'd']]
-}
-```
-
-### Advanced Fusing: Processing Pipeline
-
-You can create a `Codec` that reads a CSV string, processes the data, and outputs a new CSV string by fusing the decoder, a custom processor, and the encoder.
+If you need a `dart:convert` `Codec` — for example, to use `.fuse()` — call `asCodec()`:
 
 ```dart
 import 'dart:convert';
@@ -263,14 +271,9 @@ class AddColumnConverter extends Converter<List<List<dynamic>>, List<List<dynami
 void main() {
   final processor = AddColumnConverter();
 
-  // Create a pipeline: CSV String -> List<List> -> Modified List<List> -> CSV String
-  
-  // Let's create a "Processing Codec" that takes String and returns String (CSV -> CSV)
-  // We start with the decoder (String -> List)
-  // Fuse with processor (List -> List)
-  // Fuse with encoder (List -> String)
-  
-  final sanitizingCodec = csv.decoder.fuse(processor).fuse(csv.encoder);
+  // Use asCodec() to get a dart:convert Codec, then fuse.
+  final codec = csv.asCodec();
+  final sanitizingCodec = codec.decoder.fuse(processor).fuse(codec.encoder);
 
   final inputCsv = 'Name,Age\nAlice,30';
   final outputCsv = sanitizingCodec.convert(inputCsv);
@@ -282,6 +285,18 @@ void main() {
 }
 ```
 
+**Controlling batch size**: When the codec's decoder is used as a stream
+transformer, rows from the same input chunk are emitted together in a single
+batch (a `List<List<dynamic>>`). You can limit the maximum number of rows per
+batch with `maxRowsPerBatch`:
+
+```dart
+// Each stream event contains at most 100 rows.
+final codec = csv.asCodec(maxRowsPerBatch: 100);
+
+// For single-row events (one row per stream event), use 1:
+final singleRowCodec = csv.asCodec(maxRowsPerBatch: 1);
+```
 
 ## PapaParse Features
 
@@ -298,5 +313,84 @@ Add this to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  csv: ^7.0.0
+  csv: ^8.0.0
 ```
+
+## The Codec Problem & `asCodec()`
+
+This section explains why `Csv` does **not** extend `dart:convert`'s `Codec`,
+and what `asCodec()` provides as an escape hatch.
+
+### Background
+
+Dart's `Codec<S, T>` provides two converters:
+
+| Component | Type              |
+|-----------|-------------------|
+| `decoder` | `Converter<T, S>` |
+| `encoder` | `Converter<S, T>` |
+
+A `Converter<S, T>` has two roles:
+
+1. **Batch**: `T convert(S input)` — convert an entire input at once.
+2. **Stream**: `Stream<T> bind(Stream<S>)` — transform a stream, where each event is of type `T`.
+
+The type parameter `T` must serve **both** roles. For most codecs this is fine.
+For example, `utf8` is a `Codec<String, List<int>>`: batch conversion produces a
+`List<int>`, and each stream event is also a `List<int>` (a chunk of bytes).
+Concatenating chunks of bytes is natural.
+
+### Why CSV breaks this
+
+For a CSV decoder, the two roles need **different types**:
+
+| Role                | Needs                                            |
+|---------------------|--------------------------------------------------|
+| Batch (`convert()`) | Returns `List<List<dynamic>>` — all rows at once |
+| Stream (each event) | Should be `List<dynamic>` — one row at a time    |
+
+There is no single type `T` that works for both. If we use
+`Converter<String, List<List<dynamic>>>` (as version 7 did), then:
+
+- `convert("a,b\nc,d")` → `[['a','b'], ['c','d']]` ✓ correct
+- `stream.transform(decoder).toList()` → `List<List<List<dynamic>>>` ✗ **extra nesting!**
+
+Each stream event is a *batch* of rows, and `.toList()` collects those batches
+into yet another list — the "extra `[]`" reported in [#77](https://github.com/close2/csv/issues/77).
+
+This is a fundamental limitation of `dart:convert`'s type system, not a bug in
+this library. Versions 3.2 through 6 worked around it by not being a `Codec` at
+all (see [commit 235d898](https://github.com/close2/csv/commit/235d89854b86ef9f2e2e864d138ce96ab38b4a0d)).
+Version 7 reintroduced `Codec` and the problem came back.
+
+### The solution in version 8
+
+Version 8 takes a hybrid approach:
+
+- **By default**, `CsvDecoder` and `CsvEncoder` are `StreamTransformerBase`
+  subclasses. Stream usage works correctly — one row per event.
+- **`asCodec()`** returns a real `Codec<List<List<dynamic>>, String>` adapter for
+  when you need `.fuse()` or other `Codec`-specific APIs. The returned codec
+  wraps the same parsing/encoding logic, but follows Dart's `Converter` type
+  contract (with the inherent stream nesting trade-off).
+
+```dart
+// Default: stream works correctly
+final rows = await file.openRead()
+    .transform(utf8.decoder)
+    .transform(csv.decoder)
+    .toList();
+// rows is List<List<dynamic>> ✓
+
+// asCodec(): for fuse() and other Codec APIs
+final fused = csv.asCodec().decoder.fuse(someConverter);
+
+// asCodec() with batch size limit
+final codec = csv.asCodec(maxRowsPerBatch: 100);
+```
+
+If you use `asCodec().decoder` as a stream transformer, you will get the extra
+nesting — that is inherent to Dart's `Converter` type contract and cannot be
+avoided. Rows from the same input chunk are grouped together into a single batch.
+Use `maxRowsPerBatch` to limit the batch size, or use `csv.decoder` directly for
+streams.

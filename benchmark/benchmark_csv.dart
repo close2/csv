@@ -5,20 +5,20 @@ void main() async {
   print('--- CSV Benchmark ---');
 
   await runBenchmark('Default CSV', csv);
-  await runBenchmark('Dynamic Typing CSV', CsvCodec(dynamicTyping: true));
+  await runBenchmark('Dynamic Typing CSV', Csv(dynamicTyping: true));
   await runBenchmark('Excel CSV', excel);
-  await runBenchmark('Tab CSV', CsvCodec(fieldDelimiter: '\t'));
+  await runBenchmark('Tab CSV', Csv(fieldDelimiter: '\t'));
 
   await runFuseBenchmark('Fused Codec (Round Trip)', csv);
 }
 
-Future<void> runBenchmark(String name, CsvCodec codec) async {
+Future<void> runBenchmark(String name, Csv codec) async {
   print('\n--- $name ---');
 
   const targetSizeBytes = 100 * 1024 * 1024; // 100 MB
   const chunkSize = 1000;
   
-  final sampleRow = [
+  final sampleRow = <dynamic>[
     'field1', 12345, 12.345,
     'This is a slightly longer field.',
     'Field with "quotes" and , commas',
@@ -26,30 +26,28 @@ Future<void> runBenchmark(String name, CsvCodec codec) async {
   ];
   
   final estimatedRowSize = codec.encode([sampleRow]).length;
-  final totalRows = (targetSizeBytes / estimatedRowSize).floor();
+  final totalRows = (targetSizeBytes ~/ estimatedRowSize);
 
-  // Encoding
+  // Encoding — stream of individual rows
   final encodeStopwatch = Stopwatch()..start();
   var encodedBytes = 0;
-  final encodeController = StreamController<List<List<dynamic>>>();
+  final encodeController = StreamController<List<dynamic>>();
   final encodingStream = encodeController.stream.transform(codec.encoder);
   final encodingFuture = encodingStream.listen((data) => encodedBytes += data.length).asFuture();
 
-  for (var i = 0; i < totalRows; i += chunkSize) {
-    final nextChunkRows = (totalRows - i) > chunkSize ? chunkSize : (totalRows - i);
-    final chunk = List.generate(nextChunkRows, (_) => sampleRow);
-    encodeController.add(chunk);
+  for (var i = 0; i < totalRows; i++) {
+    encodeController.add(sampleRow);
   }
   await encodeController.close();
   await encodingFuture;
   encodeStopwatch.stop();
 
-  // Decoding
+  // Decoding — stream emits individual rows
   final decodeStopwatch = Stopwatch()..start();
   var decodedRows = 0;
   final decodeController = StreamController<String>();
   final decodingStream = decodeController.stream.transform(codec.decoder);
-  final decodingFuture = decodingStream.listen((chunk) => decodedRows += chunk.length).asFuture();
+  final decodingFuture = decodingStream.listen((_) => decodedRows++).asFuture();
 
   for (var i = 0; i < totalRows; i += chunkSize) {
     final nextChunkRows = (totalRows - i) > chunkSize ? chunkSize : (totalRows - i);
@@ -69,21 +67,17 @@ Future<void> runBenchmark(String name, CsvCodec codec) async {
   print(' - Dec: ${(mb / (decTime / 1000)).toStringAsFixed(2)} MB/s ($decTime ms)');
 }
 
-Future<void> runFuseBenchmark(String name, CsvCodec codec) async {
+Future<void> runFuseBenchmark(String name, Csv codec) async {
   print('\n--- $name ---');
   
-  // Fuse encoder and decoder: List<List> -> String -> List<List>
-  // Note: CsvCodec is Codec<List<List>, String>.
-  // codec.encoder is Converter<List<List>, String>.
-  // codec.decoder is Converter<String, List<List>>.
-  // fused = codec.encoder.fuse(codec.decoder); // Converter<List<List>, List<List>>
-  
-  final fused = codec.encoder.fuse(codec.decoder);
+  // Use asCodec() to get a dart:convert Codec for fusing.
+  final dartCodec = codec.asCodec();
+  final fused = dartCodec.encoder.fuse(dartCodec.decoder);
 
   const targetSizeBytes = 50 * 1024 * 1024; // 50 MB (smaller for round-trip)
   const chunkSize = 1000;
   
-  final sampleRow = [
+  final sampleRow = <dynamic>[
     'field1', 12345, 12.345,
     'This is a slightly longer field.',
     'Field with "quotes" and , commas',
@@ -91,24 +85,18 @@ Future<void> runFuseBenchmark(String name, CsvCodec codec) async {
   ];
   
   final estimatedRowSize = codec.encode([sampleRow]).length;
-  final totalRows = (targetSizeBytes / estimatedRowSize).floor();
+  final totalRows = (targetSizeBytes ~/ estimatedRowSize);
 
   final stopwatch = Stopwatch()..start();
   var processedRows = 0;
   
-  final controller = StreamController<List<List<dynamic>>>();
-  final stream = controller.stream.transform(fused);
-  final future = stream.listen((chunk) {
-    processedRows += chunk.length;
-  }).asFuture();
-
+  // fused.convert() works batch-style on List<List<dynamic>>
   for (var i = 0; i < totalRows; i += chunkSize) {
     final nextChunkRows = (totalRows - i) > chunkSize ? chunkSize : (totalRows - i);
     final chunk = List.generate(nextChunkRows, (_) => sampleRow);
-    controller.add(chunk);
+    final result = fused.convert(chunk);
+    processedRows += result.length;
   }
-  await controller.close();
-  await future;
   stopwatch.stop();
 
   if (processedRows != totalRows) {

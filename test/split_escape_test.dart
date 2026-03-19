@@ -1,5 +1,3 @@
-
-import 'dart:convert';
 import 'package:csv/csv.dart';
 import 'package:test/test.dart';
 
@@ -31,13 +29,7 @@ void _verifySplit(String input, List<List<dynamic>> expected,
     final chunk2 = input.substring(i);
 
     final output = <List<dynamic>>[];
-    final outSink = ChunkedConversionSink<List<List<dynamic>>>.withCallback((
-      accumulated,
-    ) {
-      for (final rows in accumulated) {
-        output.addAll(rows);
-      }
-    });
+    final outSink = _CollectorSink(output);
 
     // IMPORTANT: Set fieldDelimiter to prevent auto-detection buffering
     final decoderSink = CsvDecoder(
@@ -57,4 +49,15 @@ void _verifySplit(String input, List<List<dynamic>> expected,
           'Chunk 2: "$chunk2"',
     );
   }
+}
+
+class _CollectorSink implements Sink<List<dynamic>> {
+  final List<List<dynamic>> _target;
+  _CollectorSink(this._target);
+
+  @override
+  void add(List<dynamic> data) => _target.add(data);
+
+  @override
+  void close() {}
 }

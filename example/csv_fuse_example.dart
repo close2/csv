@@ -13,13 +13,9 @@ void main() {
   final processor = AddColumnConverter();
 
   // Create a pipeline: CSV String -> List<List> -> Modified List<List> -> CSV String
-  
-  // Let's create a "Processing Codec" that takes String and returns String (CSV -> CSV)
-  // We start with the decoder (String -> List)
-  // Fuse with processor (List -> List)
-  // Fuse with encoder (List -> String)
-  
-  final sanitizingCodec = csv.decoder.fuse(processor).fuse(csv.encoder);
+  // Use asCodec() to get a dart:convert Codec for fusing.
+  final codec = csv.asCodec();
+  final sanitizingCodec = codec.decoder.fuse(processor).fuse(codec.encoder);
 
   final inputCsv = 'Name,Age\nAlice,30';
   final outputCsv = sanitizingCodec.convert(inputCsv);

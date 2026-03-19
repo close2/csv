@@ -1,8 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 import 'csv_row.dart';
 
-/// A converter that converts a CSV string into a [List<List<dynamic>>].
-class CsvDecoder extends Converter<String, List<List<dynamic>>> {
+/// A stream transformer and batch converter that decodes CSV strings
+/// into rows of `List<dynamic>`.
+///
+/// When used as a [StreamTransformer] (e.g., with `Stream.transform()`),
+/// each stream event is a single row (`List<dynamic>`).
+///
+/// The [convert] method accepts a full CSV string and returns all rows
+/// as a `List<List<dynamic>>`.
+class CsvDecoder extends StreamTransformerBase<String, List<dynamic>> {
   /// The separator between fields. If null, it will be auto-detected.
   final String? fieldDelimiter;
 
@@ -49,26 +57,31 @@ class CsvDecoder extends Converter<String, List<List<dynamic>>> {
          'escapeCharacter must be a single character',
        );
 
-  @override
+  /// Converts a CSV [input] string into a list of rows.
+  ///
+  /// Each row is a `List<dynamic>`. If [parseHeaders] is true,
+  /// each row (except the header) is a [CsvRow].
   List<List<dynamic>> convert(String input) {
     if (input.isEmpty) return [];
 
     final output = <List<dynamic>>[];
-    final outSink = ChunkedConversionSink<List<List<dynamic>>>.withCallback((
-      result,
-    ) {
-      for (var chunk in result) {
-        output.addAll(chunk);
-      }
-    });
-    final sink = startChunkedConversion(outSink);
+    final outSink = _CollectorSink<List<dynamic>>(output);
+    final sink = _createSink(outSink);
     sink.add(input);
     sink.close();
     return output;
   }
 
-  @override
-  StringConversionSink startChunkedConversion(Sink<List<List<dynamic>>> sink) {
+  /// Creates a chunked conversion sink that writes decoded rows
+  /// into [sink].
+  ///
+  /// Each row added to [sink] is a single `List<dynamic>`.
+  /// This is used internally by [bind] for stream transformation.
+  StringConversionSink startChunkedConversion(Sink<List<dynamic>> sink) {
+    return _createSink(sink);
+  }
+
+  StringConversionSink _createSink(Sink<List<dynamic>> sink) {
     return _CsvDecoderSink(
       sink,
       fieldDelimiter,
@@ -80,10 +93,56 @@ class CsvDecoder extends Converter<String, List<List<dynamic>>> {
       dynamicTyping,
     );
   }
+
+  @override
+  Stream<List<dynamic>> bind(Stream<String> stream) {
+    return Stream<List<dynamic>>.eventTransformed(
+      stream,
+      (EventSink<List<dynamic>> sink) => _DecoderEventSink(this, sink),
+    );
+  }
+}
+
+/// An [EventSink] adapter that bridges [CsvDecoder]'s chunked conversion
+/// to the stream event model, emitting individual rows.
+class _DecoderEventSink implements EventSink<String> {
+  final EventSink<List<dynamic>> _eventSink;
+  final StringConversionSink _chunkedSink;
+
+  _DecoderEventSink(CsvDecoder decoder, EventSink<List<dynamic>> sink)
+      : _eventSink = sink,
+        _chunkedSink = decoder.startChunkedConversion(sink);
+
+  @override
+  void add(String event) {
+    _chunkedSink.add(event);
+  }
+
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) {
+    _eventSink.addError(error, stackTrace);
+  }
+
+  @override
+  void close() {
+    _chunkedSink.close();
+  }
+}
+
+/// A simple sink that collects items into a list.
+class _CollectorSink<T> implements Sink<T> {
+  final List<T> _target;
+  _CollectorSink(this._target);
+
+  @override
+  void add(T data) => _target.add(data);
+
+  @override
+  void close() {}
 }
 
 class _CsvDecoderSink extends StringConversionSink {
-  final Sink<List<List<dynamic>>> _outSink;
+  final Sink<List<dynamic>> _outSink;
   final String? _presetDelimiter;
   final String _quoteCharacter;
   final String? _escapeCharacter;
@@ -256,7 +315,6 @@ class _CsvDecoderSink extends StringConversionSink {
 
     if (end <= start) return;
 
-    final results = <List<dynamic>>[];
     final actualEscapeChar = _escapeCharacter ?? _quoteCharacter;
     final delim = _delimiter!;
 
@@ -365,7 +423,7 @@ class _CsvDecoderSink extends StringConversionSink {
           _currentRow.add(_transform(_buffer.toString()));
           _fieldIndex++;
           _buffer.clear();
-          _finalizeRow(results);
+          _finalizeRow();
           if (i + 1 < end &&
               charCode == crCode &&
               chunk.codeUnitAt(i + 1) == nlCode) {
@@ -380,10 +438,6 @@ class _CsvDecoderSink extends StringConversionSink {
     // Capture any remaining text in the chunk.
     if (anchor < end) {
       _buffer.write(chunk.substring(anchor, end));
-    }
-
-    if (results.isNotEmpty) {
-      _outSink.add(results);
     }
 
     if (isLast) close();
@@ -421,9 +475,9 @@ class _CsvDecoderSink extends StringConversionSink {
     return offset;
   }
 
-  /// Finalizes the current row, adds it to [results], and clears `_currentRow`.
+  /// Finalizes the current row, emits it to the output sink, and resets state.
   /// Handles header parsing and [CsvRow] conversion if enabled.
-  void _finalizeRow(List<List<dynamic>> results) {
+  void _finalizeRow() {
     if (!_skipEmptyLines || _currentRow.any((e) => e != '')) {
       if (_parseHeaders && _headers == null) {
         // First row is the header row.
@@ -436,7 +490,7 @@ class _CsvDecoderSink extends StringConversionSink {
         final rowToAdd = _headers != null
             ? CsvRow(_currentRow, _headers!)
             : _currentRow;
-        results.add(rowToAdd);
+        _outSink.add(rowToAdd);
       }
     }
     _currentRow = [];
@@ -494,11 +548,7 @@ class _CsvDecoderSink extends StringConversionSink {
       if (_currentRow.isNotEmpty || _buffer.isNotEmpty) {
         _currentRow.add(_transform(_buffer.toString()));
         _fieldIndex++;
-        final results = <List<dynamic>>[];
-        _finalizeRow(results);
-        if (results.isNotEmpty) {
-          _outSink.add(results);
-        }
+        _finalizeRow();
         _buffer.clear();
       }
     }

@@ -20,7 +20,7 @@ void main() {
     }
     await controller.close();
     
-    final result = (await resultFuture).expand((i) => i).toList();
+    final result = await resultFuture;
     expect(result, [['a', 'b', 'c']]);
   });
   
@@ -39,7 +39,7 @@ void main() {
     }
     await controller.close();
     
-    final result = (await resultFuture).expand((i) => i).toList();
+    final result = await resultFuture;
     expect(result, [['a', 'b', 'c'], ['1', '2', '3']]);
   });
 }

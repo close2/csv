@@ -9,8 +9,8 @@ export 'src/csv_row.dart';
 
 import 'src/csv_codec.dart';
 
-/// A default CSV codec.
-final CsvCodec csv = CsvCodec();
+/// A default CSV instance with standard settings.
+final Csv csv = Csv();
 
-/// A CSV codec configured for Excel.
-final CsvCodec excel = CsvCodec.excel();
+/// A CSV instance configured for Excel.
+final Csv excel = Csv.excel();

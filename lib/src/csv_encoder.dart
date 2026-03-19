@@ -1,9 +1,16 @@
-import 'dart:convert';
+import 'dart:async';
 import 'quote_mode.dart';
 import 'csv_row.dart';
 
-/// A converter that converts a [List<List<dynamic>>] into a CSV string.
-class CsvEncoder extends Converter<List<List<dynamic>>, String> {
+/// A stream transformer and batch converter that encodes rows into CSV strings.
+///
+/// When used as a [StreamTransformer] (e.g., with `Stream.transform()`),
+/// each incoming stream event should be a single row (`List<dynamic>`),
+/// and each outgoing event is a CSV string fragment.
+///
+/// The [convert] method accepts all rows at once as a `List<List<dynamic>>`
+/// and returns the full CSV string.
+class CsvEncoder extends StreamTransformerBase<List<dynamic>, String> {
   /// The separator between fields.
   final String fieldDelimiter;
 
@@ -43,33 +50,52 @@ class CsvEncoder extends Converter<List<List<dynamic>>, String> {
     this.fieldTransform,
   }) : escapeCharacter = escapeCharacter ?? quoteCharacter;
 
-  @override
-  String convert(List<List<dynamic>> input) {
-    if (input.isEmpty) return addBom ? '\ufeff' : '';
+  /// Converts all [rows] into a CSV string.
+  String convert(List<List<dynamic>> rows) {
+    if (rows.isEmpty) return addBom ? '\ufeff' : '';
 
-    final output = <String>[];
-    final outSink = ChunkedConversionSink<String>.withCallback(
-      (result) => output.addAll(result),
-    );
-    final sink = startChunkedConversion(outSink);
-    sink.add(input);
-    sink.close();
-    return output.join();
+    final buffer = StringBuffer();
+    if (addBom) {
+      buffer.write('\ufeff');
+    }
+
+    for (var i = 0; i < rows.length; i++) {
+      final row = rows[i];
+      _writeRow(buffer, row);
+      if (i < rows.length - 1) {
+        buffer.write(lineDelimiter);
+      }
+    }
+    return buffer.toString();
+  }
+
+  void _writeRow(StringBuffer buffer, List<dynamic> row) {
+    final isCsvRow = row is CsvRow;
+    for (var j = 0; j < row.length; j++) {
+      if (j > 0) {
+        buffer.write(fieldDelimiter);
+      }
+      final String? header = isCsvRow ? row.getHeaderName(j) : null;
+      buffer.write(
+        encodeField(
+          row[j],
+          fieldDelimiter,
+          quoteCharacter,
+          escapeCharacter,
+          quoteMode,
+          fieldTransform,
+          j,
+          header,
+        ),
+      );
+    }
   }
 
   @override
-  ChunkedConversionSink<List<List<dynamic>>> startChunkedConversion(
-    Sink<String> sink,
-  ) {
-    return _CsvEncoderSink(
-      sink,
-      fieldDelimiter,
-      lineDelimiter,
-      quoteCharacter,
-      escapeCharacter,
-      quoteMode,
-      addBom,
-      fieldTransform,
+  Stream<String> bind(Stream<List<dynamic>> stream) {
+    return Stream<String>.eventTransformed(
+      stream,
+      (EventSink<String> sink) => _EncoderEventSink(this, sink),
     );
   }
 
@@ -130,72 +156,37 @@ class CsvEncoder extends Converter<List<List<dynamic>>, String> {
   }
 }
 
-class _CsvEncoderSink implements ChunkedConversionSink<List<List<dynamic>>> {
-  final Sink<String> _outSink;
-  final String _fieldDelimiter;
-  final String _lineDelimiter;
-  final String _quoteCharacter;
-  final String _escapeCharacter;
-  final QuoteMode _quoteMode;
-  final bool _addBom;
-  final dynamic Function(dynamic field, int index, String? header)? _fieldTransform;
-  bool _isFirstChunk = true;
+/// An [EventSink] adapter for the encoder that accepts individual rows
+/// and outputs CSV string fragments.
+class _EncoderEventSink implements EventSink<List<dynamic>> {
+  final CsvEncoder _encoder;
+  final EventSink<String> _eventSink;
+  bool _isFirstRow = true;
 
-  _CsvEncoderSink(
-    this._outSink,
-    this._fieldDelimiter,
-    this._lineDelimiter,
-    this._quoteCharacter,
-    this._escapeCharacter,
-    this._quoteMode,
-    this._addBom,
-    this._fieldTransform,
-  );
+  _EncoderEventSink(this._encoder, this._eventSink);
 
   @override
-  void add(List<List<dynamic>> chunk) {
-    if (chunk.isEmpty) return;
-
+  void add(List<dynamic> row) {
     final buffer = StringBuffer();
-    if (_isFirstChunk) {
-      if (_addBom) {
+    if (_isFirstRow) {
+      if (_encoder.addBom) {
         buffer.write('\ufeff');
       }
-      _isFirstChunk = false;
+      _isFirstRow = false;
     } else {
-      buffer.write(_lineDelimiter);
+      buffer.write(_encoder.lineDelimiter);
     }
+    _encoder._writeRow(buffer, row);
+    _eventSink.add(buffer.toString());
+  }
 
-    for (var i = 0; i < chunk.length; i++) {
-      final row = chunk[i];
-      final isCsvRow = row is CsvRow;
-      for (var j = 0; j < row.length; j++) {
-        if (j > 0) {
-          buffer.write(_fieldDelimiter);
-        }
-        final String? header = isCsvRow ? row.getHeaderName(j) : null;
-        buffer.write(
-          CsvEncoder.encodeField(
-            row[j],
-            _fieldDelimiter,
-            _quoteCharacter,
-            _escapeCharacter,
-            _quoteMode,
-            _fieldTransform,
-            j,
-            header,
-          ),
-        );
-      }
-      if (i < chunk.length - 1) {
-        buffer.write(_lineDelimiter);
-      }
-    }
-    _outSink.add(buffer.toString());
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) {
+    _eventSink.addError(error, stackTrace);
   }
 
   @override
   void close() {
-    _outSink.close();
+    _eventSink.close();
   }
 }
